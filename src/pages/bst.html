@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>DS Dojo — BST</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+      body {
+        background: #0f0f1a;
+        color: #fff;
+        font-family: sans-serif;
+        text-align: center;
+      }
+      h2 {
+        color: #00e5ff;
+        margin-top: 20px;
+      }
+      #controls {
+        margin: 20px;
+      }
+      input {
+        padding: 8px;
+        font-size: 16px;
+        border-radius: 6px;
+        border: none;
+        width: 80px;
+        text-align: center;
+      }
+      button {
+        padding: 8px 16px;
+        margin: 4px;
+        font-size: 15px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      #btn-insert {
+        background: #00e5ff;
+        color: #000;
+      }
+      #btn-delete {
+        background: #ff4f4f;
+        color: #fff;
+      }
+      #btn-reset {
+        background: #444;
+        color: #fff;
+      }
+      #inorder {
+        margin-top: 10px;
+        color: #aaa;
+        font-size: 14px;
+      }
+      svg {
+        display: block;
+        margin: auto;
+      }
+      .node circle {
+        fill: #1e1e2e;
+        stroke: #00e5ff;
+        stroke-width: 2.5px;
+      }
+      .node text {
+        fill: #fff;
+        font-size: 14px;
+        font-weight: bold;
+        text-anchor: middle;
+        dominant-baseline: central;
+      }
+      .link {
+        fill: none;
+        stroke: #444;
+        stroke-width: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Binary Search Tree</h2>
+    <div id="controls">
+      <input id="val-input" type="number" placeholder="value" />
+      <button id="btn-insert">Insert</button>
+      <button id="btn-delete">Delete</button>
+      <button id="btn-reset">Reset</button>
+    </div>
+    <div id="inorder">Inorder: —</div>
+    <svg id="tree-svg" width="900" height="500"></svg>
+
+    <script src="../wasm/ds_dojo.js"></script>
+    <script>
+      const WIDTH = 900,
+        HEIGHT = 500;
+      const svg = d3.select("#tree-svg");
+      const g = svg.append("g").attr("transform", "translate(0,40)");
+
+      // ── rebuild JS tree from C inorder + re-insert ──────────────────
+      let insertedValues = [];
+
+      function rebuildTree(values) {
+        // Build a JS tree object for D3 layout from insertion order
+        let root = null;
+        function insert(node, v) {
+          if (!node) return { data: v, left: null, right: null };
+          if (v < node.data) node.left = insert(node.left, v);
+          else if (v > node.data) node.right = insert(node.right, v);
+          return node;
+        }
+        values.forEach((v) => (root = insert(root, v)));
+        return root;
+      }
+
+      function toD3Hierarchy(node) {
+        if (!node) return null;
+        const obj = { name: node.data, children: [] };
+        if (node.left) obj.children.push(toD3Hierarchy(node.left));
+        if (node.right) obj.children.push(toD3Hierarchy(node.right));
+        if (obj.children.length === 0) delete obj.children;
+        return obj;
+      }
+
+      function renderTree() {
+        g.selectAll("*").remove();
+        if (insertedValues.length === 0) return;
+
+        const jsTree = rebuildTree(insertedValues);
+        const hier = d3.hierarchy(toD3Hierarchy(jsTree));
+        const treeLayout = d3.tree().size([WIDTH - 60, HEIGHT - 80]);
+        treeLayout(hier);
+
+        // Links
+        g.selectAll(".link")
+          .data(hier.links())
+          .enter()
+          .append("path")
+          .attr("class", "link")
+          .attr(
+            "d",
+            d3
+              .linkVertical()
+              .x((d) => d.x + 30)
+              .y((d) => d.y),
+          );
+
+        // Nodes
+        const node = g
+          .selectAll(".node")
+          .data(hier.descendants())
+          .enter()
+          .append("g")
+          .attr("class", "node")
+          .attr("transform", (d) => `translate(${d.x + 30},${d.y})`);
+
+        node
+          .append("circle")
+          .attr("r", 22)
+          .style("opacity", 0)
+          .transition()
+          .duration(500)
+          .style("opacity", 1);
+
+        node.append("text").text((d) => d.data.name);
+
+        // Inorder display
+        function getInorder(node, result = []) {
+          if (!node) return result;
+          getInorder(node.left, result);
+          result.push(node.data);
+          getInorder(node.right, result);
+          return result;
+        }
+        const inorderArr = getInorder(jsTree);
+        document.getElementById("inorder").textContent =
+          "Inorder: " + inorderArr.join(", ");
+      }
+
+      Module.onRuntimeInitialized = function () {
+        function insertValue() {
+          const input = document.getElementById("val-input");
+          const v = parseInt(input.value);
+          if (isNaN(v)) return;
+          Module._bst_insert_js(v);
+          insertedValues.push(v);
+          input.value = ""; // auto-clear
+          input.focus(); // keep cursor in box
+          renderTree();
+        }
+
+        document.getElementById("btn-insert").onclick = insertValue;
+
+        document
+          .getElementById("val-input")
+          .addEventListener("keydown", (e) => {
+            if (e.key === "Enter") insertValue(); // Enter key inserts
+          });
+
+        document.getElementById("btn-delete").onclick = () => {
+          const v = parseInt(document.getElementById("val-input").value);
+          if (isNaN(v)) return;
+          Module._bst_delete_js(v);
+          insertedValues = insertedValues.filter((x) => x !== v);
+          renderTree();
+        };
+
+        document.getElementById("btn-reset").onclick = () => {
+          Module._bst_reset();
+          insertedValues = [];
+          renderTree();
+        };
+      };
+    </script>
+  </body>
+</html>
