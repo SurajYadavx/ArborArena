@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>DS Dojo — DS Battle</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: #0f0f1a;
+        color: #fff;
+        font-family: sans-serif;
+      }
+      h1 {
+        text-align: center;
+        padding: 20px;
+        font-size: 24px;
+      }
+      h1 span.bst {
+        color: #00e5ff;
+      }
+      h1 span.avl {
+        color: #a78bfa;
+      }
+      #controls {
+        text-align: center;
+        margin: 10px;
+      }
+      input {
+        padding: 8px;
+        font-size: 16px;
+        border-radius: 6px;
+        border: none;
+        width: 80px;
+        text-align: center;
+      }
+      button {
+        padding: 8px 18px;
+        margin: 4px;
+        font-size: 15px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      #btn-insert {
+        background: #00e5ff;
+        color: #000;
+      }
+      #btn-reset {
+        background: #444;
+        color: #fff;
+      }
+      #battle-area {
+        display: flex;
+        justify-content: center;
+        gap: 0;
+      }
+      .panel {
+        width: 50%;
+        padding: 10px;
+        border-top: 3px solid;
+      }
+      .panel.bst {
+        border-color: #00e5ff;
+      }
+      .panel.avl {
+        border-color: #a78bfa;
+      }
+      .panel h3 {
+        text-align: center;
+        font-size: 18px;
+        margin-bottom: 6px;
+      }
+      .panel.bst h3 {
+        color: #00e5ff;
+      }
+      .panel.avl h3 {
+        color: #a78bfa;
+      }
+      .stat-row {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+        margin-bottom: 8px;
+        flex-wrap: wrap;
+      }
+      .stat-box {
+        background: #1e1e2e;
+        padding: 6px 14px;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 13px;
+      }
+      .stat-box span {
+        font-size: 18px;
+        font-weight: bold;
+        display: block;
+      }
+      .bst .stat-box span {
+        color: #00e5ff;
+      }
+      .avl .stat-box span {
+        color: #a78bfa;
+      }
+      .winner-banner {
+        text-align: center;
+        font-size: 15px;
+        color: #ffd700;
+        min-height: 22px;
+        margin: 6px 0;
+      }
+      svg {
+        display: block;
+        margin: auto;
+      }
+      .node circle {
+        stroke-width: 2.5px;
+      }
+      .node text {
+        fill: #fff;
+        font-size: 12px;
+        font-weight: bold;
+        text-anchor: middle;
+        dominant-baseline: central;
+      }
+      .node .bf {
+        fill: #888;
+        font-size: 9px;
+        text-anchor: middle;
+      }
+      .link {
+        fill: none;
+        stroke: #333;
+        stroke-width: 1.8px;
+      }
+      #verdict {
+        text-align: center;
+        padding: 10px;
+        font-size: 14px;
+        color: #aaa;
+        border-top: 1px solid #222;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>
+      ⚔️ DS Battle: <span class="bst">BST</span> vs <span class="avl">AVL</span>
+    </h1>
+    <div id="controls">
+      <input id="val-input" type="number" placeholder="value" />
+      <button id="btn-insert">Insert Both</button>
+      <button id="btn-reset">Reset</button>
+      <div style="margin-top: 8px; color: #aaa; font-size: 13px">
+        Same values inserted into both trees simultaneously
+      </div>
+    </div>
+
+    <div id="battle-area">
+      <!-- BST Panel -->
+      <div class="panel bst">
+        <h3>BST — Binary Search Tree</h3>
+        <div class="stat-row">
+          <div class="stat-box">Height<span id="bst-height">0</span></div>
+          <div class="stat-box">Nodes<span id="bst-nodes">0</span></div>
+          <div class="stat-box">Comparisons<span id="bst-cmp">0</span></div>
+        </div>
+        <div class="winner-banner" id="bst-label"></div>
+        <svg id="bst-svg" width="100%" height="400"></svg>
+      </div>
+
+      <!-- AVL Panel -->
+      <div class="panel avl">
+        <h3>AVL — Self-Balancing Tree</h3>
+        <div class="stat-row">
+          <div class="stat-box">Height<span id="avl-height">0</span></div>
+          <div class="stat-box">Nodes<span id="avl-nodes">0</span></div>
+          <div class="stat-box">Rotations<span id="avl-rot">0</span></div>
+        </div>
+        <div class="winner-banner" id="avl-label"></div>
+        <svg id="avl-svg" width="100%" height="400"></svg>
+      </div>
+    </div>
+
+    <div id="verdict"></div>
+
+    <script src="../wasm/ds_dojo.js"></script>
+    <script>
+      const W = 560,
+        H = 400;
+      const bstSvg = d3
+        .select("#bst-svg")
+        .attr("viewBox", `0 0 ${W} ${H}`)
+        .append("g")
+        .attr("transform", "translate(0,30)");
+      const avlSvg = d3
+        .select("#avl-svg")
+        .attr("viewBox", `0 0 ${W} ${H}`)
+        .append("g")
+        .attr("transform", "translate(0,30)");
+
+      let values = [];
+      let bstCmp = 0,
+        avlRot = 0;
+
+      // ── BST JS rebuild ──────────────────────────────────────────────
+      function buildBST(vals) {
+        let root = null,
+          cmp = 0;
+        function insert(n, v) {
+          cmp++;
+          if (!n) return { data: v, left: null, right: null };
+          if (v < n.data) {
+            n.left = insert(n.left, v);
+          } else if (v > n.data) {
+            n.right = insert(n.right, v);
+          }
+          return n;
+        }
+        vals.forEach((v) => (root = insert(root, v)));
+        bstCmp = cmp;
+        return root;
+      }
+
+      // ── AVL JS rebuild ──────────────────────────────────────────────
+      function buildAVL(vals) {
+        let root = null,
+          rot = 0;
+        function h(n) {
+          return n ? n.h : 0;
+        }
+        function bf(n) {
+          return n ? h(n.left) - h(n.right) : 0;
+        }
+        function uh(n) {
+          if (n) n.h = 1 + Math.max(h(n.left), h(n.right));
+        }
+        function rr(y) {
+          let x = y.left,
+            T = x.right;
+          x.right = y;
+          y.left = T;
+          uh(y);
+          uh(x);
+          return x;
+        }
+        function rl(x) {
+          let y = x.right,
+            T = y.left;
+          y.left = x;
+          x.right = T;
+          uh(x);
+          uh(y);
+          return y;
+        }
+        function rebal(n) {
+          uh(n);
+          let b = bf(n);
+          if (b > 1 && bf(n.left) >= 0) {
+            rot++;
+            return rr(n);
+          }
+          if (b > 1 && bf(n.left) < 0) {
+            rot++;
+            n.left = rl(n.left);
+            return rr(n);
+          }
+          if (b < -1 && bf(n.right) <= 0) {
+            rot++;
+            return rl(n);
+          }
+          if (b < -1 && bf(n.right) > 0) {
+            rot++;
+            n.right = rr(n.right);
+            return rl(n);
+          }
+          return n;
+        }
+        function ins(n, v) {
+          if (!n) return { data: v, left: null, right: null, h: 1 };
+          if (v < n.data) n.left = ins(n.left, v);
+          else if (v > n.data) n.right = ins(n.right, v);
+          else return n;
+          return rebal(n);
+        }
+        vals.forEach((v) => (root = ins(root, v)));
+        avlRot = rot;
+        return root;
+      }
+
+      function treeHeight(n) {
+        return n ? 1 + Math.max(treeHeight(n.left), treeHeight(n.right)) : 0;
+      }
+
+      function toHier(node, isAVL = false) {
+        if (!node) return null;
+        const bfVal = isAVL
+          ? (node.left ? node.left.h : 0) - (node.right ? node.right.h : 0)
+          : null;
+        const obj = { name: node.data, bf: bfVal, children: [] };
+        if (node.left) obj.children.push(toHier(node.left, isAVL));
+        if (node.right) obj.children.push(toHier(node.right, isAVL));
+        if (!obj.children.length) delete obj.children;
+        return obj;
+      }
+
+      function drawTree(container, root, color, lastVal, isAVL = false) {
+        container.selectAll("*").remove();
+        if (!root) return;
+        const hier = d3.hierarchy(toHier(root, isAVL));
+        d3.tree().size([W - 40, H - 80])(hier);
+
+        container
+          .selectAll(".link")
+          .data(hier.links())
+          .enter()
+          .append("path")
+          .attr("class", "link")
+          .attr(
+            "d",
+            d3
+              .linkVertical()
+              .x((d) => d.x + 20)
+              .y((d) => d.y),
+          )
+          .style("opacity", 0)
+          .transition()
+          .duration(400)
+          .style("opacity", 1);
+
+        const node = container
+          .selectAll(".node")
+          .data(hier.descendants())
+          .enter()
+          .append("g")
+          .attr("class", "node")
+          .attr("transform", (d) => {
+            const sx = d.parent ? d.parent.x + 20 : d.x + 20;
+            const sy = d.parent ? d.parent.y : d.y;
+            return `translate(${sx},${sy})`;
+          });
+
+        node
+          .transition()
+          .duration(500)
+          .ease(d3.easeCubicOut)
+          .attr("transform", (d) => `translate(${d.x + 20},${d.y})`);
+
+        node
+          .append("circle")
+          .attr("r", 20)
+          .style("fill", (d) => (d.data.name === lastVal ? color : "#1e1e2e"))
+          .style("stroke", color)
+          .transition()
+          .delay(700)
+          .duration(600)
+          .style("fill", "#1e1e2e");
+
+        node.append("text").text((d) => d.data.name);
+
+        if (isAVL) {
+          node
+            .append("text")
+            .attr("class", "bf")
+            .attr("dy", 30)
+            .text((d) => (d.data.bf !== null ? "bf:" + d.data.bf : ""));
+        }
+      }
+
+      function updateVerdict(bstH, avlH) {
+        const v = document.getElementById("verdict");
+        if (values.length < 3) {
+          v.textContent = "";
+          return;
+        }
+        const diff = bstH - avlH;
+        if (diff >= 2)
+          v.innerHTML = `🏆 AVL wins! BST height = ${bstH}, AVL height = ${avlH}. BST is <strong>${diff} levels taller</strong> — that means slower search. This is why AVL exists.`;
+        else
+          v.innerHTML = `Both trees have similar height (${bstH} vs ${avlH}) for this input. Try inserting sorted values like 10, 20, 30, 40, 50 to see BST degenerate!`;
+      }
+
+      function render() {
+        if (!values.length) {
+          bstSvg.selectAll("*").remove();
+          avlSvg.selectAll("*").remove();
+          [
+            "bst-height",
+            "bst-nodes",
+            "bst-cmp",
+            "avl-height",
+            "avl-nodes",
+            "avl-rot",
+          ].forEach((id) => (document.getElementById(id).textContent = "0"));
+          document.getElementById("verdict").textContent = "";
+          return;
+        }
+        const last = values[values.length - 1];
+        const bstTree = buildBST([...values]);
+        const avlTree = buildAVL([...values]);
+        const bstH = treeHeight(bstTree);
+        const avlH = treeHeight(avlTree);
+
+        drawTree(bstSvg, bstTree, "#00e5ff", last, false);
+        drawTree(avlSvg, avlTree, "#a78bfa", last, true);
+
+        document.getElementById("bst-height").textContent = bstH;
+        document.getElementById("bst-nodes").textContent = values.length;
+        document.getElementById("bst-cmp").textContent = bstCmp;
+        document.getElementById("avl-height").textContent = avlH;
+        document.getElementById("avl-nodes").textContent = values.length;
+        document.getElementById("avl-rot").textContent = avlRot;
+
+        document.getElementById("bst-label").textContent =
+          bstH > avlH + 2 ? "⚠️ Degenerating!" : "";
+        document.getElementById("avl-label").textContent =
+          avlRot > 0 ? `⚡ ${avlRot} rotation(s) kept this balanced` : "";
+
+        updateVerdict(bstH, avlH);
+        Module._bst_insert_js(last);
+        Module._avl_insert_js(last);
+      }
+
+      Module.onRuntimeInitialized = function () {
+        function insertValue() {
+          const input = document.getElementById("val-input");
+          const v = parseInt(input.value);
+          if (isNaN(v)) return;
+          values.push(v);
+          input.value = "";
+          input.focus();
+          render();
+        }
+        document.getElementById("btn-insert").onclick = insertValue;
+        document
+          .getElementById("val-input")
+          .addEventListener("keydown", (e) => {
+            if (e.key === "Enter") insertValue();
+          });
+        document.getElementById("btn-reset").onclick = () => {
+          values = [];
+          Module._bst_reset();
+          Module._avl_reset();
+          render();
+        };
+      };
+    </script>
+  </body>
+</html>
