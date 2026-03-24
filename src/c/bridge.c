@@ -51,3 +51,19 @@ EMSCRIPTEN_KEEPALIVE
 int ping() {
     return 42;
 }
+
+#include "avl.h"
+
+static AVLNode* avl_root = NULL;
+
+EMSCRIPTEN_KEEPALIVE
+void avl_insert_js(int value) { avl_root = avl_insert(avl_root, value); }
+
+EMSCRIPTEN_KEEPALIVE
+void avl_delete_js(int value) { avl_root = avl_delete(avl_root, value); }
+
+EMSCRIPTEN_KEEPALIVE
+int avl_get_height() { return avl_height(avl_root); }
+
+EMSCRIPTEN_KEEPALIVE
+void avl_reset() { avl_root = NULL; }

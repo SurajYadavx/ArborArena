@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>DS Dojo — AVL Tree</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+      body {
+        background: #0f0f1a;
+        color: #fff;
+        font-family: sans-serif;
+        text-align: center;
+      }
+      h2 {
+        color: #a78bfa;
+        margin-top: 20px;
+      }
+      #controls {
+        margin: 20px;
+      }
+      input {
+        padding: 8px;
+        font-size: 16px;
+        border-radius: 6px;
+        border: none;
+        width: 80px;
+        text-anchor: middle;
+      }
+      button {
+        padding: 8px 16px;
+        margin: 4px;
+        font-size: 15px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      #btn-insert {
+        background: #a78bfa;
+        color: #000;
+      }
+      #btn-delete {
+        background: #ff4f4f;
+        color: #fff;
+      }
+      #btn-reset {
+        background: #444;
+        color: #fff;
+      }
+      #stats {
+        margin-top: 10px;
+        color: #aaa;
+        font-size: 14px;
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+      }
+      .stat-box {
+        background: #1e1e2e;
+        padding: 8px 20px;
+        border-radius: 8px;
+      }
+      .stat-box span {
+        color: #a78bfa;
+        font-size: 20px;
+        font-weight: bold;
+        display: block;
+      }
+      #rotation-label {
+        margin-top: 10px;
+        font-size: 15px;
+        color: #ffd700;
+        min-height: 24px;
+      }
+      svg {
+        display: block;
+        margin: auto;
+      }
+      .node circle {
+        stroke-width: 2.5px;
+      }
+      .node text {
+        fill: #fff;
+        font-size: 13px;
+        font-weight: bold;
+        text-anchor: middle;
+        dominant-baseline: central;
+      }
+      .node .bf {
+        fill: #aaa;
+        font-size: 10px;
+        text-anchor: middle;
+      }
+      .link {
+        fill: none;
+        stroke: #444;
+        stroke-width: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>AVL Tree</h2>
+    <div id="controls">
+      <input id="val-input" type="number" placeholder="value" />
+      <button id="btn-insert">Insert</button>
+      <button id="btn-delete">Delete</button>
+      <button id="btn-reset">Reset</button>
+    </div>
+    <div id="stats">
+      <div class="stat-box">Height<span id="stat-height">0</span></div>
+      <div class="stat-box">Nodes<span id="stat-nodes">0</span></div>
+      <div class="stat-box">Rotations<span id="stat-rotations">0</span></div>
+    </div>
+    <div id="rotation-label"></div>
+    <svg id="tree-svg" width="960" height="520"></svg>
+
+    <script src="../wasm/ds_dojo.js"></script>
+    <script>
+      const WIDTH = 960,
+        HEIGHT = 520;
+      const svg = d3.select("#tree-svg");
+      const g = svg.append("g").attr("transform", "translate(0,40)");
+
+      let insertedValues = [];
+      let lastInserted = null;
+      let rotationCount = 0;
+
+      function rebuildAVL(values) {
+        let root = null;
+        function height(n) {
+          return n ? n.height : 0;
+        }
+        function bf(n) {
+          return n ? height(n.left) - height(n.right) : 0;
+        }
+        function updateH(n) {
+          if (n) n.height = 1 + Math.max(height(n.left), height(n.right));
+        }
+
+        function rotateRight(y) {
+          let x = y.left,
+            T2 = x.right;
+          x.right = y;
+          y.left = T2;
+          updateH(y);
+          updateH(x);
+          return x;
+        }
+        function rotateLeft(x) {
+          let y = x.right,
+            T2 = y.left;
+          y.left = x;
+          x.right = T2;
+          updateH(x);
+          updateH(y);
+          return y;
+        }
+        function rebalance(node) {
+          updateH(node);
+          let b = bf(node);
+          if (b > 1 && bf(node.left) >= 0) {
+            rotationCount++;
+            setRotLabel("LL → Right Rotation");
+            return rotateRight(node);
+          }
+          if (b > 1 && bf(node.left) < 0) {
+            rotationCount++;
+            setRotLabel("LR → Left-Right Rotation");
+            node.left = rotateLeft(node.left);
+            return rotateRight(node);
+          }
+          if (b < -1 && bf(node.right) <= 0) {
+            rotationCount++;
+            setRotLabel("RR → Left Rotation");
+            return rotateLeft(node);
+          }
+          if (b < -1 && bf(node.right) > 0) {
+            rotationCount++;
+            setRotLabel("RL → Right-Left Rotation");
+            node.right = rotateRight(node.right);
+            return rotateLeft(node);
+          }
+          return node;
+        }
+        function insert(node, v) {
+          if (!node) return { data: v, left: null, right: null, height: 1 };
+          if (v < node.data) node.left = insert(node.left, v);
+          else if (v > node.data) node.right = insert(node.right, v);
+          else return node;
+          return rebalance(node);
+        }
+        values.forEach((v) => (root = insert(root, v)));
+        return root;
+      }
+
+      function setRotLabel(msg) {
+        const el = document.getElementById("rotation-label");
+        el.textContent = "⚡ " + msg;
+        setTimeout(() => (el.textContent = ""), 2000);
+      }
+
+      function toD3Hierarchy(node) {
+        if (!node) return null;
+        const bf =
+          (node.left ? node.left.height : 0) -
+          (node.right ? node.right.height : 0);
+        const obj = { name: node.data, bf: bf, children: [] };
+        if (node.left) obj.children.push(toD3Hierarchy(node.left));
+        if (node.right) obj.children.push(toD3Hierarchy(node.right));
+        if (obj.children.length === 0) delete obj.children;
+        return obj;
+      }
+
+      function countNodes(node) {
+        if (!node) return 0;
+        return 1 + countNodes(node.left) + countNodes(node.right);
+      }
+
+      function renderTree() {
+        g.selectAll("*").remove();
+        if (insertedValues.length === 0) {
+          document.getElementById("stat-height").textContent = "0";
+          document.getElementById("stat-nodes").textContent = "0";
+          return;
+        }
+
+        rotationCount = 0;
+        const avlTree = rebuildAVL(insertedValues);
+        const hier = d3.hierarchy(toD3Hierarchy(avlTree));
+        const treeLayout = d3.tree().size([WIDTH - 60, HEIGHT - 80]);
+        treeLayout(hier);
+
+        // stats
+        document.getElementById("stat-height").textContent =
+          Module._avl_get_height();
+        document.getElementById("stat-nodes").textContent =
+          insertedValues.length;
+        document.getElementById("stat-rotations").textContent = rotationCount;
+
+        // links
+        g.selectAll(".link")
+          .data(hier.links())
+          .enter()
+          .append("path")
+          .attr("class", "link")
+          .attr(
+            "d",
+            d3
+              .linkVertical()
+              .x((d) => d.x + 30)
+              .y((d) => d.y),
+          )
+          .style("opacity", 0)
+          .transition()
+          .duration(400)
+          .style("opacity", 1);
+
+        // nodes
+        const node = g
+          .selectAll(".node")
+          .data(hier.descendants())
+          .enter()
+          .append("g")
+          .attr("class", "node")
+          .attr("transform", (d) => {
+            const sx = d.parent ? d.parent.x + 30 : d.x + 30;
+            const sy = d.parent ? d.parent.y : d.y;
+            return `translate(${sx},${sy})`;
+          });
+
+        node
+          .transition()
+          .duration(500)
+          .ease(d3.easeCubicOut)
+          .attr("transform", (d) => `translate(${d.x + 30},${d.y})`);
+
+        // color by balance factor
+        node
+          .append("circle")
+          .attr("r", 22)
+          .style("fill", (d) => {
+            if (d.data.name === lastInserted) return "#a78bfa";
+            if (Math.abs(d.data.bf) > 1) return "#ff4f4f";
+            return "#1e1e2e";
+          })
+          .style("stroke", (d) =>
+            d.data.name === lastInserted ? "#a78bfa" : "#a78bfa",
+          )
+          .transition()
+          .delay(700)
+          .duration(600)
+          .style("fill", "#1e1e2e")
+          .style("stroke", "#a78bfa");
+
+        node.append("text").text((d) => d.data.name);
+
+        // balance factor label below node
+        node
+          .append("text")
+          .attr("class", "bf")
+          .attr("dy", 34)
+          .text((d) => "bf:" + d.data.bf);
+      }
+
+      Module.onRuntimeInitialized = function () {
+        function insertValue() {
+          const input = document.getElementById("val-input");
+          const v = parseInt(input.value);
+          if (isNaN(v)) return;
+          Module._avl_insert_js(v);
+          insertedValues.push(v);
+          lastInserted = v;
+          input.value = "";
+          input.focus();
+          renderTree();
+        }
+        document.getElementById("btn-insert").onclick = insertValue;
+        document
+          .getElementById("val-input")
+          .addEventListener("keydown", (e) => {
+            if (e.key === "Enter") insertValue();
+          });
+        document.getElementById("btn-delete").onclick = () => {
+          const input = document.getElementById("val-input");
+          const v = parseInt(input.value);
+          if (isNaN(v)) return;
+          Module._avl_delete_js(v);
+          insertedValues = insertedValues.filter((x) => x !== v);
+          lastInserted = null;
+          input.value = "";
+          input.focus();
+          renderTree();
+        };
+        document.getElementById("btn-reset").onclick = () => {
+          Module._avl_reset();
+          insertedValues = [];
+          lastInserted = null;
+          renderTree();
+        };
+      };
+    </script>
+  </body>
+</html>
