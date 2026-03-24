@@ -92,11 +92,10 @@
       const svg = d3.select("#tree-svg");
       const g = svg.append("g").attr("transform", "translate(0,40)");
 
-      // ── rebuild JS tree from C inorder + re-insert ──────────────────
       let insertedValues = [];
+      let lastInserted = null;
 
       function rebuildTree(values) {
-        // Build a JS tree object for D3 layout from insertion order
         let root = null;
         function insert(node, v) {
           if (!node) return { data: v, left: null, right: null };
@@ -117,16 +116,27 @@
         return obj;
       }
 
+      function getInorder(node, result = []) {
+        if (!node) return result;
+        getInorder(node.left, result);
+        result.push(node.data);
+        getInorder(node.right, result);
+        return result;
+      }
+
       function renderTree() {
         g.selectAll("*").remove();
-        if (insertedValues.length === 0) return;
+        if (insertedValues.length === 0) {
+          document.getElementById("inorder").textContent = "Inorder: —";
+          return;
+        }
 
         const jsTree = rebuildTree(insertedValues);
         const hier = d3.hierarchy(toD3Hierarchy(jsTree));
         const treeLayout = d3.tree().size([WIDTH - 60, HEIGHT - 80]);
         treeLayout(hier);
 
-        // Links
+        // ── Links with fade-in ──────────────────────────────────────────
         g.selectAll(".link")
           .data(hier.links())
           .enter()
@@ -138,35 +148,61 @@
               .linkVertical()
               .x((d) => d.x + 30)
               .y((d) => d.y),
-          );
+          )
+          .style("opacity", 0)
+          .transition()
+          .duration(400)
+          .style("opacity", 1);
 
-        // Nodes
+        // ── Nodes ───────────────────────────────────────────────────────
         const node = g
           .selectAll(".node")
           .data(hier.descendants())
           .enter()
           .append("g")
           .attr("class", "node")
+          .attr("transform", (d) => {
+            // start from parent position, slide to final
+            const startX = d.parent ? d.parent.x + 30 : d.x + 30;
+            const startY = d.parent ? d.parent.y : d.y;
+            return `translate(${startX},${startY})`;
+          });
+
+        // animate slide to final position
+        node
+          .transition()
+          .duration(500)
+          .ease(d3.easeCubicOut)
           .attr("transform", (d) => `translate(${d.x + 30},${d.y})`);
 
+        // circle — green flash for newly inserted node
         node
           .append("circle")
           .attr("r", 22)
-          .style("opacity", 0)
+          .style("fill", (d) =>
+            d.data.name === lastInserted ? "#00ff88" : "#1e1e2e",
+          )
+          .style("stroke", (d) =>
+            d.data.name === lastInserted ? "#00ff88" : "#00e5ff",
+          )
+          .style("stroke-width", "2.5px")
           .transition()
-          .duration(500)
-          .style("opacity", 1);
+          .delay(600)
+          .duration(600)
+          .style("fill", "#1e1e2e")
+          .style("stroke", "#00e5ff");
 
-        node.append("text").text((d) => d.data.name);
+        // text
+        node
+          .append("text")
+          .text((d) => d.data.name)
+          .style("fill", "#fff")
+          .style("font-size", "14px")
+          .style("font-weight", "bold")
+          .attr("text-anchor", "middle")
+          .attr("dominant-baseline", "central");
 
-        // Inorder display
-        function getInorder(node, result = []) {
-          if (!node) return result;
-          getInorder(node.left, result);
-          result.push(node.data);
-          getInorder(node.right, result);
-          return result;
-        }
+        // inorder
         const inorderArr = getInorder(jsTree);
         document.getElementById("inorder").textContent =
           "Inorder: " + inorderArr.join(", ");
@@ -179,8 +215,9 @@
           if (isNaN(v)) return;
           Module._bst_insert_js(v);
           insertedValues.push(v);
-          input.value = ""; // auto-clear
-          input.focus(); // keep cursor in box
+          lastInserted = v;
+          input.value = "";
+          input.focus();
           renderTree();
         }
 
@@ -189,20 +226,25 @@
         document
           .getElementById("val-input")
           .addEventListener("keydown", (e) => {
-            if (e.key === "Enter") insertValue(); // Enter key inserts
+            if (e.key === "Enter") insertValue();
           });
 
         document.getElementById("btn-delete").onclick = () => {
-          const v = parseInt(document.getElementById("val-input").value);
+          const input = document.getElementById("val-input");
+          const v = parseInt(input.value);
           if (isNaN(v)) return;
           Module._bst_delete_js(v);
           insertedValues = insertedValues.filter((x) => x !== v);
+          lastInserted = null;
+          input.value = "";
+          input.focus();
           renderTree();
         };
 
         document.getElementById("btn-reset").onclick = () => {
           Module._bst_reset();
           insertedValues = [];
+          lastInserted = null;
           renderTree();
         };
       };
