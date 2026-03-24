@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>DS Dojo — Learn Data Structures by Fighting Them</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: #0f0f1a;
+        color: #fff;
+        font-family: "Segoe UI", sans-serif;
+        min-height: 100vh;
+      }
+
+      /* ── NAV ── */
+      nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 40px;
+        border-bottom: 1px solid #1e1e2e;
+      }
+      .logo {
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: 1px;
+      }
+      .logo span {
+        color: #ffd700;
+      }
+      .nav-links a {
+        color: #aaa;
+        text-decoration: none;
+        margin-left: 24px;
+        font-size: 14px;
+        transition: color 0.2s;
+      }
+      .nav-links a:hover {
+        color: #fff;
+      }
+
+      /* ── HERO ── */
+      .hero {
+        text-align: center;
+        padding: 80px 20px 60px;
+      }
+      .hero h1 {
+        font-size: 48px;
+        font-weight: 900;
+        line-height: 1.2;
+      }
+      .hero h1 .fight {
+        color: #ffd700;
+      }
+      .hero p {
+        color: #aaa;
+        font-size: 18px;
+        margin: 20px auto;
+        max-width: 560px;
+        line-height: 1.7;
+      }
+      .hero-btns {
+        margin-top: 32px;
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .btn-primary {
+        background: #ffd700;
+        color: #000;
+        padding: 14px 32px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: transform 0.15s;
+      }
+      .btn-primary:hover {
+        transform: scale(1.04);
+      }
+      .btn-secondary {
+        background: transparent;
+        color: #fff;
+        border: 1px solid #333;
+        padding: 14px 32px;
+        border-radius: 8px;
+        font-size: 16px;
+        text-decoration: none;
+        transition: border-color 0.2s;
+      }
+      .btn-secondary:hover {
+        border-color: #ffd700;
+        color: #ffd700;
+      }
+
+      /* ── MODULES ── */
+      .section-title {
+        text-align: center;
+        font-size: 28px;
+        font-weight: 800;
+        margin: 20px 0 10px;
+      }
+      .section-sub {
+        text-align: center;
+        color: #aaa;
+        font-size: 15px;
+        margin-bottom: 40px;
+      }
+      .cards {
+        display: flex;
+        justify-content: center;
+        gap: 24px;
+        flex-wrap: wrap;
+        padding: 0 40px 60px;
+      }
+      .card {
+        background: #1e1e2e;
+        border-radius: 16px;
+        padding: 28px 24px;
+        width: 280px;
+        border-top: 4px solid;
+        text-decoration: none;
+        color: #fff;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+        position: relative;
+        overflow: hidden;
+      }
+      .card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+      }
+      .card .icon {
+        font-size: 36px;
+        margin-bottom: 14px;
+      }
+      .card h3 {
+        font-size: 18px;
+        margin-bottom: 8px;
+      }
+      .card p {
+        color: #888;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      .card .tag {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        font-size: 11px;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-weight: 700;
+      }
+      .tag-new {
+        background: #ffd700;
+        color: #000;
+      }
+      .tag-core {
+        background: #333;
+        color: #aaa;
+      }
+
+      .card-bst {
+        border-color: #00e5ff;
+      }
+      .card-bst h3 {
+        color: #00e5ff;
+      }
+      .card-avl {
+        border-color: #a78bfa;
+      }
+      .card-avl h3 {
+        color: #a78bfa;
+      }
+      .card-battle {
+        border-color: #ff9f43;
+      }
+      .card-battle h3 {
+        color: #ff9f43;
+      }
+      .card-hash {
+        border-color: #ffd700;
+      }
+      .card-hash h3 {
+        color: #ffd700;
+      }
+
+      /* ── WHY SECTION ── */
+      .why {
+        background: #13131f;
+        padding: 60px 40px;
+        text-align: center;
+      }
+      .why h2 {
+        font-size: 26px;
+        margin-bottom: 40px;
+      }
+      .why-grid {
+        display: flex;
+        justify-content: center;
+        gap: 32px;
+        flex-wrap: wrap;
+      }
+      .why-item {
+        max-width: 220px;
+      }
+      .why-item .ico {
+        font-size: 32px;
+        margin-bottom: 12px;
+      }
+      .why-item h4 {
+        font-size: 15px;
+        margin-bottom: 6px;
+        color: #ffd700;
+      }
+      .why-item p {
+        font-size: 13px;
+        color: #888;
+        line-height: 1.6;
+      }
+
+      /* ── FOOTER ── */
+      footer {
+        text-align: center;
+        padding: 24px;
+        color: #444;
+        font-size: 13px;
+        border-top: 1px solid #1e1e2e;
+      }
+      footer span {
+        color: #ffd700;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- NAV -->
+    <nav>
+      <div class="logo">DS <span>Dojo</span></div>
+      <div class="nav-links">
+        <a href="bst.html">BST</a>
+        <a href="avl.html">AVL</a>
+        <a href="battle.html">Battle</a>
+        <a href="hash.html">Hash</a>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+      <h1>
+        Learn Data Structures<br />by <span class="fight">Fighting</span> Them
+      </h1>
+      <p>
+        Don't just watch animations. Predict rotations. Compare trees.
+        Understand why — not just how.
+      </p>
+      <div class="hero-btns">
+        <a href="battle.html" class="btn-primary">⚔️ Start DS Battle</a>
+        <a href="avl.html" class="btn-secondary">Try AVL Tree →</a>
+      </div>
+    </section>
+
+    <!-- MODULES -->
+    <div class="section-title">Modules</div>
+    <div class="section-sub">
+      Pick a concept. Go deep. Understand it completely.
+    </div>
+    <div class="cards">
+      <a href="bst.html" class="card card-bst">
+        <div class="tag tag-core">CORE</div>
+        <div class="icon">🌳</div>
+        <h3>Binary Search Tree</h3>
+        <p>
+          Insert, delete, search. Watch the tree build in real time with inorder
+          traversal.
+        </p>
+      </a>
+
+      <a href="avl.html" class="card card-avl">
+        <div class="tag tag-core">CORE</div>
+        <div class="icon">⚖️</div>
+        <h3>AVL Tree</h3>
+        <p>
+          Self-balancing magic. See balance factors live and rotation labels as
+          they trigger.
+        </p>
+      </a>
+
+      <a href="battle.html" class="card card-battle">
+        <div class="tag tag-new">NEW</div>
+        <div class="icon">⚔️</div>
+        <h3>DS Battle</h3>
+        <p>
+          BST vs AVL — same input, side by side. Watch BST degenerate while AVL
+          stays balanced.
+        </p>
+      </a>
+
+      <a href="hash.html" class="card card-hash">
+        <div class="tag tag-new">NEW</div>
+        <div class="icon">🔑</div>
+        <h3>Hash Collision</h3>
+        <p>
+          All 4 collision methods on same input simultaneously. See exactly
+          where keys land.
+        </p>
+      </a>
+    </div>
+
+    <!-- WHY SECTION -->
+    <div class="why">
+      <h2>Why DS Dojo?</h2>
+      <div class="why-grid">
+        <div class="why-item">
+          <div class="ico">🧠</div>
+          <h4>Predict, Don't Passive Watch</h4>
+          <p>
+            Tools pause and ask you what happens next. Active recall beats
+            passive watching every time.
+          </p>
+        </div>
+        <div class="why-item">
+          <div class="ico">⚔️</div>
+          <h4>Side-by-Side Comparison</h4>
+          <p>
+            See BST degenerate while AVL self-balances. Instantly understand why
+            structures exist.
+          </p>
+        </div>
+        <div class="why-item">
+          <div class="ico">📊</div>
+          <h4>Live Complexity Stats</h4>
+          <p>
+            Height, rotations, collisions — all update in real time as you
+            interact.
+          </p>
+        </div>
+        <div class="why-item">
+          <div class="ico">🎯</div>
+          <h4>Built for Students</h4>
+          <p>
+            No fluff. Every module targets a concept students struggle with
+            most.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>Built with ❤️ at <span>VIT Pune</span> — DS Dojo 2026</footer>
+  </body>
+</html>
