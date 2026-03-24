@@ -1,0 +1,6 @@
+src/wasm/
+node_modules/
+*.o
+*.out
+*.exe
+.DS_Store
