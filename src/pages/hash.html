@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>DS Dojo — Hash Collision</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: #0f0f1a;
+        color: #fff;
+        font-family: sans-serif;
+      }
+      h1 {
+        text-align: center;
+        padding: 18px;
+        color: #ffd700;
+        font-size: 22px;
+      }
+      #controls {
+        text-align: center;
+        margin: 10px 0 16px;
+      }
+      input {
+        padding: 8px;
+        font-size: 16px;
+        border-radius: 6px;
+        border: none;
+        width: 80px;
+        text-align: center;
+      }
+      select {
+        padding: 8px;
+        font-size: 15px;
+        border-radius: 6px;
+        border: none;
+        background: #1e1e2e;
+        color: #fff;
+      }
+      button {
+        padding: 8px 18px;
+        margin: 4px;
+        font-size: 15px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      #btn-insert {
+        background: #ffd700;
+        color: #000;
+      }
+      #btn-reset {
+        background: #444;
+        color: #fff;
+      }
+      #methods {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+        flex-wrap: wrap;
+        padding: 0 16px 16px;
+      }
+      .method-card {
+        background: #1e1e2e;
+        border-radius: 12px;
+        padding: 14px;
+        width: 300px;
+        border-top: 3px solid;
+      }
+      .method-card h3 {
+        font-size: 15px;
+        margin-bottom: 8px;
+      }
+      .method-card .stats {
+        font-size: 12px;
+        color: #aaa;
+        margin-bottom: 10px;
+        display: flex;
+        gap: 12px;
+      }
+      .method-card .stats span {
+        color: #ffd700;
+        font-weight: bold;
+      }
+      .table-wrap {
+        overflow-x: auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+      th {
+        background: #111;
+        padding: 5px;
+        color: #aaa;
+      }
+      td {
+        padding: 5px;
+        text-align: center;
+        border-bottom: 1px solid #222;
+        transition: background 0.3s;
+      }
+      td.empty {
+        color: #333;
+      }
+      td.filled {
+        color: #fff;
+        font-weight: bold;
+      }
+      td.new {
+        animation: flash 0.8s ease;
+      }
+      td.probed {
+        background: #2a2a00 !important;
+        color: #ffd700;
+      }
+      td.chained {
+        background: #1a2a1a;
+        color: #88ff88;
+      }
+      @keyframes flash {
+        0% {
+          background: #ffd700;
+          color: #000;
+        }
+        100% {
+          background: inherit;
+          color: inherit;
+        }
+      }
+
+      /* color themes per method */
+      .card-chain {
+        border-color: #00e5ff;
+      }
+      .card-chain h3 {
+        color: #00e5ff;
+      }
+      .card-linear {
+        border-color: #a78bfa;
+      }
+      .card-linear h3 {
+        color: #a78bfa;
+      }
+      .card-quad {
+        border-color: #ff9f43;
+      }
+      .card-quad h3 {
+        color: #ff9f43;
+      }
+      .card-double {
+        border-color: #ff4f4f;
+      }
+      .card-double h3 {
+        color: #ff4f4f;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🔑 Hash Collision Comparator</h1>
+    <div id="controls">
+      <input id="val-input" type="number" placeholder="key" />
+      <select id="size-select">
+        <option value="7">Table Size: 7</option>
+        <option value="11" selected>Table Size: 11</option>
+        <option value="13">Table Size: 13</option>
+        <option value="17">Table Size: 17</option>
+      </select>
+      <button id="btn-insert">Insert</button>
+      <button id="btn-reset">Reset</button>
+      <div style="margin-top: 8px; color: #aaa; font-size: 13px">
+        h(k) = k mod tableSize &nbsp;|&nbsp; Same key inserted into all 4
+        methods simultaneously
+      </div>
+    </div>
+
+    <div id="methods">
+      <div class="method-card card-chain" id="card-chain">
+        <h3>🔗 Chaining</h3>
+        <div class="stats">
+          Collisions: <span id="chain-coll">0</span> &nbsp; Load:
+          <span id="chain-load">0.00</span>
+        </div>
+        <div class="table-wrap"><table id="chain-table"></table></div>
+      </div>
+      <div class="method-card card-linear" id="card-linear">
+        <h3>📏 Linear Probing</h3>
+        <div class="stats">
+          Collisions: <span id="linear-coll">0</span> &nbsp; Probes:
+          <span id="linear-probes">0</span>
+        </div>
+        <div class="table-wrap"><table id="linear-table"></table></div>
+      </div>
+      <div class="method-card card-quad" id="card-quad">
+        <h3>📐 Quadratic Probing</h3>
+        <div class="stats">
+          Collisions: <span id="quad-coll">0</span> &nbsp; Probes:
+          <span id="quad-probes">0</span>
+        </div>
+        <div class="table-wrap"><table id="quad-table"></table></div>
+      </div>
+      <div class="method-card card-double" id="card-double">
+        <h3>🔂 Double Hashing</h3>
+        <div class="stats">
+          Collisions: <span id="double-coll">0</span> &nbsp; Probes:
+          <span id="double-probes">0</span>
+        </div>
+        <div class="table-wrap"><table id="double-table"></table></div>
+      </div>
+    </div>
+
+    <script>
+      let SIZE = 11;
+
+      // ── Data structures ─────────────────────────────────────────────
+      let chainTable = []; // array of arrays
+      let linearTable = [];
+      let quadTable = [];
+      let doubleTable = [];
+      let stats = {
+        chain: { coll: 0 },
+        linear: { coll: 0, probes: 0 },
+        quad: { coll: 0, probes: 0 },
+        double: { coll: 0, probes: 0 },
+      };
+
+      function initTables() {
+        chainTable = Array.from({ length: SIZE }, () => []);
+        linearTable = new Array(SIZE).fill(null);
+        quadTable = new Array(SIZE).fill(null);
+        doubleTable = new Array(SIZE).fill(null);
+        stats = {
+          chain: { coll: 0 },
+          linear: { coll: 0, probes: 0 },
+          quad: { coll: 0, probes: 0 },
+          double: { coll: 0, probes: 0 },
+        };
+      }
+
+      function h1(k) {
+        return k % SIZE;
+      }
+      function h2(k) {
+        return 1 + (k % (SIZE - 1));
+      } // double hashing step
+
+      // ── Insert logic ────────────────────────────────────────────────
+      function insertChain(k) {
+        const idx = h1(k);
+        if (chainTable[idx].length > 0) stats.chain.coll++;
+        chainTable[idx].push(k);
+      }
+
+      function insertLinear(k) {
+        let idx = h1(k),
+          probes = 0;
+        while (linearTable[idx] !== null && probes < SIZE) {
+          stats.linear.coll++;
+          probes++;
+          idx = (idx + 1) % SIZE;
+        }
+        stats.linear.probes += probes;
+        if (probes < SIZE) linearTable[idx] = k;
+      }
+
+      function insertQuad(k) {
+        let base = h1(k),
+          probes = 0,
+          idx;
+        do {
+          idx = (base + probes * probes) % SIZE;
+          if (quadTable[idx] === null) {
+            quadTable[idx] = k;
+            stats.quad.probes += probes;
+            return;
+          }
+          stats.quad.coll++;
+          probes++;
+        } while (probes < SIZE);
+      }
+
+      function insertDouble(k) {
+        let idx = h1(k),
+          step = h2(k),
+          probes = 0;
+        while (doubleTable[idx] !== null && probes < SIZE) {
+          stats.double.coll++;
+          probes++;
+          idx = (idx + step) % SIZE;
+        }
+        stats.double.probes += probes;
+        if (probes < SIZE) doubleTable[idx] = k;
+      }
+
+      // ── Render tables ───────────────────────────────────────────────
+      function renderTable(tableId, data, isChain, newKey) {
+        const tbl = document.getElementById(tableId);
+        tbl.innerHTML = "";
+        const head = tbl.insertRow();
+        ["Idx", "h(k)", "Value(s)"].forEach((t) => {
+          const th = document.createElement("th");
+          th.textContent = t;
+          head.appendChild(th);
+        });
+        for (let i = 0; i < SIZE; i++) {
+          const row = tbl.insertRow();
+          row.insertCell().textContent = i;
+          const hkCell = row.insertCell();
+          const valCell = row.insertCell();
+          if (isChain) {
+            if (chainTable[i].length === 0) {
+              hkCell.textContent = "—";
+              valCell.textContent = "—";
+              valCell.className = "empty";
+            } else {
+              const isNew = chainTable[i].includes(newKey) && h1(newKey) === i;
+              hkCell.textContent = chainTable[i].map((v) => v % SIZE).join(",");
+              valCell.textContent = chainTable[i].join(" → ");
+              valCell.className = isNew
+                ? "filled chained new"
+                : "filled chained";
+            }
+          } else {
+            const val = data[i];
+            if (val === null) {
+              hkCell.textContent = "—";
+              valCell.textContent = "—";
+              valCell.className = "empty";
+            } else {
+              hkCell.textContent = val % SIZE;
+              valCell.textContent = val;
+              const isNew = val === newKey;
+              valCell.className = isNew ? "filled new" : "filled";
+            }
+          }
+        }
+      }
+
+      function updateStats() {
+        document.getElementById("chain-coll").textContent = stats.chain.coll;
+        document.getElementById("chain-load").textContent = (
+          Object.values(chainTable).flat().length / SIZE
+        ).toFixed(2);
+        document.getElementById("linear-coll").textContent = stats.linear.coll;
+        document.getElementById("linear-probes").textContent =
+          stats.linear.probes;
+        document.getElementById("quad-coll").textContent = stats.quad.coll;
+        document.getElementById("quad-probes").textContent = stats.quad.probes;
+        document.getElementById("double-coll").textContent = stats.double.coll;
+        document.getElementById("double-probes").textContent =
+          stats.double.probes;
+      }
+
+      function renderAll(newKey) {
+        renderTable("chain-table", chainTable, true, newKey);
+        renderTable("linear-table", linearTable, false, newKey);
+        renderTable("quad-table", quadTable, false, newKey);
+        renderTable("double-table", doubleTable, false, newKey);
+        updateStats();
+      }
+
+      // ── Init ────────────────────────────────────────────────────────
+      initTables();
+      renderAll(null);
+
+      document.getElementById("size-select").onchange = function () {
+        SIZE = parseInt(this.value);
+        initTables();
+        renderAll(null);
+      };
+
+      function insertValue() {
+        const input = document.getElementById("val-input");
+        const k = parseInt(input.value);
+        if (isNaN(k)) return;
+        insertChain(k);
+        insertLinear(k);
+        insertQuad(k);
+        insertDouble(k);
+        input.value = "";
+        input.focus();
+        renderAll(k);
+      }
+
+      document.getElementById("btn-insert").onclick = insertValue;
+      document.getElementById("val-input").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") insertValue();
+      });
+      document.getElementById("btn-reset").onclick = () => {
+        initTables();
+        renderAll(null);
+      };
+    </script>
+  </body>
+</html>
