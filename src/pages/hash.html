@@ -259,10 +259,10 @@
         let idx = h1(k),
           probes = 0;
         while (linearTable[idx] !== null && probes < SIZE) {
-          stats.linear.coll++;
           probes++;
           idx = (idx + 1) % SIZE;
         }
+        if (probes > 0) stats.linear.coll++;
         stats.linear.probes += probes;
         if (probes < SIZE) linearTable[idx] = k;
       }
@@ -275,10 +275,10 @@
           idx = (base + probes * probes) % SIZE;
           if (quadTable[idx] === null) {
             quadTable[idx] = k;
+            if (probes > 0) stats.quad.coll++;
             stats.quad.probes += probes;
             return;
           }
-          stats.quad.coll++;
           probes++;
         } while (probes < SIZE);
       }
@@ -318,7 +318,8 @@
               valCell.className = "empty";
             } else {
               const isNew = chainTable[i].includes(newKey) && h1(newKey) === i;
-              hkCell.textContent = chainTable[i].map((v) => v % SIZE).join(",");
+              hkCell.textContent = i;
+
               valCell.textContent = chainTable[i].join(" → ");
               valCell.className = isNew
                 ? "filled chained new"
