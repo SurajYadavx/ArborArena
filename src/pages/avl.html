@@ -568,6 +568,24 @@
         </div>
         <button id="btn-continue" onclick="continueAfterPredict()">
           Continue →
+          <button
+            id="btn-replay"
+            onclick="replayRotation()"
+            style="
+              display: none;
+              margin-top: 8px;
+              width: 100%;
+              background: #1e1e2e;
+              color: #a78bfa;
+              border: 1px solid #a78bfa;
+              padding: 10px;
+              border-radius: 8px;
+              font-size: 14px;
+              cursor: pointer;
+            "
+          >
+            ↩ Replay Rotation Animation
+          </button>
         </button>
       </div>
     </div>
@@ -1116,6 +1134,8 @@
         } else {
           clickedBtn.classList.add("wrong");
           streak = 0;
+          wrongHistory[pendingRotation.type]++;
+
           document.getElementById("feedback-msg").textContent =
             "❌ Wrong. Read the hint, then click the correct answer to continue.";
           document.getElementById("feedback-msg").className =
@@ -1204,6 +1224,10 @@
 
       function continueAfterPredict() {
         document.getElementById("predict-overlay").classList.remove("active");
+        document.getElementById("btn-replay").style.display = "block";
+        document.getElementById("btn-replay").disabled = false;
+        rotationHistory[pendingRotation.type]++;
+
         // now actually complete the insert and re-render
         const avlTree = buildAVL([...insertedValues]);
         const rotLabel = pendingRotation.label;
@@ -1271,6 +1295,7 @@
       }
 
       function endChallenge(completed = false) {
+        showSummary();
         challengeActive = false;
         document.getElementById("challenge-bar").classList.remove("active");
         document.getElementById("btn-insert").disabled = false;
@@ -1340,6 +1365,136 @@
           }
         });
 
+      // ── ROTATION TRACKING ───────────────────────────────────────────
+      let rotationHistory = { LL: 0, RR: 0, LR: 0, RL: 0 };
+      let wrongHistory = { LL: 0, RR: 0, LR: 0, RL: 0 };
+
+      // ── REPLAY ROTATION ─────────────────────────────────────────────
+      function replayRotation() {
+        if (!pendingRotation) return;
+        document.getElementById("btn-replay").disabled = true;
+
+        const type = pendingRotation.type;
+        const avlTree = buildAVL([...insertedValues]);
+        renderTree(avlTree, lastInserted);
+
+        // highlight unbalanced node red, then animate fix
+        const unbalVal = pendingRotation.nodeVal;
+        const nodes = document.querySelectorAll(".node");
+
+        // flash unbalanced node red
+        g.selectAll(".node").each(function (d) {
+          if (d.data.name === unbalVal) {
+            d3.select(this)
+              .select("circle")
+              .transition()
+              .duration(300)
+              .style("stroke", "#ff4f4f")
+              .style("stroke-width", "4px")
+              .transition()
+              .duration(300)
+              .style("stroke", "#ff4f4f")
+              .transition()
+              .duration(400)
+              .style("stroke", "#ffd700")
+              .style("stroke-width", "4px")
+              .transition()
+              .duration(500)
+              .style("stroke", "#a78bfa")
+              .style("stroke-width", "2.5px");
+          }
+        });
+
+        // show rotation label animating
+        const labels = {
+          LL: "Step 1: bf=+2 detected → Step 2: Right Rotation →  Balanced ✅",
+          RR: "Step 1: bf=-2 detected → Step 2: Left Rotation → Balanced ✅",
+          LR: "Step 1: bf=+2, left child right-heavy → Step 2: Left rotate child → Step 3: Right rotate root → Balanced ✅",
+          RL: "Step 1: bf=-2, right child left-heavy → Step 2: Right rotate child → Step 3: Left rotate root → Balanced ✅",
+        };
+
+        let step = 0;
+        const steps = labels[type].split(" → ");
+        const label = document.getElementById("rotation-label");
+
+        function nextStep() {
+          if (step >= steps.length) {
+            document.getElementById("btn-replay").disabled = false;
+            return;
+          }
+          label.textContent = "⚡ " + steps[step];
+          step++;
+          setTimeout(nextStep, 900);
+        }
+        nextStep();
+      }
+
+      // ── SESSION SUMMARY ─────────────────────────────────────────────
+      function showSummary() {
+        if (scoreTotal === 0) return;
+
+        const pct = Math.round((scoreCorrect / scoreTotal) * 100);
+        const bestRot = Object.entries(rotationHistory).sort(
+          (a, b) => b[1] - a[1],
+        )[0];
+        const worstRot = Object.entries(wrongHistory).sort(
+          (a, b) => b[1] - a[1],
+        )[0];
+
+        const rotNames = {
+          LL: "Right Rotation (LL)",
+          RR: "Left Rotation (RR)",
+          LR: "Left-Right (LR)",
+          RL: "Right-Left (RL)",
+        };
+        const grade =
+          pct >= 80
+            ? "🏆 Excellent!"
+            : pct >= 50
+              ? "👍 Good effort!"
+              : "📚 Keep practicing!";
+
+        let html = `
+    <div style="text-align:center;font-size:28px;font-weight:900;color:${pct >= 80 ? "#00ff88" : pct >= 50 ? "#ffd700" : "#ff4f4f"}">${pct}%</div>
+    <div style="text-align:center;color:#aaa;margin-bottom:12px;">${grade}</div>
+    <div>✅ <b>Correct:</b> <span style="color:#00ff88">${scoreCorrect} / ${scoreTotal}</span></div>
+    <div>🔥 <b>Best Streak:</b> <span style="color:#ffd700">${streak}</span></div>
+    <div>⚡ <b>Rotations Practiced:</b></div>
+    <div style="padding-left:16px;font-size:13px;color:#aaa;">
+      LL: ${rotationHistory.LL} &nbsp; RR: ${rotationHistory.RR} &nbsp; LR: ${rotationHistory.LR} &nbsp; RL: ${rotationHistory.RL}
+    </div>
+  `;
+
+        if (worstRot && wrongHistory[worstRot[0]] > 0) {
+          html += `<div style="margin-top:10px;">📘 <b>Weakest Case:</b> <span style="color:#ff9f43">${rotNames[worstRot[0]]}</span> — review the hint for this case</div>`;
+        }
+        if (bestRot && rotationHistory[bestRot[0]] > 0) {
+          html += `<div>💪 <b>Most Practiced:</b> <span style="color:#a78bfa">${rotNames[bestRot[0]]}</span></div>`;
+        }
+
+        document.getElementById("summary-content").innerHTML = html;
+        document.getElementById("summary-overlay").style.display = "flex";
+      }
+
+      function closeSummary() {
+        document.getElementById("summary-overlay").style.display = "none";
+        // full reset
+        insertedValues = [];
+        lastInserted = null;
+        totalRotations = 0;
+        streak = 0;
+        scoreCorrect = 0;
+        scoreTotal = 0;
+        rotationHistory = { LL: 0, RR: 0, LR: 0, RL: 0 };
+        wrongHistory = { LL: 0, RR: 0, LR: 0, RL: 0 };
+        Module._avl_reset();
+        g.selectAll("*").remove();
+        document.getElementById("stat-height").textContent = "0";
+        document.getElementById("stat-nodes").textContent = "0";
+        document.getElementById("stat-rotations").textContent = "0";
+        updateScoreDisplay();
+      }
+
       // ═══════════════════════════════════════════════════════════
       // WASM INIT
       // ═══════════════════════════════════════════════════════════
@@ -1373,6 +1528,7 @@
         };
 
         document.getElementById("btn-reset").onclick = () => {
+          showSummary();
           Module._avl_reset();
           insertedValues = [];
           lastInserted = null;
@@ -1388,5 +1544,62 @@
         };
       };
     </script>
+    <!-- SESSION SUMMARY -->
+    <div
+      id="summary-overlay"
+      style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 200;
+        justify-content: center;
+        align-items: center;
+      "
+    >
+      <div
+        style="
+          background: #1a1a2e;
+          border: 2px solid #a78bfa;
+          border-radius: 20px;
+          padding: 32px;
+          max-width: 420px;
+          width: 90%;
+          animation: slideUp 0.3s ease;
+        "
+      >
+        <h3
+          style="
+            color: #a78bfa;
+            font-size: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+          "
+        >
+          📊 Session Summary
+        </h3>
+        <div
+          id="summary-content"
+          style="font-size: 15px; line-height: 2.2; color: #ddd"
+        ></div>
+        <button
+          onclick="closeSummary()"
+          style="
+            margin-top: 20px;
+            width: 100%;
+            background: #a78bfa;
+            color: #000;
+            font-weight: 700;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            cursor: pointer;
+          "
+        >
+          Start New Session
+        </button>
+      </div>
+    </div>
   </body>
 </html>
