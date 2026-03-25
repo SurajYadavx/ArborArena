@@ -1008,6 +1008,9 @@
         </div>
         <div class="filter-chip" onclick="filterProbs('AVL Tree', this)">
           AVL
+          <div class="filter-chip" onclick="filterProbs('Stack', this)">
+            Stack
+          </div>
         </div>
       </div>
       <div class="pl-scroll" id="pl-scroll"></div>
@@ -1022,6 +1025,7 @@
       const JUDGE0 =
         "https://ce.judge0.com/submissions/?base64_encoded=false&wait=true";
       const LANG_ID = { cpp: 54, c: 50, java: 62, python: 71 };
+      const DIFF_DOT = { easy: "#2ecc71", medium: "#ffd700", hard: "#e74c3c" };
       // Language IDs: C(50), C++(54), Java(62), Python3(71)
 
       async function pistonRun(lang, code, stdin) {
