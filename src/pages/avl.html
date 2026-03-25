@@ -5,38 +5,108 @@
     <title>DS Dojo — AVL Tree</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
       body {
         background: #0f0f1a;
         color: #fff;
-        font-family: sans-serif;
-        text-align: center;
+        font-family: "Segoe UI", sans-serif;
       }
-      h2 {
+
+      /* ── TOP BAR ── */
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 32px;
+        border-bottom: 1px solid #1e1e2e;
+      }
+      .topbar h2 {
         color: #a78bfa;
-        margin-top: 20px;
+        font-size: 20px;
       }
+      .mode-toggle {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 14px;
+        color: #aaa;
+      }
+      .toggle-switch {
+        position: relative;
+        width: 52px;
+        height: 26px;
+      }
+      .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        inset: 0;
+        background: #333;
+        border-radius: 26px;
+        transition: 0.3s;
+      }
+      .slider:before {
+        content: "";
+        position: absolute;
+        height: 20px;
+        width: 20px;
+        left: 3px;
+        bottom: 3px;
+        background: #fff;
+        border-radius: 50%;
+        transition: 0.3s;
+      }
+      input:checked + .slider {
+        background: #a78bfa;
+      }
+      input:checked + .slider:before {
+        transform: translateX(26px);
+      }
+      .mode-label {
+        font-weight: 700;
+      }
+      .mode-label.predict {
+        color: #a78bfa;
+      }
+
+      /* ── CONTROLS ── */
       #controls {
-        margin: 20px;
+        text-align: center;
+        padding: 16px;
       }
-      input {
+      input[type="number"] {
         padding: 8px;
         font-size: 16px;
         border-radius: 6px;
         border: none;
         width: 80px;
-        text-anchor: middle;
+        text-align: center;
       }
       button {
-        padding: 8px 16px;
+        padding: 8px 18px;
         margin: 4px;
         font-size: 15px;
         border: none;
         border-radius: 6px;
         cursor: pointer;
+        transition: opacity 0.2s;
+      }
+      button:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
       }
       #btn-insert {
         background: #a78bfa;
         color: #000;
+        font-weight: 700;
       }
       #btn-delete {
         background: #ff4f4f;
@@ -46,31 +116,256 @@
         background: #444;
         color: #fff;
       }
+
+      /* ── STATS ── */
       #stats {
-        margin-top: 10px;
-        color: #aaa;
-        font-size: 14px;
         display: flex;
         justify-content: center;
-        gap: 30px;
+        gap: 16px;
+        margin: 8px 0;
+        flex-wrap: wrap;
       }
       .stat-box {
         background: #1e1e2e;
-        padding: 8px 20px;
+        padding: 6px 20px;
         border-radius: 8px;
+        text-align: center;
+        font-size: 13px;
       }
       .stat-box span {
-        color: #a78bfa;
         font-size: 20px;
-        font-weight: bold;
+        font-weight: 800;
         display: block;
+        color: #a78bfa;
       }
+      #streak-box span {
+        color: #ffd700;
+      }
+      #score-box span {
+        color: #00e5ff;
+      }
+
+      /* ── PREDICT PANEL ── */
+      #predict-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 100;
+        justify-content: center;
+        align-items: center;
+      }
+      #predict-overlay.active {
+        display: flex;
+      }
+      #predict-panel {
+        background: #1a1a2e;
+        border: 2px solid #a78bfa;
+        border-radius: 20px;
+        padding: 32px;
+        max-width: 480px;
+        width: 90%;
+        animation: slideUp 0.3s ease;
+      }
+      @keyframes slideUp {
+        from {
+          transform: translateY(30px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+      #predict-panel h3 {
+        color: #a78bfa;
+        font-size: 18px;
+        margin-bottom: 6px;
+      }
+      #predict-question {
+        font-size: 16px;
+        line-height: 1.6;
+        color: #ddd;
+        margin-bottom: 20px;
+      }
+      #predict-question .highlight {
+        color: #ffd700;
+        font-weight: 700;
+      }
+
+      /* tree snapshot inside question */
+      #mini-tree {
+        margin: 12px 0;
+        background: #0f0f1a;
+        border-radius: 10px;
+        border: 1px solid #333;
+      }
+
+      .options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 16px;
+      }
+      .opt-btn {
+        background: #1e1e2e;
+        border: 2px solid #333;
+        color: #fff;
+        padding: 12px;
+        border-radius: 10px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: left;
+      }
+      .opt-btn:hover {
+        border-color: #a78bfa;
+        background: #2a1e4e;
+      }
+      .opt-btn.correct {
+        border-color: #00ff88;
+        background: #0a2a1a;
+        color: #00ff88;
+        animation: pulse 0.5s ease;
+      }
+      .opt-btn.wrong {
+        border-color: #ff4f4f;
+        background: #2a0a0a;
+        color: #ff4f4f;
+      }
+      .opt-btn.reveal {
+        border-color: #00ff88;
+        background: #0a2a1a;
+        color: #00ff88;
+      }
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.04);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      #feedback-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        min-height: 36px;
+        margin-bottom: 12px;
+      }
+      #feedback-msg {
+        font-size: 15px;
+        font-weight: 700;
+        flex: 1;
+      }
+      #feedback-msg.correct {
+        color: #00ff88;
+      }
+      #feedback-msg.wrong {
+        color: #ff4f4f;
+      }
+      #btn-hint {
+        background: #2a2a00;
+        border: 1px solid #ffd700;
+        color: #ffd700;
+        padding: 6px 14px;
+        border-radius: 6px;
+        font-size: 13px;
+        cursor: pointer;
+        display: none;
+      }
+      #btn-continue {
+        background: #a78bfa;
+        color: #000;
+        font-weight: 700;
+        padding: 10px 24px;
+        border-radius: 8px;
+        font-size: 15px;
+        cursor: pointer;
+        width: 100%;
+        display: none;
+      }
+
+      /* ── HINT CARD ── */
+      #hint-card {
+        display: none;
+        background: #0f0f1a;
+        border: 1px solid #ffd700;
+        border-radius: 10px;
+        padding: 14px;
+        margin-bottom: 14px;
+        font-size: 13px;
+        line-height: 1.8;
+        color: #ddd;
+      }
+      #hint-card h4 {
+        color: #ffd700;
+        margin-bottom: 6px;
+        font-size: 14px;
+      }
+      #hint-card .rule {
+        color: #a78bfa;
+        font-weight: 700;
+      }
+      #hint-card .example {
+        color: #00e5ff;
+        font-style: italic;
+        margin-top: 6px;
+        font-size: 12px;
+      }
+
+      /* ── RULE CARD (shown after answer) ── */
+      #rule-card {
+        display: none;
+        background: #0d1a0d;
+        border: 1px solid #00ff88;
+        border-radius: 10px;
+        padding: 14px;
+        margin-bottom: 14px;
+        font-size: 13px;
+        color: #ddd;
+      }
+      #rule-card h4 {
+        color: #00ff88;
+        margin-bottom: 4px;
+      }
+
+      /* ── ROTATION LABEL ── */
       #rotation-label {
-        margin-top: 10px;
+        text-align: center;
         font-size: 15px;
         color: #ffd700;
         min-height: 24px;
+        margin: 6px 0;
       }
+
+      /* ── CHALLENGE MODE ── */
+      #challenge-bar {
+        display: none;
+        background: #1e1e2e;
+        padding: 10px 32px;
+        text-align: center;
+        font-size: 14px;
+        color: #aaa;
+        border-bottom: 1px solid #333;
+      }
+      #challenge-bar.active {
+        display: block;
+      }
+      #challenge-bar .cseq {
+        color: #ffd700;
+        font-weight: 700;
+        letter-spacing: 2px;
+      }
+      #challenge-bar .cprog {
+        color: #a78bfa;
+      }
+
+      /* ── TREE SVG ── */
       svg {
         display: block;
         margin: auto;
@@ -86,7 +381,7 @@
         dominant-baseline: central;
       }
       .node .bf {
-        fill: #aaa;
+        fill: #888;
         font-size: 10px;
         text-anchor: middle;
       }
@@ -95,148 +390,345 @@
         stroke: #444;
         stroke-width: 2px;
       }
+      .node.unbalanced circle {
+        stroke: #ff4f4f !important;
+      }
     </style>
   </head>
   <body>
-    <h2>AVL Tree</h2>
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <h2>⚖️ AVL Tree</h2>
+      <div class="mode-toggle">
+        <span>Free Mode</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="mode-toggle-input" />
+          <span class="slider"></span>
+        </label>
+        <span class="mode-label predict">Predict Mode</span>
+      </div>
+    </div>
+
+    <!-- CHALLENGE BAR -->
+    <div id="challenge-bar">
+      🎯 Challenge: Insert sequence
+      <span class="cseq" id="cseq-display"></span> &nbsp;|&nbsp; Progress:
+      <span class="cprog" id="cprog-display">0 / 0</span> &nbsp;|&nbsp;
+      <button
+        onclick="endChallenge()"
+        style="
+          background: #444;
+          color: #fff;
+          padding: 4px 10px;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 12px;
+        "
+      >
+        End
+      </button>
+    </div>
+
+    <!-- CONTROLS -->
     <div id="controls">
       <input id="val-input" type="number" placeholder="value" />
       <button id="btn-insert">Insert</button>
       <button id="btn-delete">Delete</button>
       <button id="btn-reset">Reset</button>
+      <button
+        id="btn-challenge"
+        style="background: #ffd700; color: #000; font-weight: 700"
+        onclick="startChallenge()"
+      >
+        🎯 Challenge
+      </button>
     </div>
+    <div
+      id="practice-bar"
+      style="
+        text-align: center;
+        padding: 8px;
+        border-bottom: 1px solid #1e1e2e;
+        background: #13131f;
+      "
+    >
+      <span style="color: #aaa; font-size: 13px">🎲 Custom Practice:</span>
+      <input
+        id="prac-length"
+        type="number"
+        min="3"
+        max="15"
+        value="5"
+        style="
+          width: 50px;
+          padding: 5px;
+          border-radius: 6px;
+          border: none;
+          text-align: center;
+          font-size: 14px;
+          margin: 0 6px;
+        "
+        placeholder="len"
+      />
+      <span style="color: #aaa; font-size: 12px">nodes</span>
+      <input
+        id="prac-min"
+        type="number"
+        value="1"
+        style="
+          width: 50px;
+          padding: 5px;
+          border-radius: 6px;
+          border: none;
+          text-align: center;
+          font-size: 14px;
+          margin: 0 4px;
+        "
+        placeholder="min"
+      />
+      <span style="color: #aaa; font-size: 12px">to</span>
+      <input
+        id="prac-max"
+        type="number"
+        value="99"
+        style="
+          width: 50px;
+          padding: 5px;
+          border-radius: 6px;
+          border: none;
+          text-align: center;
+          font-size: 14px;
+          margin: 0 4px;
+        "
+        placeholder="max"
+      />
+      <button
+        onclick="startCustomPractice()"
+        style="
+          background: #a78bfa;
+          color: #000;
+          font-weight: 700;
+          padding: 6px 16px;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 14px;
+          margin-left: 8px;
+        "
+      >
+        ▶ Generate & Practice
+      </button>
+    </div>
+    <!-- STATS -->
     <div id="stats">
-      <div class="stat-box">Height<span id="stat-height">0</span></div>
-      <div class="stat-box">Nodes<span id="stat-nodes">0</span></div>
-      <div class="stat-box">Rotations<span id="stat-rotations">0</span></div>
+      <div class="stat-box">
+        <div>Height</div>
+        <span id="stat-height">0</span>
+      </div>
+      <div class="stat-box">
+        <div>Nodes</div>
+        <span id="stat-nodes">0</span>
+      </div>
+      <div class="stat-box">
+        <div>Rotations</div>
+        <span id="stat-rotations">0</span>
+      </div>
+      <div class="stat-box" id="streak-box" style="display: none">
+        <div>🔥 Streak</div>
+        <span id="stat-streak">0</span>
+      </div>
+      <div class="stat-box" id="score-box" style="display: none">
+        <div>✅ Score</div>
+        <span id="stat-score">0/0</span>
+      </div>
     </div>
+
     <div id="rotation-label"></div>
-    <svg id="tree-svg" width="960" height="520"></svg>
+    <svg id="tree-svg" width="960" height="480"></svg>
+
+    <!-- PREDICT OVERLAY -->
+    <div id="predict-overlay">
+      <div id="predict-panel">
+        <h3>🥊 Predict the Next Step</h3>
+        <div id="predict-question"></div>
+        <svg id="mini-tree" width="420" height="160"></svg>
+        <div class="options" id="options-grid"></div>
+        <div id="hint-card">
+          <h4>💡 Hint</h4>
+          <div id="hint-content"></div>
+        </div>
+        <div id="rule-card">
+          <h4>📘 Rule Applied</h4>
+          <div id="rule-content"></div>
+        </div>
+        <div id="feedback-row">
+          <div id="feedback-msg"></div>
+          <button id="btn-hint" onclick="showHint()">💡 Hint</button>
+        </div>
+        <button id="btn-continue" onclick="continueAfterPredict()">
+          Continue →
+        </button>
+      </div>
+    </div>
 
     <script src="../wasm/ds_dojo.js"></script>
     <script>
-      const WIDTH = 960,
-        HEIGHT = 520;
-      const svg = d3.select("#tree-svg");
-      const g = svg.append("g").attr("transform", "translate(0,40)");
-
+      // ═══════════════════════════════════════════════════════════
+      // STATE
+      // ═══════════════════════════════════════════════════════════
       let insertedValues = [];
       let lastInserted = null;
-      let rotationCount = 0;
+      let totalRotations = 0;
+      let predictMode = false;
+      let streak = 0,
+        scoreCorrect = 0,
+        scoreTotal = 0;
+      let pendingRotation = null; // { type, nodeVal, insertedVal }
+      let pendingInsertVal = null;
+      let hintUsed = false;
 
-      function rebuildAVL(values) {
+      // Challenge mode
+      const CHALLENGES = [
+        [10, 20, 30, 40, 50],
+        [5, 10, 15, 20, 25, 30],
+        [50, 40, 30, 20, 10],
+        [15, 25, 35, 45, 55, 65],
+      ];
+      let challengeActive = false;
+      let challengeSeq = [];
+      let challengeIdx = 0;
+
+      // ═══════════════════════════════════════════════════════════
+      // AVL JS REBUILD (with rotation detection)
+      // ═══════════════════════════════════════════════════════════
+      let detectedRotation = null;
+      let unbalancedNode = null;
+
+      function buildAVL(values) {
         let root = null;
-        function height(n) {
-          return n ? n.height : 0;
+        detectedRotation = null;
+        unbalancedNode = null;
+
+        function h(n) {
+          return n ? n.h : 0;
         }
         function bf(n) {
-          return n ? height(n.left) - height(n.right) : 0;
+          return n ? h(n.left) - h(n.right) : 0;
         }
-        function updateH(n) {
-          if (n) n.height = 1 + Math.max(height(n.left), height(n.right));
+        function uh(n) {
+          if (n) n.h = 1 + Math.max(h(n.left), h(n.right));
         }
-
-        function rotateRight(y) {
+        function rr(y) {
           let x = y.left,
-            T2 = x.right;
+            T = x.right;
           x.right = y;
-          y.left = T2;
-          updateH(y);
-          updateH(x);
+          y.left = T;
+          uh(y);
+          uh(x);
           return x;
         }
-        function rotateLeft(x) {
+        function rl(x) {
           let y = x.right,
-            T2 = y.left;
+            T = y.left;
           y.left = x;
-          x.right = T2;
-          updateH(x);
-          updateH(y);
+          x.right = T;
+          uh(x);
+          uh(y);
           return y;
         }
-        function rebalance(node) {
-          updateH(node);
-          let b = bf(node);
-          if (b > 1 && bf(node.left) >= 0) {
-            rotationCount++;
-            setRotLabel("LL → Right Rotation");
-            return rotateRight(node);
+
+        function rebal(n, insertedVal) {
+          uh(n);
+          let b = bf(n);
+          if (b > 1 && bf(n.left) >= 0) {
+            detectedRotation = {
+              type: "LL",
+              label: "Right Rotation (LL case)",
+              nodeVal: n.data,
+              insertedVal,
+            };
+            totalRotations++;
+            return rr(n);
           }
-          if (b > 1 && bf(node.left) < 0) {
-            rotationCount++;
-            setRotLabel("LR → Left-Right Rotation");
-            node.left = rotateLeft(node.left);
-            return rotateRight(node);
+          if (b > 1 && bf(n.left) < 0) {
+            detectedRotation = {
+              type: "LR",
+              label: "Left-Right Rotation (LR case)",
+              nodeVal: n.data,
+              insertedVal,
+            };
+            totalRotations++;
+            n.left = rl(n.left);
+            return rr(n);
           }
-          if (b < -1 && bf(node.right) <= 0) {
-            rotationCount++;
-            setRotLabel("RR → Left Rotation");
-            return rotateLeft(node);
+          if (b < -1 && bf(n.right) <= 0) {
+            detectedRotation = {
+              type: "RR",
+              label: "Left Rotation (RR case)",
+              nodeVal: n.data,
+              insertedVal,
+            };
+            totalRotations++;
+            return rl(n);
           }
-          if (b < -1 && bf(node.right) > 0) {
-            rotationCount++;
-            setRotLabel("RL → Right-Left Rotation");
-            node.right = rotateRight(node.right);
-            return rotateLeft(node);
+          if (b < -1 && bf(n.right) > 0) {
+            detectedRotation = {
+              type: "RL",
+              label: "Right-Left Rotation (RL case)",
+              nodeVal: n.data,
+              insertedVal,
+            };
+            totalRotations++;
+            n.right = rr(n.right);
+            return rl(n);
           }
-          return node;
+          return n;
         }
-        function insert(node, v) {
-          if (!node) return { data: v, left: null, right: null, height: 1 };
-          if (v < node.data) node.left = insert(node.left, v);
-          else if (v > node.data) node.right = insert(node.right, v);
-          else return node;
-          return rebalance(node);
+        function ins(n, v) {
+          if (!n) return { data: v, left: null, right: null, h: 1 };
+          if (v < n.data) n.left = ins(n.left, v);
+          else if (v > n.data) n.right = ins(n.right, v);
+          else return n;
+          return rebal(n, v);
         }
-        values.forEach((v) => (root = insert(root, v)));
+        values.forEach((v) => (root = ins(root, v)));
         return root;
       }
 
-      function setRotLabel(msg) {
-        const el = document.getElementById("rotation-label");
-        el.textContent = "⚡ " + msg;
-        setTimeout(() => (el.textContent = ""), 2000);
+      function treeH(n) {
+        return n ? 1 + Math.max(treeH(n.left), treeH(n.right)) : 0;
       }
 
-      function toD3Hierarchy(node) {
+      function toHier(node) {
         if (!node) return null;
-        const bf =
-          (node.left ? node.left.height : 0) -
-          (node.right ? node.right.height : 0);
-        const obj = { name: node.data, bf: bf, children: [] };
-        if (node.left) obj.children.push(toD3Hierarchy(node.left));
-        if (node.right) obj.children.push(toD3Hierarchy(node.right));
-        if (obj.children.length === 0) delete obj.children;
+        const bfv =
+          (node.left ? node.left.h : 0) - (node.right ? node.right.h : 0);
+        const obj = { name: node.data, bf: bfv, children: [] };
+        if (node.left) obj.children.push(toHier(node.left));
+        if (node.right) obj.children.push(toHier(node.right));
+        if (!obj.children.length) delete obj.children;
         return obj;
       }
 
-      function countNodes(node) {
-        if (!node) return 0;
-        return 1 + countNodes(node.left) + countNodes(node.right);
-      }
+      // ═══════════════════════════════════════════════════════════
+      // D3 RENDER
+      // ═══════════════════════════════════════════════════════════
+      const W = 960,
+        H = 480;
+      const svg = d3.select("#tree-svg");
+      const g = svg.append("g").attr("transform", "translate(0,40)");
 
-      function renderTree() {
+      function renderTree(avlTree, highlightVal, highlightColor = "#a78bfa") {
         g.selectAll("*").remove();
-        if (insertedValues.length === 0) {
+        if (!avlTree) {
           document.getElementById("stat-height").textContent = "0";
           document.getElementById("stat-nodes").textContent = "0";
           return;
         }
+        const hier = d3.hierarchy(toHier(avlTree));
+        d3.tree().size([W - 60, H - 80])(hier);
 
-        rotationCount = 0;
-        const avlTree = rebuildAVL(insertedValues);
-        const hier = d3.hierarchy(toD3Hierarchy(avlTree));
-        const treeLayout = d3.tree().size([WIDTH - 60, HEIGHT - 80]);
-        treeLayout(hier);
-
-        // stats
-        document.getElementById("stat-height").textContent =
-          Module._avl_get_height();
-        document.getElementById("stat-nodes").textContent =
-          insertedValues.length;
-        document.getElementById("stat-rotations").textContent = rotationCount;
-
-        // links
         g.selectAll(".link")
           .data(hier.links())
           .enter()
@@ -251,16 +743,18 @@
           )
           .style("opacity", 0)
           .transition()
-          .duration(400)
+          .duration(350)
           .style("opacity", 1);
 
-        // nodes
         const node = g
           .selectAll(".node")
           .data(hier.descendants())
           .enter()
           .append("g")
-          .attr("class", "node")
+          .attr(
+            "class",
+            (d) => "node" + (Math.abs(d.data.bf) > 1 ? " unbalanced" : ""),
+          )
           .attr("transform", (d) => {
             const sx = d.parent ? d.parent.x + 30 : d.x + 30;
             const sy = d.parent ? d.parent.y : d.y;
@@ -273,45 +767,590 @@
           .ease(d3.easeCubicOut)
           .attr("transform", (d) => `translate(${d.x + 30},${d.y})`);
 
-        // color by balance factor
         node
           .append("circle")
           .attr("r", 22)
-          .style("fill", (d) => {
-            if (d.data.name === lastInserted) return "#a78bfa";
-            if (Math.abs(d.data.bf) > 1) return "#ff4f4f";
-            return "#1e1e2e";
-          })
+          .style("fill", (d) =>
+            d.data.name === highlightVal ? highlightColor : "#1e1e2e",
+          )
           .style("stroke", (d) =>
-            d.data.name === lastInserted ? "#a78bfa" : "#a78bfa",
+            Math.abs(d.data.bf) > 1 ? "#ff4f4f" : "#a78bfa",
           )
           .transition()
           .delay(700)
           .duration(600)
-          .style("fill", "#1e1e2e")
-          .style("stroke", "#a78bfa");
+          .style("fill", "#1e1e2e");
 
         node.append("text").text((d) => d.data.name);
-
-        // balance factor label below node
         node
           .append("text")
           .attr("class", "bf")
           .attr("dy", 34)
           .text((d) => "bf:" + d.data.bf);
+
+        document.getElementById("stat-height").textContent = treeH(avlTree);
+        document.getElementById("stat-nodes").textContent =
+          insertedValues.length;
+        document.getElementById("stat-rotations").textContent = totalRotations;
       }
 
+      // mini tree in predict panel
+      function renderMiniTree(values) {
+        const msvg = d3.select("#mini-tree");
+        msvg.selectAll("*").remove();
+        const mg = msvg.append("g").attr("transform", "translate(0,20)");
+        const tree = buildAVL([...values]);
+        detectedRotation = null; // reset — we just rebuilt for display
+        if (!tree) return;
+        const hier = d3.hierarchy(toHier(tree));
+        d3.tree().size([400, 120])(hier);
+        mg.selectAll(".link")
+          .data(hier.links())
+          .enter()
+          .append("path")
+          .attr("class", "link")
+          .style("stroke", "#333")
+          .style("fill", "none")
+          .style("stroke-width", "1.5px")
+          .attr(
+            "d",
+            d3
+              .linkVertical()
+              .x((d) => d.x + 10)
+              .y((d) => d.y),
+          );
+        const node = mg
+          .selectAll(".node")
+          .data(hier.descendants())
+          .enter()
+          .append("g")
+          .attr("transform", (d) => `translate(${d.x + 10},${d.y})`);
+        node
+          .append("circle")
+          .attr("r", 16)
+          .style("fill", "#1e1e2e")
+          .style("stroke", (d) =>
+            Math.abs(d.data.bf) > 1 ? "#ff4f4f" : "#555",
+          )
+          .style("stroke-width", "2px");
+        node
+          .append("text")
+          .text((d) => d.data.name)
+          .style("fill", "#fff")
+          .style("font-size", "11px")
+          .style("font-weight", "bold")
+          .attr("text-anchor", "middle")
+          .attr("dominant-baseline", "central");
+        node
+          .append("text")
+          .text((d) => "bf:" + d.data.bf)
+          .style("fill", "#888")
+          .style("font-size", "8px")
+          .attr("text-anchor", "middle")
+          .attr("dy", 24);
+      }
+
+      // renders any pre-built tree object directly into mini tree (for hover preview)
+      function renderMiniTreeDirect(tree) {
+        const msvg = d3.select("#mini-tree");
+        msvg.selectAll("*").remove();
+        const mg = msvg.append("g").attr("transform", "translate(0,20)");
+        if (!tree) return;
+        const hier = d3.hierarchy(toHier(tree));
+        d3.tree().size([400, 120])(hier);
+        mg.selectAll(".link")
+          .data(hier.links())
+          .enter()
+          .append("path")
+          .attr("class", "link")
+          .style("stroke", "#444")
+          .style("fill", "none")
+          .style("stroke-width", "1.5px")
+          .attr(
+            "d",
+            d3
+              .linkVertical()
+              .x((d) => d.x + 10)
+              .y((d) => d.y),
+          );
+        const node = mg
+          .selectAll(".node")
+          .data(hier.descendants())
+          .enter()
+          .append("g")
+          .attr("transform", (d) => `translate(${d.x + 10},${d.y})`);
+        node
+          .append("circle")
+          .attr("r", 16)
+          .style("fill", "#1e1e2e")
+          .style("stroke", "#a78bfa")
+
+          .style("stroke-width", "2px");
+        node
+          .append("text")
+          .text((d) => d.data.name)
+          .style("fill", "#fff")
+          .style("font-size", "11px")
+          .style("font-weight", "bold")
+          .attr("text-anchor", "middle")
+          .attr("dominant-baseline", "central");
+        node
+          .append("text")
+          .text((d) => "bf:" + (d.data.bf || 0))
+          .style("fill", "#888")
+          .style("font-size", "8px")
+          .attr("text-anchor", "middle")
+          .attr("dy", 24);
+      }
+
+      // ═══════════════════════════════════════════════════════════
+      // PREDICT MODE ENGINE
+      // ═══════════════════════════════════════════════════════════
+      const ROTATION_DATA = {
+        LL: {
+          question: (nv, iv) =>
+            `Node <span class="highlight">${iv}</span> was inserted. Node <span class="highlight">${nv}</span> is now unbalanced (bf = +2). Its left subtree is also left-heavy.<br><br>What rotation restores balance?`,
+          options: [
+            "Right Rotation ✅",
+            "Left Rotation",
+            "Left-Right Rotation",
+            "Right-Left Rotation",
+          ],
+          correct: 0,
+          hint: `<span class="rule">LL Case Rule:</span> When the unbalanced node AND its left child are both left-heavy (positive bf), a single <strong>Right Rotation</strong> at the unbalanced node fixes it.<br><br>Think: the tree is leaning left-left, so you rotate right to bring it back up.`,
+          rule: `<strong>LL Case → Right Rotation</strong><br>Unbalanced node bf = +2, left child bf ≥ 0<br>→ Single right rotation at unbalanced node`,
+        },
+        RR: {
+          question: (nv, iv) =>
+            `Node <span class="highlight">${iv}</span> was inserted. Node <span class="highlight">${nv}</span> is now unbalanced (bf = -2). Its right subtree is also right-heavy.<br><br>What rotation restores balance?`,
+          options: [
+            "Right Rotation",
+            "Left Rotation ✅",
+            "Left-Right Rotation",
+            "Right-Left Rotation",
+          ],
+          correct: 1,
+          hint: `<span class="rule">RR Case Rule:</span> When the unbalanced node AND its right child are both right-heavy (negative bf), a single <strong>Left Rotation</strong> at the unbalanced node fixes it.<br><br>Think: the tree is leaning right-right, so you rotate left.`,
+          rule: `<strong>RR Case → Left Rotation</strong><br>Unbalanced node bf = -2, right child bf ≤ 0<br>→ Single left rotation at unbalanced node`,
+        },
+        LR: {
+          question: (nv, iv) =>
+            `Node <span class="highlight">${iv}</span> was inserted. Node <span class="highlight">${nv}</span> is unbalanced (bf = +2) but its left child is right-heavy — a zig-zag pattern!<br><br>What double rotation restores balance?`,
+          options: [
+            "Right Rotation",
+            "Left Rotation",
+            "Left-Right Rotation ✅",
+            "Right-Left Rotation",
+          ],
+          correct: 2,
+          hint: `<span class="rule">LR Case Rule:</span> The unbalanced node is left-heavy but its left child is right-heavy — they zig-zag. You need <strong>two rotations</strong>:<br>1. Left rotate the left child first<br>2. Right rotate the unbalanced node<br><br><span class="example">Tip: "LR" → Left then Right rotation, but applied in reverse order.</span>`,
+          rule: `<strong>LR Case → Left-Right Double Rotation</strong><br>Unbalanced node bf = +2, left child bf < 0<br>→ Left rotate left child, then right rotate unbalanced node`,
+        },
+        RL: {
+          question: (nv, iv) =>
+            `Node <span class="highlight">${iv}</span> was inserted. Node <span class="highlight">${nv}</span> is unbalanced (bf = -2) but its right child is left-heavy — another zig-zag!<br><br>What double rotation restores balance?`,
+          options: [
+            "Right Rotation",
+            "Left Rotation",
+            "Left-Right Rotation",
+            "Right-Left Rotation ✅",
+          ],
+          correct: 3,
+          hint: `<span class="rule">RL Case Rule:</span> The unbalanced node is right-heavy but its right child is left-heavy — zig-zag again. You need <strong>two rotations</strong>:<br>1. Right rotate the right child first<br>2. Left rotate the unbalanced node<br><br><span class="example">Tip: "RL" → Right then Left rotation.</span>`,
+          rule: `<strong>RL Case → Right-Left Double Rotation</strong><br>Unbalanced node bf = -2, right child bf > 0<br>→ Right rotate right child, then left rotate unbalanced node`,
+        },
+      };
+      // builds BST without AVL rebalancing (raw unbalanced state)
+      function buildUnbalancedBST(values) {
+        let root = null;
+        function ins(n, v) {
+          if (!n) return { data: v, h: 1, left: null, right: null };
+          if (v < n.data) n.left = ins(n.left, v);
+          else if (v > n.data) n.right = ins(n.right, v);
+          return n;
+        }
+        function uh(n) {
+          if (!n) return;
+          uh(n.left);
+          uh(n.right);
+          n.h = 1 + Math.max(n.left ? n.left.h : 0, n.right ? n.right.h : 0);
+        }
+        values.forEach((v) => (root = ins(root, v)));
+        uh(root);
+        return root;
+      }
+
+      // applies a chosen rotation type to a cloned unbalanced tree at a target node
+      function applyRotationPreview(tree, nodeVal, rotType) {
+        function clone(n) {
+          if (!n) return null;
+          return {
+            data: n.data,
+            h: n.h,
+            left: clone(n.left),
+            right: clone(n.right),
+          };
+        }
+        function uh(n) {
+          if (n)
+            n.h = 1 + Math.max(n.left ? n.left.h : 0, n.right ? n.right.h : 0);
+        }
+        function rr(y) {
+          let x = y.left,
+            T = x.right;
+          x.right = y;
+          y.left = T;
+          uh(y);
+          uh(x);
+          return x;
+        }
+        function rl(x) {
+          let y = x.right,
+            T = y.left;
+          y.left = x;
+          x.right = T;
+          uh(x);
+          uh(y);
+          return y;
+        }
+        function applyAt(n, tgt, type) {
+          if (!n) return null;
+          if (n.data === tgt) {
+            if (type === "LL") return rr(n);
+            if (type === "RR") return rl(n);
+            if (type === "LR") {
+              n.left = rl(n.left);
+              return rr(n);
+            }
+            if (type === "RL") {
+              n.right = rr(n.right);
+              return rl(n);
+            }
+          }
+          n.left = applyAt(n.left, tgt, type);
+          n.right = applyAt(n.right, tgt, type);
+          return n;
+        }
+        return applyAt(clone(tree), nodeVal, rotType);
+      }
+      // rotation type each option index maps to (same order for all cases)
+      const OPTION_ROT_TYPES = ["LL", "RR", "LR", "RL"];
+
+      function showPredictPanel(rotation, valuesBefore, insertedVal) {
+        const data = ROTATION_DATA[rotation.type];
+        pendingRotation = rotation;
+        pendingInsertVal = insertedVal;
+        hintUsed = false;
+
+        document.getElementById("predict-question").innerHTML = data.question(
+          rotation.nodeVal,
+          insertedVal,
+        );
+        document.getElementById("hint-card").style.display = "none";
+        document.getElementById("rule-card").style.display = "none";
+        document.getElementById("feedback-msg").textContent = "";
+        document.getElementById("feedback-msg").className = "feedback-msg";
+        document.getElementById("btn-hint").style.display = "none";
+        document.getElementById("btn-continue").style.display = "none";
+
+        // build unbalanced tree for hover preview
+        const unbalTree = buildUnbalancedBST([...insertedValues]);
+
+        renderMiniTree(insertedValues); // show current state
+
+        const grid = document.getElementById("options-grid");
+        grid.innerHTML = "";
+
+        data.options.forEach((opt, i) => {
+          const btn = document.createElement("button");
+          btn.className = "opt-btn";
+          btn.textContent = opt.replace(" ✅", "");
+
+          // hover preview — show what this rotation would produce
+          if (!challengeActive) {
+            btn.addEventListener("mouseenter", () => {
+              const rotType = OPTION_ROT_TYPES[i];
+              const previewTree = applyRotationPreview(
+                unbalTree,
+                rotation.nodeVal,
+                rotType,
+              );
+              renderMiniTreeDirect(previewTree);
+            });
+            btn.addEventListener("mouseleave", () => {
+              renderMiniTree(insertedValues); // restore original
+            });
+          }
+
+          btn.onclick = () => handleAnswer(i, data, btn);
+          grid.appendChild(btn);
+        });
+
+        document.getElementById("predict-overlay").classList.add("active");
+      }
+
+      function handleAnswer(chosen, data, clickedBtn) {
+        // disable ALL buttons immediately
+        const allBtns = document.querySelectorAll(".opt-btn");
+        allBtns.forEach((b) => {
+          b.disabled = true;
+          b.onclick = null; // remove all old handlers
+        });
+
+        scoreTotal++;
+        const isCorrect = chosen === data.correct;
+
+        if (isCorrect) {
+          clickedBtn.classList.add("correct");
+          streak++;
+          scoreCorrect++;
+          document.getElementById("feedback-msg").textContent =
+            "🎉 Correct! " +
+            (streak > 1 ? `🔥 ${streak} streak!` : "Well done!");
+          document.getElementById("feedback-msg").className =
+            "feedback-msg correct";
+          document.getElementById("rule-card").innerHTML =
+            `<h4>📘 Rule Applied</h4><div>${data.rule}</div>`;
+          document.getElementById("rule-card").style.display = "block";
+          document.getElementById("btn-continue").style.display = "block";
+        } else {
+          clickedBtn.classList.add("wrong");
+          streak = 0;
+          document.getElementById("feedback-msg").textContent =
+            "❌ Wrong. Read the hint, then click the correct answer to continue.";
+          document.getElementById("feedback-msg").className =
+            "feedback-msg wrong";
+          document.getElementById("btn-hint").style.display = "inline-block";
+
+          // re-enable ONLY the correct button — no green yet
+          const correctBtn = allBtns[data.correct];
+          correctBtn.disabled = false;
+          correctBtn.onclick = () => {
+            allBtns.forEach((b) => {
+              b.disabled = true;
+              b.onclick = null;
+            });
+            correctBtn.classList.add("correct"); // green ONLY when student clicks it
+            document.getElementById("btn-continue").style.display = "block";
+            document.getElementById("rule-card").innerHTML =
+              `<h4>📘 Rule Applied</h4><div>${data.rule}</div>`;
+            document.getElementById("rule-card").style.display = "block";
+            document.getElementById("feedback-msg").textContent =
+              "✅ Correct! Now you know the rule.";
+            document.getElementById("feedback-msg").className =
+              "feedback-msg correct";
+          };
+        }
+        updateScoreDisplay();
+      }
+
+      function showHint() {
+        const data = ROTATION_DATA[pendingRotation.type];
+        document.getElementById("hint-content").innerHTML = data.hint;
+        document.getElementById("hint-card").style.display = "block";
+        document.getElementById("btn-hint").style.display = "none";
+        hintUsed = true;
+      }
+
+      function startCustomPractice() {
+        const len = Math.min(
+          15,
+          Math.max(
+            3,
+            parseInt(document.getElementById("prac-length").value) || 5,
+          ),
+        );
+        const min = parseInt(document.getElementById("prac-min").value) || 1;
+        const max = parseInt(document.getElementById("prac-max").value) || 99;
+        if (min >= max) {
+          alert("Min must be less than Max");
+          return;
+        }
+
+        // generate unique random values
+        const pool = new Set();
+        let attempts = 0;
+        while (pool.size < len && attempts < 1000) {
+          pool.add(Math.floor(Math.random() * (max - min + 1)) + min);
+          attempts++;
+        }
+        const seq = [...pool];
+
+        // inject as a challenge
+        challengeSeq = seq;
+        challengeIdx = 0;
+        challengeActive = true;
+        document.getElementById("mode-toggle-input").checked = true;
+        predictMode = true;
+        document.getElementById("streak-box").style.display = "block";
+        document.getElementById("score-box").style.display = "block";
+        insertedValues = [];
+        lastInserted = null;
+        totalRotations = 0;
+        streak = 0;
+        scoreCorrect = 0;
+        scoreTotal = 0;
+        Module._avl_reset();
+        g.selectAll("*").remove();
+        updateScoreDisplay();
+        document.getElementById("challenge-bar").classList.add("active");
+        document.getElementById("cseq-display").textContent = seq.join(" → ");
+        document.getElementById("cprog-display").textContent =
+          "0 / " + seq.length;
+        document.getElementById("btn-insert").disabled = true;
+        document.getElementById("val-input").disabled = true;
+        setTimeout(() => doInsert(challengeSeq[challengeIdx]), 400);
+      }
+
+      function continueAfterPredict() {
+        document.getElementById("predict-overlay").classList.remove("active");
+        // now actually complete the insert and re-render
+        const avlTree = buildAVL([...insertedValues]);
+        const rotLabel = pendingRotation.label;
+        document.getElementById("rotation-label").textContent =
+          "⚡ " + rotLabel;
+        setTimeout(
+          () => (document.getElementById("rotation-label").textContent = ""),
+          2500,
+        );
+        renderTree(avlTree, lastInserted);
+
+        // challenge mode advance
+        if (challengeActive) advanceChallenge();
+      }
+
+      function updateScoreDisplay() {
+        document.getElementById("stat-streak").textContent = streak;
+        document.getElementById("stat-score").textContent =
+          scoreCorrect + "/" + scoreTotal;
+      }
+
+      // ═══════════════════════════════════════════════════════════
+      // CHALLENGE MODE
+      // ═══════════════════════════════════════════════════════════
+      function startChallenge() {
+        const seq = CHALLENGES[Math.floor(Math.random() * CHALLENGES.length)];
+        challengeSeq = seq;
+        challengeIdx = 0;
+        challengeActive = true;
+        // force predict mode on
+        document.getElementById("mode-toggle-input").checked = true;
+        predictMode = true;
+        document.getElementById("streak-box").style.display = "block";
+        document.getElementById("score-box").style.display = "block";
+        // reset
+        insertedValues = [];
+        lastInserted = null;
+        totalRotations = 0;
+        streak = 0;
+        scoreCorrect = 0;
+        scoreTotal = 0;
+        Module._avl_reset();
+        g.selectAll("*").remove();
+        updateScoreDisplay();
+
+        document.getElementById("challenge-bar").classList.add("active");
+        document.getElementById("cseq-display").textContent = seq.join(" → ");
+        document.getElementById("cprog-display").textContent =
+          "0 / " + seq.length;
+        document.getElementById("btn-insert").disabled = true;
+        document.getElementById("val-input").disabled = true;
+
+        setTimeout(() => doInsert(challengeSeq[challengeIdx]), 400);
+      }
+
+      function advanceChallenge() {
+        challengeIdx++;
+        document.getElementById("cprog-display").textContent =
+          challengeIdx + " / " + challengeSeq.length;
+        if (challengeIdx < challengeSeq.length) {
+          setTimeout(() => doInsert(challengeSeq[challengeIdx]), 600);
+        } else {
+          endChallenge(true);
+        }
+      }
+
+      function endChallenge(completed = false) {
+        challengeActive = false;
+        document.getElementById("challenge-bar").classList.remove("active");
+        document.getElementById("btn-insert").disabled = false;
+        document.getElementById("val-input").disabled = false;
+        if (completed) {
+          document.getElementById("rotation-label").textContent =
+            `🏆 Challenge complete! Score: ${scoreCorrect}/${scoreTotal}`;
+          setTimeout(
+            () => (document.getElementById("rotation-label").textContent = ""),
+            4000,
+          );
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════
+      // INSERT LOGIC
+      // ═══════════════════════════════════════════════════════════
+      function doInsert(v) {
+        const before = [...insertedValues];
+        insertedValues.push(v);
+        lastInserted = v;
+        Module._avl_insert_js(v);
+
+        detectedRotation = null;
+        const avlTree = buildAVL([...insertedValues]);
+        const rot = detectedRotation; // save before any re-render clears it
+
+        if (predictMode && rot) {
+          // render tree WITH new node visible (unbalanced state) before panel pops
+          detectedRotation = null;
+          const displayTree = buildAVL([...insertedValues]);
+          renderTree(displayTree, v);
+          setTimeout(() => showPredictPanel(rot, insertedValues, v), 700);
+        } else {
+          // free mode or no rotation needed
+          renderTree(avlTree, v);
+          if (rot) {
+            document.getElementById("rotation-label").textContent =
+              "⚡ " + rot.label;
+            setTimeout(
+              () =>
+                (document.getElementById("rotation-label").textContent = ""),
+              2000,
+            );
+          }
+          if (challengeActive) setTimeout(() => advanceChallenge(), 800);
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════
+      // MODE TOGGLE
+      // ═══════════════════════════════════════════════════════════
+      document
+        .getElementById("mode-toggle-input")
+        .addEventListener("change", function () {
+          predictMode = this.checked;
+          document.getElementById("streak-box").style.display = predictMode
+            ? "block"
+            : "none";
+          document.getElementById("score-box").style.display = predictMode
+            ? "block"
+            : "none";
+          if (!predictMode) {
+            streak = 0;
+            scoreCorrect = 0;
+            scoreTotal = 0;
+          }
+        });
+
+      // ═══════════════════════════════════════════════════════════
+      // WASM INIT
+      // ═══════════════════════════════════════════════════════════
       Module.onRuntimeInitialized = function () {
         function insertValue() {
           const input = document.getElementById("val-input");
           const v = parseInt(input.value);
           if (isNaN(v)) return;
-          Module._avl_insert_js(v);
-          insertedValues.push(v);
-          lastInserted = v;
           input.value = "";
           input.focus();
-          renderTree();
+          doInsert(v);
         }
         document.getElementById("btn-insert").onclick = insertValue;
         document
@@ -319,6 +1358,7 @@
           .addEventListener("keydown", (e) => {
             if (e.key === "Enter") insertValue();
           });
+
         document.getElementById("btn-delete").onclick = () => {
           const input = document.getElementById("val-input");
           const v = parseInt(input.value);
@@ -328,13 +1368,23 @@
           lastInserted = null;
           input.value = "";
           input.focus();
-          renderTree();
+          const avlTree = buildAVL([...insertedValues]);
+          renderTree(avlTree, null);
         };
+
         document.getElementById("btn-reset").onclick = () => {
           Module._avl_reset();
           insertedValues = [];
           lastInserted = null;
-          renderTree();
+          totalRotations = 0;
+          streak = 0;
+          scoreCorrect = 0;
+          scoreTotal = 0;
+          g.selectAll("*").remove();
+          document.getElementById("stat-height").textContent = "0";
+          document.getElementById("stat-nodes").textContent = "0";
+          document.getElementById("stat-rotations").textContent = "0";
+          updateScoreDisplay();
         };
       };
     </script>
