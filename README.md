@@ -1,8 +1,8 @@
-# 🥋 DS Dojo — Data Structures Learning Platform
+# 🥋 Arbor Areana — Data Structures Learning Platform
 
 > A gamified platform to learn, visualize and practice Data Structures.
 
-🔗 **Live Demo:** [https://github.com/SurajYadavx/ArborArena.git](https://surajyadavx.github.io/ArborArena)
+🔗 **Live Demo:** https://surajyadavx.github.io/ArborArena
 
 ## 🏛️ The 4 Pillars
 
@@ -27,6 +27,3 @@ git clone https://github.com/SurajYadavx/ArborArena.git
 cd ds-dojo
 # Open with VS Code Live Server
 ```
-
-## 📁 Project Structure
-#
