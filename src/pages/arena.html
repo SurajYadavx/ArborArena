@@ -1,0 +1,1649 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>DS Dojo — Code Arena</title>
+    <script src="questions.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+      }
+      body {
+        background: #0f0f1a;
+        color: #fff;
+        font-family: "Segoe UI", sans-serif;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* HEADER */
+      .arena-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 16px;
+        border-bottom: 1px solid #1e1e2e;
+        background: #0d0d1a;
+        flex-shrink: 0;
+        flex-wrap: wrap;
+      }
+      .logo {
+        font-size: 16px;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+      .logo span {
+        color: #ffd700;
+      }
+      .back-btn {
+        background: #1e1e2e;
+        border: none;
+        color: #aaa;
+        padding: 5px 12px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 12px;
+      }
+      .back-btn:hover {
+        color: #fff;
+      }
+      .prob-selector select {
+        background: #1e1e2e;
+        color: #fff;
+        border: 1px solid #333;
+        border-radius: 6px;
+        padding: 6px 10px;
+        font-size: 13px;
+        cursor: pointer;
+        min-width: 220px;
+      }
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-left: auto;
+        flex-wrap: wrap;
+      }
+      .streak-box {
+        background: #1e1e2e;
+        padding: 5px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .streak-count {
+        color: #ffd700;
+        font-weight: 800;
+        font-size: 15px;
+      }
+      .stat-chip {
+        background: #1e1e2e;
+        padding: 4px 10px;
+        border-radius: 5px;
+        font-size: 11px;
+        color: #aaa;
+      }
+      .stat-chip span {
+        color: #ffd700;
+        font-weight: 700;
+      }
+
+      /* MAIN */
+      .arena-main {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+      }
+
+      /* LEFT PANEL */
+      .problem-panel {
+        width: 440px;
+        min-width: 280px;
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid #1e1e2e;
+        overflow: hidden;
+        flex-shrink: 0;
+        background: #0f0f1a;
+      }
+      .problem-tabs {
+        display: flex;
+        border-bottom: 1px solid #1e1e2e;
+        background: #0d0d1a;
+        flex-shrink: 0;
+      }
+      .ptab {
+        padding: 8px 16px;
+        font-size: 12px;
+        color: #555;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+      }
+      .ptab.active {
+        color: #fff;
+        border-bottom-color: #ffd700;
+      }
+      .ptab:hover:not(.active) {
+        color: #aaa;
+      }
+
+      /* PROBLEM TOP BAR */
+      .prob-top-bar {
+        padding: 14px 16px 10px;
+        border-bottom: 1px solid #1e1e2e;
+        flex-shrink: 0;
+        background: #0d0d1a;
+      }
+      .prob-title {
+        font-size: 16px;
+        font-weight: 800;
+        margin-bottom: 8px;
+        line-height: 1.4;
+        color: #fff;
+      }
+      .tags-row {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .diff-tag {
+        padding: 3px 10px;
+        border-radius: 10px;
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .diff-easy {
+        background: #1a3a1a;
+        color: #2ecc71;
+      }
+      .diff-medium {
+        background: #3a2a00;
+        color: #ffd700;
+      }
+      .diff-hard {
+        background: #3a0a0a;
+        color: #e74c3c;
+      }
+      .topic-tag {
+        background: #1e1e2e;
+        color: #a78bfa;
+        padding: 3px 10px;
+        border-radius: 10px;
+        font-size: 11px;
+      }
+      .type-tag {
+        background: #0a1a2a;
+        color: #00e5ff;
+        padding: 3px 10px;
+        border-radius: 10px;
+        font-size: 11px;
+      }
+
+      /* SPLIT BODY */
+      .prob-body-split {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+      }
+      .prob-left-col {
+        flex: 1;
+        overflow-y: auto;
+        padding: 14px 14px 20px;
+        border-right: 1px solid #111;
+        min-width: 0;
+      }
+      .prob-right-col {
+        width: 44%;
+        overflow-y: auto;
+        padding: 12px 12px 20px;
+        background: #0a0a12;
+        min-width: 0;
+      }
+      .prob-left-col::-webkit-scrollbar,
+      .prob-right-col::-webkit-scrollbar {
+        width: 4px;
+      }
+      .prob-left-col::-webkit-scrollbar-thumb,
+      .prob-right-col::-webkit-scrollbar-thumb {
+        background: #2a2a3e;
+        border-radius: 2px;
+      }
+
+      /* PROBLEM CONTENT */
+      .prob-desc {
+        font-size: 13px;
+        color: #ccc;
+        line-height: 1.85;
+        white-space: pre-wrap;
+        margin-bottom: 14px;
+      }
+      .prob-desc b {
+        color: #fff;
+      }
+      .prob-desc code {
+        background: #1e1e2e;
+        padding: 1px 5px;
+        border-radius: 3px;
+        font-family: monospace;
+        color: #00e5ff;
+        font-size: 11px;
+      }
+      .section-lbl {
+        font-size: 10px;
+        color: #555;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin: 14px 0 8px;
+      }
+      .example-box {
+        background: #1e1e2e;
+        border-radius: 7px;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        border-left: 2px solid #333;
+      }
+      .example-box .ex-lbl {
+        font-size: 10px;
+        color: #555;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .ex-row {
+        font-family: monospace;
+        font-size: 11px;
+        line-height: 2;
+      }
+      .ex-row .k {
+        color: #555;
+      }
+      .ex-row .v {
+        color: #00e5ff;
+      }
+      .ex-row .exp {
+        color: #888;
+        font-family: "Segoe UI", sans-serif;
+        font-style: italic;
+        font-size: 11px;
+        margin-top: 3px;
+        display: block;
+      }
+      .constraints-list {
+        list-style: none;
+      }
+      .constraints-list li {
+        font-size: 11px;
+        color: #888;
+        padding: 3px 0;
+        font-family: monospace;
+      }
+      .constraints-list li::before {
+        content: "▸ ";
+        color: #333;
+      }
+      .story-link-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #0a1a2a;
+        border: 1px solid #00e5ff22;
+        padding: 9px 12px;
+        border-radius: 7px;
+        cursor: pointer;
+        margin-top: 12px;
+        text-decoration: none;
+        transition: all 0.2s;
+      }
+      .story-link-btn:hover {
+        border-color: #00e5ff66;
+      }
+      .story-link-btn .sl-main {
+        color: #00e5ff;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .story-link-btn .sl-sub {
+        color: #444;
+        font-size: 10px;
+        margin-top: 1px;
+      }
+
+      /* HINTS */
+      .problem-scroll {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+      }
+      .problem-scroll::-webkit-scrollbar {
+        width: 4px;
+      }
+      .problem-scroll::-webkit-scrollbar-thumb {
+        background: #2a2a3e;
+        border-radius: 2px;
+      }
+      .hints-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .hint-card {
+        background: #1e1e2e;
+        border: 1px solid #333;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .hint-hdr {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 14px;
+      }
+      .hint-num {
+        font-size: 13px;
+        color: #aaa;
+      }
+      .hint-unlock-btn {
+        background: #ffd700;
+        color: #000;
+        border: none;
+        padding: 4px 12px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .hint-unlock-btn.unlocked {
+        background: #1a3a1a;
+        color: #2ecc71;
+        cursor: default;
+      }
+      .hint-body {
+        display: none;
+        padding: 10px 14px;
+        font-size: 13px;
+        color: #ccc;
+        line-height: 1.7;
+        border-top: 1px solid #333;
+      }
+      .hint-body.show {
+        display: block;
+      }
+
+      /* SUBMISSIONS */
+      .sub-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .sub-item {
+        background: #1e1e2e;
+        border-left: 3px solid;
+        border-radius: 0 8px 8px 0;
+        padding: 10px 14px;
+      }
+      .sub-item.ac {
+        border-color: #2ecc71;
+      }
+      .sub-item.wa {
+        border-color: #e74c3c;
+      }
+      .sub-item .si-top {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 4px;
+      }
+      .sub-item .si-status {
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .sub-item.ac .si-status {
+        color: #2ecc71;
+      }
+      .sub-item.wa .si-status {
+        color: #e74c3c;
+      }
+      .sub-item .si-meta {
+        font-size: 11px;
+        color: #555;
+      }
+      .sub-item .si-lang {
+        font-size: 10px;
+        background: #111;
+        color: #aaa;
+        padding: 2px 7px;
+        border-radius: 3px;
+        font-family: monospace;
+      }
+      .empty-state {
+        color: #444;
+        font-size: 13px;
+        text-align: center;
+        padding: 24px 0;
+      }
+
+      /* DRAG DIVIDER */
+      .drag-divider {
+        width: 5px;
+        background: #1e1e2e;
+        cursor: col-resize;
+        flex-shrink: 0;
+      }
+      .drag-divider:hover {
+        background: #333;
+      }
+
+      /* RIGHT / EDITOR */
+      .editor-panel {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        min-width: 300px;
+      }
+      .editor-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        border-bottom: 1px solid #1e1e2e;
+        background: #0d0d1a;
+        flex-shrink: 0;
+        flex-wrap: wrap;
+      }
+      .lang-select {
+        background: #1e1e2e;
+        color: #fff;
+        border: 1px solid #333;
+        border-radius: 6px;
+        padding: 6px 10px;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      .btn-run {
+        background: #ffd700;
+        color: #000;
+        font-weight: 800;
+        border: none;
+        padding: 7px 18px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+      }
+      .btn-run:hover {
+        background: #ffe033;
+      }
+      .btn-run:disabled {
+        background: #333;
+        color: #666;
+        cursor: not-allowed;
+      }
+      .btn-submit {
+        background: #2ecc71;
+        color: #000;
+        font-weight: 800;
+        border: none;
+        padding: 7px 18px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+      }
+      .btn-submit:hover {
+        background: #33d87a;
+      }
+      .btn-submit:disabled {
+        background: #333;
+        color: #666;
+        cursor: not-allowed;
+      }
+      .btn-reset-code {
+        background: #1e1e2e;
+        color: #aaa;
+        border: 1px solid #333;
+        padding: 7px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+      }
+      .btn-reset-code:hover {
+        color: #fff;
+      }
+      .run-status {
+        font-size: 12px;
+        color: #555;
+        margin-left: auto;
+        min-width: 120px;
+        text-align: right;
+      }
+      #editor-container {
+        flex: 1;
+        overflow: hidden;
+      }
+
+      /* OUTPUT */
+      .output-resize {
+        height: 4px;
+        background: #1e1e2e;
+        cursor: row-resize;
+        flex-shrink: 0;
+      }
+      .output-resize:hover {
+        background: #333;
+      }
+      .output-panel {
+        height: 220px;
+        border-top: 1px solid #1e1e2e;
+        background: #0a0a14;
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+      }
+      .output-tabs {
+        display: flex;
+        border-bottom: 1px solid #1e1e2e;
+        flex-shrink: 0;
+      }
+      .otab {
+        padding: 6px 16px;
+        font-size: 12px;
+        color: #555;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+      }
+      .otab.active {
+        color: #fff;
+        border-bottom-color: #ffd700;
+      }
+      .output-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 12px 16px;
+        font-size: 12px;
+      }
+      .output-body::-webkit-scrollbar {
+        width: 4px;
+      }
+      .output-body::-webkit-scrollbar-thumb {
+        background: #333;
+      }
+      .verdict-banner {
+        padding: 10px 14px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .verdict-ac {
+        background: #0a1a0a;
+        border: 1px solid #2ecc71;
+        color: #2ecc71;
+      }
+      .verdict-wa {
+        background: #1a0a0a;
+        border: 1px solid #e74c3c;
+        color: #e74c3c;
+      }
+      .verdict-ce {
+        background: #1a1000;
+        border: 1px solid #ffd700;
+        color: #ffd700;
+      }
+      .verdict-re {
+        background: #1a0a1a;
+        border: 1px solid #a78bfa;
+        color: #a78bfa;
+      }
+      .verdict-running {
+        color: #555;
+        font-size: 13px;
+      }
+      .tc-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 8px 0;
+        border-bottom: 1px solid #0f0f1a;
+      }
+      .tc-icon {
+        font-size: 15px;
+        min-width: 22px;
+      }
+      .tc-body {
+        flex: 1;
+      }
+      .tc-label {
+        font-size: 12px;
+        font-weight: 700;
+        margin-bottom: 3px;
+      }
+      .tc-pass {
+        color: #2ecc71;
+      }
+      .tc-fail {
+        color: #e74c3c;
+      }
+      .tc-hidden {
+        color: #555;
+      }
+      .tc-detail {
+        font-size: 11px;
+        color: #555;
+        line-height: 1.8;
+      }
+      .tc-detail .dk {
+        color: #444;
+      }
+      .tc-detail .dv {
+        color: #aaa;
+        font-family: monospace;
+      }
+      .tc-detail .dexp {
+        color: #2ecc71;
+        font-family: monospace;
+      }
+      .tc-detail .dgot {
+        color: #ff9090;
+        font-family: monospace;
+      }
+      .console-out {
+        color: #ccc;
+        line-height: 1.8;
+        white-space: pre-wrap;
+        font-family: monospace;
+      }
+      .console-err {
+        color: #ff9090;
+        line-height: 1.8;
+        white-space: pre-wrap;
+        font-family: monospace;
+      }
+
+      /* PROBLEM LIST PANEL */
+      .pl-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 200;
+      }
+      .pl-overlay.active {
+        display: block;
+      }
+      .pl-panel {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 340px;
+        background: #0d0d1a;
+        border-right: 1px solid #1e1e2e;
+        z-index: 201;
+        display: flex;
+        flex-direction: column;
+        transform: translateX(-100%);
+        transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .pl-panel.open {
+        transform: translateX(0);
+      }
+      .pl-header {
+        padding: 14px 16px;
+        border-bottom: 1px solid #1e1e2e;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-shrink: 0;
+      }
+      .pl-title {
+        font-size: 15px;
+        font-weight: 700;
+      }
+      .pl-close {
+        background: none;
+        border: none;
+        color: #aaa;
+        font-size: 20px;
+        cursor: pointer;
+        line-height: 1;
+      }
+      .pl-filters {
+        padding: 10px 12px;
+        border-bottom: 1px solid #1e1e2e;
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+        flex-shrink: 0;
+      }
+      .filter-chip {
+        background: #1e1e2e;
+        border: 1px solid #333;
+        color: #aaa;
+        padding: 3px 10px;
+        border-radius: 10px;
+        font-size: 11px;
+        cursor: pointer;
+      }
+      .filter-chip.active {
+        background: #ffd700;
+        color: #000;
+        border-color: #ffd700;
+        font-weight: 700;
+      }
+      .pl-scroll {
+        flex: 1;
+        overflow-y: auto;
+        padding: 8px;
+      }
+      .pl-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        border: 1px solid transparent;
+        margin-bottom: 3px;
+      }
+      .pl-item:hover {
+        background: #1e1e2e;
+      }
+      .pl-item.current {
+        background: #1a1a2e;
+        border-color: #ffd700;
+      }
+      .pl-num {
+        font-size: 11px;
+        color: #444;
+        min-width: 22px;
+      }
+      .pl-name {
+        flex: 1;
+        font-size: 13px;
+      }
+      .pl-diff-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .pl-solved {
+        font-size: 13px;
+      }
+
+      @keyframes ldots {
+        0% {
+          content: "";
+        }
+        33% {
+          content: ".";
+        }
+        66% {
+          content: "..";
+        }
+        100% {
+          content: "...";
+        }
+      }
+      .ldots::after {
+        content: "";
+        animation: ldots 1.2s steps(3, end) infinite;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- HEADER -->
+    <div class="arena-header">
+      <button class="back-btn" onclick="window.location.href = 'home.html'">
+        ← Home
+      </button>
+      <div class="logo">DS <span>Dojo</span> — Code Arena</div>
+      <div class="prob-selector">
+        <select
+          id="prob-dropdown"
+          onchange="loadQuestion(parseInt(this.value))"
+        ></select>
+      </div>
+      <button
+        class="back-btn"
+        onclick="toggleProbList()"
+        style="color: #ffd700"
+      >
+        ☰ All Problems
+      </button>
+      <div class="header-right">
+        <div class="streak-box">
+          🔥 <span class="streak-count" id="streak-count">0</span>
+          <span style="font-size: 11px; color: #555">day streak</span>
+        </div>
+        <div class="stat-chip">Solved: <span id="solved-count">0</span></div>
+        <div class="stat-chip">Total: <span id="total-count">0</span></div>
+      </div>
+    </div>
+
+    <!-- MAIN SPLIT -->
+    <div class="arena-main">
+      <!-- LEFT PANEL -->
+      <div class="problem-panel" id="problem-panel">
+        <div class="problem-tabs">
+          <div
+            class="ptab active"
+            id="ptab-btn-description"
+            onclick="switchPTab('description')"
+          >
+            📋 Problem
+          </div>
+          <div class="ptab" id="ptab-btn-hints" onclick="switchPTab('hints')">
+            💡 Hints
+          </div>
+          <div
+            class="ptab"
+            id="ptab-btn-submissions"
+            onclick="switchPTab('submissions')"
+          >
+            📜 History
+          </div>
+        </div>
+
+        <!-- TAB 1: DESCRIPTION -->
+        <div
+          id="ptab-description"
+          style="
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+          "
+        >
+          <div class="prob-top-bar">
+            <div class="prob-title" id="prob-title">Select a problem</div>
+            <div class="tags-row">
+              <span class="diff-tag" id="prob-diff"></span>
+              <span class="topic-tag" id="prob-topic"></span>
+              <span class="type-tag" id="prob-type"></span>
+            </div>
+          </div>
+          <div class="prob-body-split">
+            <div class="prob-left-col">
+              <div class="prob-desc" id="prob-desc">
+                Use the dropdown above or ☰ All Problems to pick a question.
+              </div>
+              <div class="section-lbl">📐 Constraints</div>
+              <ul class="constraints-list" id="prob-constraints"></ul>
+              <a class="story-link-btn" id="story-link" href="#">
+                <div>
+                  <div class="sl-main" id="story-link-label">
+                    See DS Dojo Explanation →
+                  </div>
+                  <div class="sl-sub">
+                    Opens Story / Battle mode for this concept
+                  </div>
+                </div>
+              </a>
+            </div>
+            <div
+              class="prob-right-col"
+              id="prob-right-col"
+              style="display: none"
+            >
+              <div class="section-lbl">📌 Examples</div>
+              <div id="prob-examples"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: HINTS -->
+        <div id="ptab-hints" class="problem-scroll" style="display: none">
+          <div style="font-size: 12px; color: #555; margin-bottom: 14px">
+            Hints unlock one by one. Use them only if stuck!
+          </div>
+          <div class="hints-wrap" id="hints-wrap"></div>
+        </div>
+
+        <!-- TAB 3: SUBMISSIONS -->
+        <div id="ptab-submissions" class="problem-scroll" style="display: none">
+          <div class="sub-list" id="sub-list">
+            <div class="empty-state">No submissions yet for this problem.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DRAG DIVIDER -->
+      <div class="drag-divider" id="drag-divider"></div>
+
+      <!-- RIGHT PANEL -->
+      <div class="editor-panel" id="editor-panel">
+        <div class="editor-toolbar">
+          <select
+            class="lang-select"
+            id="lang-select"
+            onchange="switchLanguage(this.value)"
+          >
+            <option value="cpp">C++</option>
+            <option value="python">Python</option>
+            <option value="java">Java</option>
+            <option value="c">C</option>
+          </select>
+          <button class="btn-run" id="btn-run" onclick="runCode(false)">
+            ▶ Run
+          </button>
+          <button class="btn-submit" id="btn-submit" onclick="runCode(true)">
+            ✔ Submit
+          </button>
+          <button class="btn-reset-code" onclick="resetCode()">↺ Reset</button>
+          <span class="run-status" id="run-status"></span>
+        </div>
+
+        <div id="editor-container"></div>
+
+        <div class="output-resize" id="output-resize"></div>
+
+        <div class="output-panel" id="output-panel">
+          <div class="output-tabs">
+            <div
+              class="otab active"
+              id="otab-btn-testcases"
+              onclick="switchOTab('testcases')"
+            >
+              🧪 Test Cases
+            </div>
+            <div
+              class="otab"
+              id="otab-btn-console"
+              onclick="switchOTab('console')"
+            >
+              🖥️ Console
+            </div>
+          </div>
+          <div class="output-body" id="otab-testcases">
+            <div class="verdict-running">Run your code to see results.</div>
+          </div>
+          <div class="output-body" id="otab-console" style="display: none">
+            <div class="verdict-running">Console output appears here.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROBLEM LIST OVERLAY -->
+    <div class="pl-overlay" id="pl-overlay" onclick="toggleProbList()"></div>
+    <div class="pl-panel" id="pl-panel">
+      <div class="pl-header">
+        <div class="pl-title">📚 Problem Bank</div>
+        <button class="pl-close" onclick="toggleProbList()">✕</button>
+      </div>
+      <div class="pl-filters">
+        <div class="filter-chip active" onclick="filterProbs('all', this)">
+          All
+        </div>
+        <div class="filter-chip" onclick="filterProbs('easy', this)">
+          🟢 Easy
+        </div>
+        <div class="filter-chip" onclick="filterProbs('medium', this)">
+          🟡 Medium
+        </div>
+        <div class="filter-chip" onclick="filterProbs('hard', this)">
+          🔴 Hard
+        </div>
+        <div class="filter-chip" onclick="filterProbs('BST', this)">BST</div>
+        <div class="filter-chip" onclick="filterProbs('Graph', this)">
+          Graph
+        </div>
+        <div class="filter-chip" onclick="filterProbs('Hash Table', this)">
+          Hash
+        </div>
+        <div class="filter-chip" onclick="filterProbs('Priority Queue', this)">
+          PQ
+        </div>
+        <div class="filter-chip" onclick="filterProbs('Union-Find', this)">
+          DSU
+        </div>
+        <div class="filter-chip" onclick="filterProbs('AVL Tree', this)">
+          AVL
+        </div>
+      </div>
+      <div class="pl-scroll" id="pl-scroll"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+    <script>
+      // ═══════════════════════════════════════════════
+      // CONSTANTS
+      // ═══════════════════════════════════════════════
+      // ── JUDGE0 CONFIG ──
+      const JUDGE0 =
+        "https://ce.judge0.com/submissions/?base64_encoded=false&wait=true";
+      const LANG_ID = { cpp: 54, c: 50, java: 62, python: 71 };
+      // Language IDs: C(50), C++(54), Java(62), Python3(71)
+
+      async function pistonRun(lang, code, stdin) {
+        const resp = await fetch(JUDGE0, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            language_id: LANG_ID[lang],
+            source_code: code,
+            stdin: stdin || "",
+          }),
+        });
+        if (!resp.ok) throw new Error(`Judge0 HTTP ${resp.status}`);
+        const data = await resp.json();
+        // status ids: 3=Accepted, 4=WA, 5=TLE, 6=CE, 11=RE
+        const stdout = (data.stdout || "").trim();
+        const stderr = (data.stderr || "").trim();
+        const compile = (data.compile_output || "").trim();
+        return { stdout, stderr, compile, code: data.status?.id ?? 3 };
+      }
+      // ═══════════════════════════════════════════════
+      // STATE
+      // ═══════════════════════════════════════════════
+      let editor = null;
+      let currentQ = null;
+      let currentLang = "cpp";
+      let isRunning = false;
+      let filterMode = "all";
+      let plOpen = false;
+
+      // ═══════════════════════════════════════════════
+      // LOCALSTORAGE HELPERS
+      // ═══════════════════════════════════════════════
+      function lsGet(key, def) {
+        try {
+          return JSON.parse(localStorage.getItem(key)) ?? def;
+        } catch {
+          return def;
+        }
+      }
+      function lsSet(key, val) {
+        localStorage.setItem(key, JSON.stringify(val));
+      }
+
+      function getSolvedSet() {
+        return new Set(lsGet("dojo_solved", []));
+      }
+      function getSubmissions() {
+        return lsGet("dojo_subs", {});
+      }
+      function getHintsState() {
+        return lsGet("dojo_hints", {});
+      }
+      function getStreak() {
+        return lsGet("dojo_streak", { count: 0, lastDate: "" });
+      }
+
+      function markSolved(qid) {
+        const s = getSolvedSet();
+        s.add(qid);
+        lsSet("dojo_solved", [...s]);
+        updateStreak();
+        updateHeaderStats();
+      }
+
+      function updateStreak() {
+        const today = new Date().toDateString();
+        const streak = getStreak();
+        if (streak.lastDate === today) return;
+        const yesterday = new Date(Date.now() - 86400000).toDateString();
+        streak.count = streak.lastDate === yesterday ? streak.count + 1 : 1;
+        streak.lastDate = today;
+        lsSet("dojo_streak", streak);
+        document.getElementById("streak-count").textContent = streak.count;
+      }
+
+      function updateHeaderStats() {
+        const solved = getSolvedSet().size;
+        document.getElementById("solved-count").textContent = solved;
+        document.getElementById("total-count").textContent = QUESTIONS.length;
+      }
+
+      // ═══════════════════════════════════════════════
+      // MONACO INIT
+      // ═══════════════════════════════════════════════
+      require.config({
+        paths: {
+          vs: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs",
+        },
+      });
+      require(["vs/editor/editor.main"], function () {
+        editor = monaco.editor.create(
+          document.getElementById("editor-container"),
+          {
+            value: "// Select a problem to begin",
+            language: "cpp",
+            theme: "vs-dark",
+            fontSize: 14,
+            minimap: { enabled: false },
+            scrollBeyondLastLine: false,
+            automaticLayout: true,
+            fontFamily: "'Cascadia Code', 'Fira Code', monospace",
+            fontLigatures: true,
+            lineNumbers: "on",
+            roundedSelection: true,
+            padding: { top: 12 },
+          },
+        );
+        initPage();
+      });
+
+      // ═══════════════════════════════════════════════
+      // INIT
+      // ═══════════════════════════════════════════════
+      function initPage() {
+        // populate dropdown
+        const dd = document.getElementById("prob-dropdown");
+        QUESTIONS.forEach((q) => {
+          const o = document.createElement("option");
+          o.value = q.id;
+          const icon =
+            q.difficulty === "easy"
+              ? "🟢"
+              : q.difficulty === "medium"
+                ? "🟡"
+                : "🔴";
+          o.textContent = `${q.id}. ${icon} ${q.title} — ${q.topic}`;
+          dd.appendChild(o);
+        });
+        updateHeaderStats();
+        const streak = getStreak();
+        document.getElementById("streak-count").textContent = streak.count;
+        renderProbList("all");
+        loadQuestion(1);
+      }
+
+      // ═══════════════════════════════════════════════
+      // LOAD QUESTION
+      // ═══════════════════════════════════════════════
+      function loadQuestion(id) {
+        const q = QUESTIONS.find((x) => x.id === id);
+        if (!q) return;
+        currentQ = q;
+        document.getElementById("prob-dropdown").value = id;
+
+        // title row
+        document.getElementById("prob-title").textContent =
+          `${q.id}. ${q.title}`;
+        const dTag = document.getElementById("prob-diff");
+        dTag.textContent =
+          q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1);
+        dTag.className = `diff-tag diff-${q.difficulty}`;
+        document.getElementById("prob-topic").textContent = q.topic;
+        document.getElementById("prob-type").textContent = q.type;
+
+        // description
+        document.getElementById("prob-desc").innerHTML = q.description
+          .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
+          .replace(/`(.*?)`/g, "<code>$1</code>");
+
+        // examples
+        const exWrap = document.getElementById("prob-examples");
+        exWrap.innerHTML = "";
+        q.examples.forEach((ex, i) => {
+          const div = document.createElement("div");
+          div.className = "example-box";
+          div.innerHTML = `<div class="ex-lbl">Example ${i + 1}</div>
+            <div class="ex-row"><span class="k">Input:&nbsp;</span><span class="v">${escHtml(ex.input)}</span></div>
+            <div class="ex-row"><span class="k">Output:&nbsp;</span><span class="v">${escHtml(ex.output)}</span></div>
+            ${ex.explanation ? `<div class="ex-row"><span class="exp">💡 ${escHtml(ex.explanation)}</span></div>` : ""}`;
+          exWrap.appendChild(div);
+        });
+
+        // constraints
+        const cList = document.getElementById("prob-constraints");
+        cList.innerHTML = "";
+        q.constraints.forEach((c) => {
+          const li = document.createElement("li");
+          li.textContent = c;
+          cList.appendChild(li);
+        });
+
+        // story link
+        const sl = document.getElementById("story-link");
+        sl.href = q.linkedPage;
+        document.getElementById("story-link-label").textContent =
+          q.linkedLabel + " →";
+        document.getElementById("prob-right-col").style.display = "block";
+
+        // hints
+        renderHints(q);
+
+        // submissions
+        renderSubmissions(q.id);
+
+        // editor
+        const lang = currentLang;
+        const code = q.starterCode[lang] || "// No template for this language";
+        editor.setValue(code);
+        monaco.editor.setModelLanguage(
+          editor.getModel(),
+          lang === "cpp" || lang === "c" ? "cpp" : lang,
+        );
+
+        // output reset
+        document.getElementById("otab-testcases").innerHTML =
+          '<div class="verdict-running">Run your code to see results.</div>';
+        document.getElementById("otab-console").innerHTML =
+          '<div class="verdict-running">Console output appears here.</div>';
+        document.getElementById("run-status").textContent = "";
+        isRunning = false;
+        document.getElementById("btn-run").disabled = false;
+        document.getElementById("btn-submit").disabled = false;
+
+        // switch to description tab
+        switchPTab("description");
+
+        // highlight in list
+        document.querySelectorAll(".pl-item").forEach((el) => {
+          el.classList.toggle("current", parseInt(el.dataset.qid) === id);
+        });
+      }
+
+      // ═══════════════════════════════════════════════
+      // HINTS
+      // ═══════════════════════════════════════════════
+      function renderHints(q) {
+        const wrap = document.getElementById("hints-wrap");
+        wrap.innerHTML = "";
+        const hintsState = getHintsState();
+        const unlocked = hintsState[q.id] || [false, false, false];
+
+        q.hints.forEach((hint, i) => {
+          const card = document.createElement("div");
+          card.className = "hint-card";
+          const isUnlocked = unlocked[i];
+          card.innerHTML = `
+            <div class="hint-hdr">
+              <span class="hint-num">💡 Hint ${i + 1}</span>
+              <button class="hint-unlock-btn ${isUnlocked ? "unlocked" : ""}" onclick="unlockHint(${q.id},${i})" ${isUnlocked ? "disabled" : ""}>
+                ${isUnlocked ? "✓ Unlocked" : i === 0 ? "Unlock" : "🔒 Unlock"}
+              </button>
+            </div>
+            <div class="hint-body ${isUnlocked ? "show" : ""}" id="hint-body-${i}">${isUnlocked ? escHtml(hint) : ""}</div>`;
+          wrap.appendChild(card);
+        });
+      }
+
+      function unlockHint(qid, idx) {
+        const q = QUESTIONS.find((x) => x.id === qid);
+        if (!q) return;
+        // enforce sequential unlock
+        const hintsState = getHintsState();
+        const unlocked = hintsState[qid] || [false, false, false];
+        if (idx > 0 && !unlocked[idx - 1]) {
+          alert(`Unlock Hint ${idx} first!`);
+          return;
+        }
+        unlocked[idx] = true;
+        hintsState[qid] = unlocked;
+        lsSet("dojo_hints", hintsState);
+        renderHints(q);
+        switchPTab("hints");
+      }
+
+      // ═══════════════════════════════════════════════
+      // SUBMISSIONS
+      // ═══════════════════════════════════════════════
+      function renderSubmissions(qid) {
+        const subs = getSubmissions();
+        const list = subs[qid] || [];
+        const wrap = document.getElementById("sub-list");
+        if (!list.length) {
+          wrap.innerHTML =
+            '<div class="empty-state">No submissions yet for this problem.</div>';
+          return;
+        }
+        wrap.innerHTML = "";
+        [...list].reverse().forEach((sub) => {
+          const div = document.createElement("div");
+          div.className = `sub-item ${sub.result === "Accepted" ? "ac" : "wa"}`;
+          div.innerHTML = `
+            <div class="si-top">
+              <span class="si-status">${sub.result === "Accepted" ? "✅ Accepted" : "❌ " + sub.result}</span>
+              <span class="si-lang">${sub.lang}</span>
+            </div>
+            <div class="si-meta">${sub.passed}/${sub.total} tests passed &nbsp;·&nbsp; ${sub.timestamp}</div>`;
+          wrap.appendChild(div);
+        });
+      }
+
+      function saveSubmission(qid, lang, result, passed, total) {
+        const subs = getSubmissions();
+        if (!subs[qid]) subs[qid] = [];
+        subs[qid].push({
+          lang,
+          result,
+          passed,
+          total,
+          timestamp: new Date().toLocaleString("en-IN", { hour12: true }),
+        });
+        lsSet("dojo_subs", subs);
+      }
+
+      // ═══════════════════════════════════════════════
+      // RUN / SUBMIT
+      // ═══════════════════════════════════════════════
+      async function runCode(isSubmit) {
+        if (isRunning || !currentQ || !editor) return;
+        isRunning = true;
+        document.getElementById("btn-run").disabled = true;
+        document.getElementById("btn-submit").disabled = true;
+        document.getElementById("run-status").innerHTML =
+          '<span class="ldots">⚙️ Running</span>';
+
+        const code = editor.getValue();
+        const lang = currentLang;
+        const visibleTCs = currentQ.testCases.visible;
+        const hiddenTCs = currentQ.testCases.hidden;
+        const tcs = isSubmit ? [...visibleTCs, ...hiddenTCs] : visibleTCs;
+
+        switchOTab("testcases");
+        const tcBody = document.getElementById("otab-testcases");
+        tcBody.innerHTML = `<div class="verdict-running">⏳ Running ${tcs.length} test case${tcs.length > 1 ? "s" : ""}...</div>`;
+        let passed = 0;
+        const results = [];
+        let compileErr = "";
+        let consoleOut = "";
+
+        for (let i = 0; i < tcs.length; i++) {
+          const tc = tcs[i];
+          const isHidden = isSubmit && i >= visibleTCs.length;
+          try {
+            const r = await pistonRun(lang, code, tc.input);
+            consoleOut +=
+              r.stdout +
+              (r.stderr ? "\n[stderr]\n" + r.stderr : "") +
+              "\n---\n";
+            if (r.compile) {
+              compileErr = r.compile;
+              break;
+            }
+            const actual = r.stdout.trim();
+            const expected = tc.expected.trim();
+            const ok = actual === expected;
+            if (ok) passed++;
+            results.push({
+              tc,
+              actual,
+              expected,
+              ok,
+              isHidden,
+              runtime: r.code,
+            });
+          } catch (e) {
+            consoleOut += `[ERROR on TC${i + 1}]: ${e.message}\n`;
+            results.push({
+              tc,
+              actual: `[Error: ${e.message}]`,
+              expected: tc.expected,
+              ok: false,
+              isHidden,
+              runtime: -1,
+            });
+          }
+        }
+
+        // console tab
+        document.getElementById("otab-console").innerHTML = compileErr
+          ? `<div class="console-err">⚠️ Compile Error:\n${escHtml(compileErr)}</div>`
+          : `<div class="console-out">${escHtml(consoleOut) || "(no output)"}</div>`;
+
+        // render test case results
+        if (compileErr) {
+          tcBody.innerHTML = `
+            <div class="verdict-banner verdict-ce">⚠️ Compile Error — check your syntax</div>
+            <div class="console-err" style="font-size:12px;">${escHtml(compileErr)}</div>`;
+        } else {
+          let html = "";
+          // verdict banner
+          if (isSubmit) {
+            const allPassed = passed === tcs.length;
+            html += `<div class="verdict-banner ${allPassed ? "verdict-ac" : "verdict-wa"}">
+              ${allPassed ? "🏆 Accepted — All " + tcs.length + " test cases passed!" : `❌ Wrong Answer — ${passed}/${tcs.length} passed`}
+            </div>`;
+          }
+          // per TC
+          results.forEach((r, i) => {
+            const label = r.isHidden
+              ? `Hidden Test ${i - visibleTCs.length + 1}`
+              : `Test Case ${i + 1}`;
+            if (r.isHidden && !r.ok) {
+              html += `<div class="tc-row">
+                <div class="tc-icon">❌</div>
+                <div class="tc-body">
+                  <div class="tc-label tc-fail">${label}</div>
+                  <div class="tc-detail"><span class="dk">Hidden test case failed.</span></div>
+                </div></div>`;
+            } else if (r.isHidden && r.ok) {
+              html += `<div class="tc-row">
+                <div class="tc-icon">✅</div>
+                <div class="tc-body">
+                  <div class="tc-label tc-pass">${label}</div>
+                  <div class="tc-detail tc-hidden">Hidden test passed.</div>
+                </div></div>`;
+            } else {
+              html += `<div class="tc-row">
+                <div class="tc-icon">${r.ok ? "✅" : "❌"}</div>
+                <div class="tc-body">
+                  <div class="tc-label ${r.ok ? "tc-pass" : "tc-fail"}">${label} — ${r.ok ? "Passed" : "Failed"}</div>
+                  <div class="tc-detail">
+                    <div><span class="dk">Input:&nbsp;</span><span class="dv">${escHtml(r.tc.input.replace(/\n/g, " | "))}</span></div>
+                    <div><span class="dk">Expected:&nbsp;</span><span class="dexp">${escHtml(r.expected)}</span></div>
+                    ${!r.ok ? `<div><span class="dk">Got:&nbsp;</span><span class="dgot">${escHtml(r.actual || "(no output)")}</span></div>` : ""}
+                  </div>
+                </div></div>`;
+            }
+          });
+          tcBody.innerHTML = html;
+        }
+
+        // save submission + mark solved
+        if (isSubmit && !compileErr) {
+          const result =
+            passed === tcs.length ? "Accepted" : `WA ${passed}/${tcs.length}`;
+          saveSubmission(
+            currentQ.id,
+            lang,
+            passed === tcs.length ? "Accepted" : result,
+            passed,
+            tcs.length,
+          );
+          if (passed === tcs.length) markSolved(currentQ.id);
+          renderSubmissions(currentQ.id);
+          renderProbList(filterMode);
+          if (isSubmit && !compileErr) switchPTab("submissions"); // ← add this
+        }
+
+        document.getElementById("run-status").textContent = compileErr
+          ? "⚠️ CE"
+          : `${passed}/${tcs.length} passed`;
+        isRunning = false;
+        document.getElementById("btn-run").disabled = false;
+        document.getElementById("btn-submit").disabled = false;
+      }
+
+      // ═══════════════════════════════════════════════
+      // LANGUAGE SWITCH
+      // ═══════════════════════════════════════════════
+      function switchLanguage(lang) {
+        currentLang = lang;
+        if (!currentQ || !editor) return;
+        const code = currentQ.starterCode[lang] || `// No template for ${lang}`;
+        editor.setValue(code);
+        const monacoLang = lang === "cpp" || lang === "c" ? "cpp" : lang;
+        monaco.editor.setModelLanguage(editor.getModel(), monacoLang);
+      }
+
+      function resetCode() {
+        if (!currentQ || !editor) return;
+        if (confirm("Reset code to starter template?")) {
+          editor.setValue(currentQ.starterCode[currentLang] || "");
+        }
+      }
+
+      // ═══════════════════════════════════════════════
+      // TAB SWITCHES
+      // ═══════════════════════════════════════════════
+      function switchPTab(tab) {
+        document.getElementById("ptab-description").style.display =
+          tab === "description" ? "flex" : "none";
+        document.getElementById("ptab-hints").style.display =
+          tab === "hints" ? "block" : "none";
+        document.getElementById("ptab-submissions").style.display =
+          tab === "submissions" ? "block" : "none";
+        ["description", "hints", "submissions"].forEach((t) => {
+          document.getElementById(`ptab-btn-${t}`).className =
+            "ptab" + (t === tab ? " active" : "");
+        });
+      }
+
+      function switchOTab(tab) {
+        ["testcases", "console"].forEach((t) => {
+          document.getElementById(`otab-${t}`).style.display =
+            t === tab ? "block" : "none";
+          document.getElementById(`otab-btn-${t}`).className =
+            "otab" + (t === tab ? " active" : "");
+        });
+      }
+
+      // ═══════════════════════════════════════════════
+      // PROBLEM LIST
+      // ═══════════════════════════════════════════════
+      function toggleProbList() {
+        plOpen = !plOpen;
+        document.getElementById("pl-panel").classList.toggle("open", plOpen);
+        document
+          .getElementById("pl-overlay")
+          .classList.toggle("active", plOpen);
+        if (plOpen) {
+          filterMode = "all";
+          document.querySelectorAll(".filter-chip").forEach((c, i) => {
+            c.classList.toggle("active", i === 0);
+          });
+          renderProbList("all");
+        }
+      }
+
+      function filterProbs(mode, el) {
+        filterMode = mode;
+        document
+          .querySelectorAll(".filter-chip")
+          .forEach((c) => c.classList.remove("active"));
+        el.classList.add("active");
+        renderProbList(mode);
+      }
+
+      function renderProbList(mode) {
+        const scroll = document.getElementById("pl-scroll");
+        scroll.innerHTML = "";
+        const solved = getSolvedSet();
+        const list = QUESTIONS.filter((q) => {
+          if (mode === "all") return true;
+          if (["easy", "medium", "hard"].includes(mode))
+            return q.difficulty === mode;
+          return q.topic === mode;
+        });
+        if (!list.length) {
+          scroll.innerHTML =
+            '<div class="empty-state">No problems match filter.</div>';
+          return;
+        }
+        list.forEach((q) => {
+          const div = document.createElement("div");
+          div.className =
+            "pl-item" + (currentQ && currentQ.id === q.id ? " current" : "");
+          div.dataset.qid = q.id;
+          const isSolved = solved.has(q.id);
+          div.innerHTML = `
+            <span class="pl-num">${q.id}</span>
+            <div style="flex:1;">
+              <div class="pl-name">${q.title}</div>
+              <div style="font-size:10px;color:#555;margin-top:2px;">${q.topic} · ${q.type}</div>
+            </div>
+            <div class="pl-diff-dot" style="background:${DIFF_DOT[q.difficulty]}"></div>
+            ${isSolved ? '<span class="pl-solved">✅</span>' : ""}`;
+          div.onclick = () => {
+            loadQuestion(q.id);
+            toggleProbList();
+          };
+          scroll.appendChild(div);
+        });
+      }
+
+      // ═══════════════════════════════════════════════
+      // DRAG RESIZE — LEFT/RIGHT PANELS
+      // ═══════════════════════════════════════════════
+      (function () {
+        const divider = document.getElementById("drag-divider");
+        const left = document.getElementById("problem-panel");
+        let dragging = false,
+          startX = 0,
+          startW = 0;
+        divider.addEventListener("mousedown", (e) => {
+          dragging = true;
+          startX = e.clientX;
+          startW = left.offsetWidth;
+          document.body.style.cursor = "col-resize";
+          document.body.style.userSelect = "none";
+        });
+        document.addEventListener("mousemove", (e) => {
+          if (!dragging) return;
+          const w = Math.min(Math.max(startW + e.clientX - startX, 240), 700);
+          left.style.width = w + "px";
+          left.style.minWidth = w + "px";
+        });
+        document.addEventListener("mouseup", () => {
+          dragging = false;
+          document.body.style.cursor = "";
+          document.body.style.userSelect = "";
+        });
+      })();
+
+      // ═══════════════════════════════════════════════
+      // DRAG RESIZE — OUTPUT PANEL HEIGHT
+      // ═══════════════════════════════════════════════
+      (function () {
+        const handle = document.getElementById("output-resize");
+        const panel = document.getElementById("output-panel");
+        let dragging = false,
+          startY = 0,
+          startH = 0;
+        handle.addEventListener("mousedown", (e) => {
+          dragging = true;
+          startY = e.clientY;
+          startH = panel.offsetHeight;
+          document.body.style.cursor = "row-resize";
+          document.body.style.userSelect = "none";
+        });
+        document.addEventListener("mousemove", (e) => {
+          if (!dragging) return;
+          const h = Math.min(Math.max(startH - (e.clientY - startY), 80), 520);
+          panel.style.height = h + "px";
+        });
+        document.addEventListener("mouseup", () => {
+          dragging = false;
+          document.body.style.cursor = "";
+          document.body.style.userSelect = "";
+        });
+      })();
+
+      // ═══════════════════════════════════════════════
+      // UTIL
+      // ═══════════════════════════════════════════════
+      function escHtml(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/\n/g, "<br>");
+      }
+    </script>
+  </body>
+</html>
