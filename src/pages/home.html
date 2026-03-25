@@ -237,6 +237,35 @@
       footer span {
         color: #ffd700;
       }
+      /* ── STORY CARDS ── */
+      .card-story-a {
+        border-color: #00e5ff;
+      }
+      .card-story-a h3 {
+        color: #00e5ff;
+      }
+      .card-story-b {
+        border-color: #a78bfa;
+      }
+      .card-story-b h3 {
+        color: #a78bfa;
+      }
+      .card-story-c {
+        border-color: #ff9f43;
+      }
+      .card-story-c h3 {
+        color: #ff9f43;
+      }
+      .card-story-d {
+        border-color: #ffd700;
+      }
+      .card-story-d h3 {
+        color: #ffd700;
+      }
+      .tag-story {
+        background: #2ecc71;
+        color: #000;
+      }
     </style>
   </head>
   <body>
@@ -248,6 +277,8 @@
         <a href="avl.html">AVL</a>
         <a href="battle.html">Battle</a>
         <a href="hash.html">Hash</a>
+        <a href="story_a.html">Stories</a>
+        <a href="battle3.html">Battle 3-Way</a>
       </div>
     </nav>
 
@@ -309,6 +340,52 @@
         <p>
           All 4 collision methods on same input simultaneously. See exactly
           where keys land.
+        </p>
+      </a>
+    </div>
+    <!-- STORY MODE -->
+    <div class="section-title" style="margin-top: 20px">🗺️ Story Mode</div>
+    <div class="section-sub">
+      Real-world problems. DS animates underneath. You solve it.
+    </div>
+    <div class="cards">
+      <a href="story_a.html" class="card card-story-a">
+        <div class="tag tag-story">STORY</div>
+        <div class="icon">🗺️</div>
+        <h3>VIT Campus Route</h3>
+        <p>
+          8 minutes to reach your exam hall. Dijkstra finds the shortest path
+          across VIT Pune — step by step.
+        </p>
+      </a>
+
+      <a href="story_b.html" class="card card-story-b">
+        <div class="tag tag-story">STORY</div>
+        <div class="icon">📅</div>
+        <h3>Timetable Builder</h3>
+        <p>
+          Pick 6 subjects. AVL Tree detects clashes instantly via O(log n)
+          search and self-balancing rotations.
+        </p>
+      </a>
+
+      <a href="story_c.html" class="card card-story-c">
+        <div class="tag tag-story">STORY</div>
+        <div class="icon">🏥</div>
+        <h3>OPD Emergency Room</h3>
+        <p>
+          120 patients. 3 doctors. Max Heap always serves the most critical
+          patient first — watch heapify live.
+        </p>
+      </a>
+
+      <a href="story_d.html" class="card card-story-d">
+        <div class="tag tag-story">STORY</div>
+        <div class="icon">🎓</div>
+        <h3>Student ID Lookup</h3>
+        <p>
+          10,000 students. Hash function computed character by character.
+          Collision handled via chaining — O(1) search.
         </p>
       </a>
     </div>

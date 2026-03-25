@@ -1,0 +1,1159 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>DS Dojo — Story: VIT Campus Route</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: #0f0f1a;
+        color: #fff;
+        font-family: "Segoe UI", sans-serif;
+        overflow-x: hidden;
+      }
+
+      /* TOP */
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 24px;
+        border-bottom: 1px solid #1e1e2e;
+      }
+      .topbar h1 {
+        font-size: 17px;
+      }
+      .topbar h1 span {
+        color: #ffd700;
+      }
+      .back-btn {
+        background: #1e1e2e;
+        border: none;
+        color: #aaa;
+        padding: 7px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+      }
+      .back-btn:hover {
+        background: #2a2a3e;
+        color: #fff;
+      }
+
+      /* STORY BANNER */
+      .story-banner {
+        background: linear-gradient(135deg, #0f0f1a, #1a1a2e, #0f0f1a);
+        border-bottom: 1px solid #1e1e2e;
+        padding: 20px 28px;
+      }
+      .story-tag {
+        font-size: 11px;
+        color: #ffd700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+      }
+      .story-title {
+        font-size: 26px;
+        font-weight: 800;
+        margin-bottom: 8px;
+      }
+      .story-title span {
+        color: #00e5ff;
+      }
+      .story-desc {
+        font-size: 14px;
+        color: #aaa;
+        line-height: 1.7;
+        max-width: 800px;
+      }
+      .story-desc b {
+        color: #fff;
+      }
+
+      /* MAIN LAYOUT */
+      .main {
+        display: flex;
+        height: calc(100vh - 180px);
+      }
+
+      /* LEFT — MAP */
+      .map-panel {
+        flex: 1.4;
+        padding: 16px;
+        border-right: 1px solid #1e1e2e;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        overflow: hidden;
+      }
+      .panel-label {
+        font-size: 11px;
+        color: #555;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      #campus-svg {
+        width: 100%;
+        flex: 1;
+      }
+
+      /* RIGHT — CONTROL + INFO */
+      .right-panel {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      /* CONTROLS */
+      .controls {
+        padding: 14px 16px;
+        border-bottom: 1px solid #1e1e2e;
+      }
+      .controls-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+      }
+      .ctrl-label {
+        font-size: 12px;
+        color: #666;
+      }
+      select {
+        background: #1e1e2e;
+        color: #fff;
+        border: 1px solid #333;
+        border-radius: 6px;
+        padding: 7px 10px;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      .btn-primary {
+        background: #ffd700;
+        color: #000;
+        font-weight: 800;
+        border: none;
+        padding: 8px 18px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+      }
+      .btn-primary:hover {
+        background: #ffe033;
+      }
+      .btn-primary:disabled {
+        background: #444;
+        color: #888;
+        cursor: not-allowed;
+      }
+      .btn-secondary {
+        background: #1e1e2e;
+        color: #aaa;
+        border: 1px solid #333;
+        padding: 8px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+      }
+      .btn-secondary:hover {
+        background: #2a2a3e;
+        color: #fff;
+      }
+      .speed-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: #555;
+      }
+      .speed-row input {
+        width: 90px;
+      }
+      #speed-label {
+        color: #ffd700;
+        font-size: 12px;
+      }
+
+      /* STEP EXPLAIN */
+      .explain-panel {
+        padding: 14px 16px;
+        border-bottom: 1px solid #1e1e2e;
+        min-height: 80px;
+      }
+      .explain-phase {
+        font-size: 10px;
+        color: #ffd700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+      }
+      .explain-text {
+        font-size: 13px;
+        color: #ccc;
+        line-height: 1.7;
+      }
+      .explain-text b {
+        color: #00e5ff;
+      }
+      .explain-text .highlight {
+        color: #ffd700;
+        font-weight: 700;
+      }
+
+      /* CHALLENGE BOX */
+      .challenge-box {
+        padding: 14px 16px;
+        border-bottom: 1px solid #1e1e2e;
+        display: none;
+      }
+      .challenge-box.active {
+        display: block;
+      }
+      .challenge-title {
+        font-size: 12px;
+        color: #ff9f43;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+      .challenge-q {
+        font-size: 13px;
+        color: #fff;
+        margin-bottom: 10px;
+      }
+      .challenge-opts {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .c-opt {
+        background: #1e1e2e;
+        border: 1px solid #333;
+        color: #aaa;
+        padding: 6px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        transition: all 0.2s;
+      }
+      .c-opt:hover {
+        border-color: #ffd700;
+        color: #ffd700;
+      }
+      .c-opt.correct {
+        background: #1a3a1a;
+        border-color: #2ecc71;
+        color: #2ecc71;
+      }
+      .c-opt.wrong {
+        background: #3a1a1a;
+        border-color: #e74c3c;
+        color: #e74c3c;
+      }
+
+      /* DIST TABLE */
+      .dist-panel {
+        flex: 1;
+        padding: 14px 16px;
+        overflow-y: auto;
+      }
+      .dist-title {
+        font-size: 11px;
+        color: #555;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 8px;
+      }
+      .dist-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+      }
+      .dist-table th {
+        color: #555;
+        text-align: left;
+        padding: 4px 8px;
+        border-bottom: 1px solid #1e1e2e;
+        font-weight: 600;
+      }
+      .dist-table td {
+        padding: 5px 8px;
+        border-bottom: 1px solid #111;
+        transition: background 0.3s;
+      }
+      .dist-table tr.visited td {
+        color: #555;
+      }
+      .dist-table tr.current td {
+        background: #1a1a0a;
+        color: #ffd700;
+        font-weight: 700;
+      }
+      .dist-table tr.updated td {
+        background: #0a1a1a;
+        color: #00e5ff;
+      }
+      .dist-table .inf {
+        color: #333;
+      }
+
+      /* AHA PANEL */
+      .aha-panel {
+        display: none;
+        position: absolute;
+        inset: 0;
+        background: rgba(15, 15, 26, 0.97);
+        z-index: 100;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 20px;
+        padding: 40px;
+        text-align: center;
+      }
+      .aha-panel.active {
+        display: flex;
+      }
+      .aha-title {
+        font-size: 28px;
+        font-weight: 800;
+        color: #ffd700;
+      }
+      .aha-path {
+        font-size: 18px;
+        color: #00e5ff;
+        font-weight: 700;
+        letter-spacing: 1px;
+      }
+      .aha-stats {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .aha-chip {
+        background: #1e1e2e;
+        padding: 16px 28px;
+        border-radius: 10px;
+      }
+      .aha-chip .label {
+        font-size: 11px;
+        color: #555;
+        margin-bottom: 6px;
+      }
+      .aha-chip .val {
+        font-size: 22px;
+        font-weight: 800;
+        color: #ffd700;
+      }
+      .aha-vs {
+        display: flex;
+        gap: 40px;
+        justify-content: center;
+        margin: 10px 0;
+      }
+      .aha-vs-box {
+        background: #1e1e2e;
+        padding: 14px 24px;
+        border-radius: 10px;
+        text-align: center;
+      }
+      .aha-vs-box .method {
+        font-size: 11px;
+        color: #555;
+        margin-bottom: 6px;
+      }
+      .aha-vs-box .time {
+        font-size: 20px;
+        font-weight: 800;
+      }
+      .aha-vs-box .time.bad {
+        color: #e74c3c;
+      }
+      .aha-vs-box .time.good {
+        color: #2ecc71;
+      }
+      .aha-insight {
+        font-size: 13px;
+        color: #aaa;
+        max-width: 600px;
+        line-height: 1.7;
+      }
+      .aha-insight b {
+        color: #fff;
+      }
+
+      /* SVG STYLES */
+      .campus-edge {
+        stroke: #2a2a3e;
+        stroke-width: 3;
+        fill: none;
+        transition:
+          stroke 0.4s,
+          stroke-width 0.4s;
+      }
+      .campus-edge.active {
+        stroke: #ffd700;
+        stroke-width: 4;
+      }
+      .campus-edge.visited {
+        stroke: #00e5ff;
+        stroke-width: 3.5;
+      }
+      .campus-edge.path {
+        stroke: #2ecc71;
+        stroke-width: 5;
+      }
+      .campus-node circle {
+        stroke-width: 2.5;
+        transition: all 0.4s;
+        cursor: pointer;
+      }
+      .campus-node text {
+        font-size: 11px;
+        font-weight: 700;
+        fill: #fff;
+        text-anchor: middle;
+        dominant-baseline: central;
+        pointer-events: none;
+      }
+      .campus-node .node-label {
+        font-size: 9px;
+        fill: #777;
+        text-anchor: middle;
+      }
+      .campus-node.current circle {
+        filter: drop-shadow(0 0 8px #ffd700);
+      }
+      .campus-node.visited circle {
+        opacity: 0.7;
+      }
+      .campus-node.path-node circle {
+        filter: drop-shadow(0 0 10px #2ecc71);
+      }
+      .edge-weight {
+        font-size: 9px;
+        fill: #444;
+        text-anchor: middle;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <h1>🗺️ Story Mode — <span>VIT Campus Route Finder</span></h1>
+      <button class="back-btn" onclick="window.location.href = '../index.html'">
+        ← Home
+      </button>
+    </div>
+
+    <!-- STORY BANNER -->
+    <div class="story-banner">
+      <div class="story-tag">📖 Story A — Graph + Dijkstra</div>
+      <div class="story-title">
+        You have <span>8 minutes</span> to reach your exam hall.
+      </div>
+      <div class="story-desc">
+        It's 9:52 AM. Your exam starts at 10:00 AM in the <b>Lab Block</b>.
+        You're at the <b>Main Gate</b>. There are multiple routes — but which
+        one is actually shortest? <b>Dijkstra's Algorithm</b> answers this in
+        seconds. Watch it work on your own campus.
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main" style="position: relative">
+      <!-- LEFT MAP -->
+      <div class="map-panel">
+        <div class="panel-label">🏫 VIT Pune Campus Map</div>
+        <svg id="campus-svg" viewBox="0 0 780 480"></svg>
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <div class="right-panel">
+        <!-- CONTROLS -->
+        <div class="controls">
+          <div class="controls-row">
+            <span class="ctrl-label">From:</span>
+            <select id="src-select"></select>
+            <span class="ctrl-label">To:</span>
+            <select id="dst-select"></select>
+            <button class="btn-primary" id="btn-run">▶ Find Route</button>
+            <button class="btn-secondary" id="btn-reset">↺ Reset</button>
+          </div>
+          <div class="speed-row">
+            ⚡ Speed:
+            <input
+              type="range"
+              id="speed-range"
+              min="300"
+              max="2000"
+              value="900"
+              step="100"
+              oninput="
+                stepDelay = parseInt(this.value);
+                document.getElementById('speed-label').textContent =
+                  this.value + 'ms';
+              "
+            />
+            <span id="speed-label">900ms</span>
+            &nbsp;|&nbsp;
+            <span id="step-counter" style="color: #555">Step 0 / 0</span>
+          </div>
+        </div>
+
+        <!-- EXPLAIN -->
+        <div class="explain-panel">
+          <div class="explain-phase" id="explain-phase">WAITING</div>
+          <div class="explain-text" id="explain-text">
+            Pick a <b>start</b> and <b>destination</b>, then click
+            <span class="highlight">Find Route</span> to watch Dijkstra work
+            step by step.
+          </div>
+        </div>
+
+        <!-- CHALLENGE -->
+        <div class="challenge-box" id="challenge-box">
+          <div class="challenge-title">
+            🎯 CHALLENGE — Predict the next step!
+          </div>
+          <div class="challenge-q" id="challenge-q"></div>
+          <div class="challenge-opts" id="challenge-opts"></div>
+        </div>
+
+        <!-- DIST TABLE -->
+        <div class="dist-panel">
+          <div class="dist-title">📊 Shortest Distance Table</div>
+          <table class="dist-table">
+            <thead>
+              <tr>
+                <th>Node</th>
+                <th>Best Distance</th>
+                <th>Via</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="dist-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- AHA PANEL -->
+      <div class="aha-panel" id="aha-panel">
+        <div class="aha-title">🏆 Route Found!</div>
+        <div class="aha-path" id="aha-path"></div>
+        <div class="aha-stats" id="aha-stats"></div>
+        <div class="aha-vs">
+          <div class="aha-vs-box">
+            <div class="method">🐢 Brute Force (all paths)</div>
+            <div class="time bad" id="aha-brute">checking...</div>
+          </div>
+          <div class="aha-vs-box">
+            <div class="method">⚡ Dijkstra's Algorithm</div>
+            <div class="time good" id="aha-dijkstra">checking...</div>
+          </div>
+        </div>
+        <div class="aha-insight" id="aha-insight"></div>
+        <div style="display: flex; gap: 12px">
+          <button class="btn-primary" onclick="closeAha()">
+            ← Try Another Route
+          </button>
+          <button
+            class="btn-secondary"
+            onclick="window.location.href = 'story_b.html'"
+          >
+            Next Story: Timetable AVL →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // ═══════════════════════════════════════════════════════
+      // GRAPH DATA
+      // ═══════════════════════════════════════════════════════
+      const NODES = [
+        { id: 0, name: "Main Gate", short: "Gate", x: 70, y: 400, emoji: "🚪" },
+        {
+          id: 1,
+          name: "Admin Block",
+          short: "Admin",
+          x: 200,
+          y: 300,
+          emoji: "🏛️",
+        },
+        {
+          id: 2,
+          name: "Library",
+          short: "Library",
+          x: 360,
+          y: 180,
+          emoji: "📚",
+        },
+        {
+          id: 3,
+          name: "Main Block",
+          short: "Main Blk",
+          x: 480,
+          y: 290,
+          emoji: "🏫",
+        },
+        { id: 4, name: "Lab Block", short: "Lab", x: 630, y: 200, emoji: "🔬" },
+        {
+          id: 5,
+          name: "Canteen",
+          short: "Canteen",
+          x: 480,
+          y: 400,
+          emoji: "🍽️",
+        },
+        { id: 6, name: "Hostel", short: "Hostel", x: 630, y: 400, emoji: "🏠" },
+        {
+          id: 7,
+          name: "Sports Ground",
+          short: "Sports",
+          x: 720,
+          y: 310,
+          emoji: "⚽",
+        },
+        { id: 8, name: "MCA Block", short: "MCA", x: 360, y: 80, emoji: "💻" },
+        {
+          id: 9,
+          name: "Parking",
+          short: "Parking",
+          x: 80,
+          y: 270,
+          emoji: "🅿️",
+        },
+      ];
+
+      const EDGES = [
+        [0, 9, 2],
+        [0, 1, 3],
+        [9, 1, 2],
+        [1, 2, 4],
+        [1, 3, 6],
+        [2, 3, 3],
+        [2, 8, 3],
+        [8, 4, 4],
+        [3, 4, 2],
+        [3, 5, 3],
+        [4, 7, 3],
+        [5, 6, 2],
+        [5, 7, 4],
+        [6, 7, 3],
+      ];
+
+      const ADJ = Array.from({ length: NODES.length }, () => []);
+      EDGES.forEach(([u, v, w]) => {
+        ADJ[u].push({ to: v, w });
+        ADJ[v].push({ to: u, w });
+      });
+
+      // ═══════════════════════════════════════════════════════
+      // STATE
+      // ═══════════════════════════════════════════════════════
+      let stepDelay = 900;
+      let isRunning = false;
+      let steps = []; // dijkstra steps
+      let stepIdx = 0;
+      let timer = null;
+      let challengePending = false;
+      let challengeAnswer = -1;
+
+      // ═══════════════════════════════════════════════════════
+      // SVG SETUP
+      // ═══════════════════════════════════════════════════════
+      const svg = document.getElementById("campus-svg");
+
+      function makeSVG(tag, attrs = {}) {
+        const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+        Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+        return el;
+      }
+
+      // draw edges
+      const edgeEls = {};
+      EDGES.forEach(([u, v, w], i) => {
+        const nu = NODES[u],
+          nv = NODES[v];
+        const mx = (nu.x + nv.x) / 2,
+          my = (nu.y + nv.y) / 2;
+        const line = makeSVG("line", {
+          class: "campus-edge",
+          id: `edge-${u}-${v}`,
+          x1: nu.x,
+          y1: nu.y,
+          x2: nv.x,
+          y2: nv.y,
+        });
+        svg.appendChild(line);
+        edgeEls[`${u}-${v}`] = line;
+        edgeEls[`${v}-${u}`] = line;
+
+        // weight label
+        const wlabel = makeSVG("text", {
+          class: "edge-weight",
+          x: mx,
+          y: my - 6,
+          id: `wlabel-${u}-${v}`,
+        });
+        wlabel.textContent = w + "min";
+        svg.appendChild(wlabel);
+      });
+
+      // draw nodes
+      const nodeEls = {};
+      NODES.forEach((n) => {
+        const g = makeSVG("g", { class: "campus-node", id: `node-g-${n.id}` });
+
+        const circ = makeSVG("circle", {
+          cx: n.x,
+          cy: n.y,
+          r: 22,
+          fill: "#1e1e2e",
+          stroke: "#333",
+        });
+        g.appendChild(circ);
+
+        const txt = makeSVG("text", { x: n.x, y: n.y });
+        txt.textContent = n.id;
+        g.appendChild(txt);
+
+        const lbl = makeSVG("text", {
+          class: "node-label",
+          x: n.x,
+          y: n.y + 34,
+        });
+        lbl.textContent = n.short;
+        g.appendChild(lbl);
+
+        svg.appendChild(g);
+        nodeEls[n.id] = { g, circ };
+      });
+
+      // ═══════════════════════════════════════════════════════
+      // POPULATE SELECTS
+      // ═══════════════════════════════════════════════════════
+      const srcSel = document.getElementById("src-select");
+      const dstSel = document.getElementById("dst-select");
+      NODES.forEach((n) => {
+        const o1 = document.createElement("option");
+        o1.value = n.id;
+        o1.textContent = n.emoji + " " + n.name;
+        srcSel.appendChild(o1);
+        const o2 = document.createElement("option");
+        o2.value = n.id;
+        o2.textContent = n.emoji + " " + n.name;
+        dstSel.appendChild(o2);
+      });
+      srcSel.value = 0;
+      dstSel.value = 4; // default: Gate → Lab
+
+      // ═══════════════════════════════════════════════════════
+      // DIJKSTRA — compute all steps
+      // ═══════════════════════════════════════════════════════
+      function dijkstra(src, dst) {
+        const INF = Infinity;
+        const dist = Array(NODES.length).fill(INF);
+        const prev = Array(NODES.length).fill(-1);
+        const visited = Array(NODES.length).fill(false);
+        dist[src] = 0;
+
+        const steps = [];
+        steps.push({
+          type: "init",
+          src,
+          dst,
+          dist: [...dist],
+          prev: [...prev],
+          visited: [...visited],
+          explain: `Starting at <b>${NODES[src].name}</b>. Distance to all other nodes = ∞. Distance to source = <span class="highlight">0</span>.`,
+        });
+
+        for (let iter = 0; iter < NODES.length; iter++) {
+          // find min unvisited
+          let u = -1,
+            minD = INF;
+          for (let i = 0; i < NODES.length; i++) {
+            if (!visited[i] && dist[i] < minD) {
+              minD = dist[i];
+              u = i;
+            }
+          }
+          if (u === -1 || dist[u] === INF) break;
+
+          visited[u] = true;
+          steps.push({
+            type: "pick",
+            node: u,
+            dist: [...dist],
+            prev: [...prev],
+            visited: [...visited],
+            explain: `<b>Finalizing ${NODES[u].name}</b> — it has the current shortest distance of <span class="highlight">${dist[u]} min</span>. Once finalized, this distance is guaranteed optimal.`,
+            challenge:
+              iter > 0
+                ? {
+                    q: `Which node gets finalized next after ${NODES[u].name}?`,
+                    answer: u,
+                  }
+                : null,
+          });
+
+          if (u === dst) {
+            steps.push({
+              type: "done",
+              node: u,
+              dist: [...dist],
+              prev: [...prev],
+              visited: [...visited],
+              explain: `🎉 Reached <b>${NODES[dst].name}</b>! Shortest path found in <span class="highlight">${dist[dst]} minutes</span>.`,
+            });
+            break;
+          }
+
+          // relax neighbours
+          for (const { to, w } of ADJ[u]) {
+            if (visited[to]) continue;
+            const newD = dist[u] + w;
+            if (newD < dist[to]) {
+              const oldD = dist[to];
+              dist[to] = newD;
+              prev[to] = u;
+              steps.push({
+                type: "relax",
+                from: u,
+                to,
+                w,
+                oldDist: oldD,
+                newDist: newD,
+                dist: [...dist],
+                prev: [...prev],
+                visited: [...visited],
+                explain: `Checking edge <b>${NODES[u].name} → ${NODES[to].name}</b> (${w} min). &nbsp;${oldD === Infinity ? "∞" : oldD} &nbsp;→ <span class="highlight">${newD} min</span> via ${NODES[u].name}. Updated! ✅`,
+              });
+            } else {
+              steps.push({
+                type: "skip",
+                from: u,
+                to,
+                w,
+                dist: [...dist],
+                prev: [...prev],
+                visited: [...visited],
+                explain: `Checking edge <b>${NODES[u].name} → ${NODES[to].name}</b> (${w} min). Current best is ${dist[to]} min — no update needed. ⏭️`,
+              });
+            }
+          }
+        }
+
+        return { steps, dist, prev };
+      }
+
+      function getPath(prev, src, dst) {
+        const path = [];
+        let cur = dst;
+        while (cur !== -1) {
+          path.unshift(cur);
+          cur = prev[cur];
+        }
+        if (path[0] !== src) return [];
+        return path;
+      }
+
+      // ═══════════════════════════════════════════════════════
+      // DISTANCE TABLE
+      // ═══════════════════════════════════════════════════════
+      function renderDistTable(dist, prev, visited, current = -1) {
+        const tbody = document.getElementById("dist-tbody");
+        tbody.innerHTML = "";
+        NODES.forEach((n) => {
+          const tr = document.createElement("tr");
+          const status = visited[n.id]
+            ? "✅ Finalized"
+            : dist[n.id] < Infinity
+              ? "⏳ Tentative"
+              : "⬜ Not reached";
+          if (visited[n.id]) tr.className = "visited";
+          if (n.id === current) tr.className = "current";
+          if (!visited[n.id] && dist[n.id] < Infinity && n.id !== current)
+            tr.className = "updated";
+          tr.innerHTML = `
+      <td>${n.emoji} ${n.short}</td>
+      <td>${dist[n.id] === Infinity ? '<span class="inf">∞</span>' : dist[n.id] + " min"}</td>
+      <td>${prev[n.id] >= 0 ? NODES[prev[n.id]].short : "—"}</td>
+      <td style="font-size:11px;">${status}</td>
+    `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      // ═══════════════════════════════════════════════════════
+      // NODE / EDGE VISUAL STATE
+      // ═══════════════════════════════════════════════════════
+      function resetVisuals() {
+        NODES.forEach((n) => {
+          nodeEls[n.id].circ.setAttribute("fill", "#1e1e2e");
+          nodeEls[n.id].circ.setAttribute("stroke", "#333");
+          nodeEls[n.id].g.className.baseVal = "campus-node";
+        });
+        EDGES.forEach(([u, v]) => {
+          const key = `${u}-${v}`;
+          if (edgeEls[key]) edgeEls[key].className.baseVal = "campus-edge";
+        });
+      }
+
+      function applyStepVisuals(step, prevSteps) {
+        resetVisuals();
+        const { dist, prev, visited } = step;
+
+        // colour all nodes by state
+        NODES.forEach((n) => {
+          const el = nodeEls[n.id];
+          if (visited[n.id]) {
+            el.circ.setAttribute("fill", "#1a2a2a");
+            el.circ.setAttribute("stroke", "#00e5ff");
+            el.g.className.baseVal = "campus-node visited";
+          } else if (dist[n.id] < Infinity) {
+            el.circ.setAttribute("fill", "#2a2a1a");
+            el.circ.setAttribute("stroke", "#ffd700");
+          }
+        });
+
+        // highlight current active nodes/edges
+        if (step.type === "pick") {
+          nodeEls[step.node].circ.setAttribute("fill", "#2a2a00");
+          nodeEls[step.node].circ.setAttribute("stroke", "#ffd700");
+          nodeEls[step.node].g.className.baseVal = "campus-node current";
+        }
+        if (step.type === "relax" || step.type === "skip") {
+          const key = `${step.from}-${step.to}`;
+          if (edgeEls[key])
+            edgeEls[key].className.baseVal =
+              "campus-edge " + (step.type === "relax" ? "active" : "");
+          nodeEls[step.to].circ.setAttribute(
+            "stroke",
+            step.type === "relax" ? "#00e5ff" : "#555",
+          );
+        }
+      }
+
+      function showFinalPath(path) {
+        for (let i = 0; i < path.length; i++) {
+          nodeEls[path[i]].circ.setAttribute("fill", "#0a2a0a");
+          nodeEls[path[i]].circ.setAttribute("stroke", "#2ecc71");
+          nodeEls[path[i]].g.className.baseVal = "campus-node path-node";
+          if (i > 0) {
+            const key = `${path[i - 1]}-${path[i]}`;
+            if (edgeEls[key])
+              edgeEls[key].className.baseVal = "campus-edge path";
+          }
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════
+      // CHALLENGE
+      // ═══════════════════════════════════════════════════════
+      function showChallenge(nextPickNode) {
+        if (nextPickNode === -1) return;
+        const box = document.getElementById("challenge-box");
+        const q = document.getElementById("challenge-q");
+        const opts = document.getElementById("challenge-opts");
+        box.classList.add("active");
+        q.innerHTML = `🤔 <b>Which node will Dijkstra finalize next?</b>`;
+        opts.innerHTML = "";
+        challengeAnswer = nextPickNode;
+        challengePending = true;
+
+        // pick 3 random wrong options + correct
+        const others = NODES.filter((n) => n.id !== nextPickNode)
+          .sort(() => Math.random() - 0.5)
+          .slice(0, 3);
+        const choices = [...others, NODES[nextPickNode]].sort(
+          () => Math.random() - 0.5,
+        );
+        choices.forEach((n) => {
+          const btn = document.createElement("button");
+          btn.className = "c-opt";
+          btn.textContent = n.emoji + " " + n.name;
+          btn.onclick = () => answerChallenge(n.id, btn, opts);
+          opts.appendChild(btn);
+        });
+        clearInterval(timer);
+      }
+
+      function answerChallenge(chosen, btn, opts) {
+        if (!challengePending) return;
+        challengePending = false;
+        const allBtns = opts.querySelectorAll(".c-opt");
+        allBtns.forEach((b) => {
+          if (
+            parseInt(b.dataset && b.dataset.id) === challengeAnswer ||
+            b.textContent.includes(NODES[challengeAnswer].name)
+          )
+            b.classList.add("correct");
+        });
+        if (chosen === challengeAnswer) {
+          btn.classList.add("correct");
+          document.getElementById("explain-text").innerHTML =
+            `✅ <b>Correct!</b> ${NODES[challengeAnswer].name} has the smallest tentative distance. Dijkstra always picks the globally closest unvisited node.`;
+        } else {
+          btn.classList.add("wrong");
+          document.getElementById("explain-text").innerHTML =
+            `❌ Not quite. <b>${NODES[challengeAnswer].name}</b> is next — it currently has the smallest tentative distance among unvisited nodes.`;
+        }
+        setTimeout(() => {
+          document.getElementById("challenge-box").classList.remove("active");
+          timer = setInterval(playStep, stepDelay);
+        }, 1400);
+      }
+
+      // ═══════════════════════════════════════════════════════
+      // PLAYBACK
+      // ═══════════════════════════════════════════════════════
+      function playStep() {
+        if (stepIdx >= steps.length) {
+          clearInterval(timer);
+          return;
+        }
+        const step = steps[stepIdx];
+        stepIdx++;
+
+        document.getElementById("step-counter").textContent =
+          `Step ${stepIdx} / ${steps.length}`;
+        document.getElementById("explain-phase").textContent =
+          step.type === "init"
+            ? "INITIALIZATION"
+            : step.type === "pick"
+              ? "FINALIZE NODE"
+              : step.type === "relax"
+                ? "RELAX EDGE"
+                : step.type === "skip"
+                  ? "SKIP EDGE"
+                  : step.type === "done"
+                    ? "DESTINATION REACHED"
+                    : "RUNNING";
+        document.getElementById("explain-text").innerHTML = step.explain;
+
+        applyStepVisuals(step, steps.slice(0, stepIdx));
+        renderDistTable(
+          step.dist,
+          step.prev,
+          step.visited,
+          step.type === "pick"
+            ? step.node
+            : step.type === "relax"
+              ? step.to
+              : -1,
+        );
+
+        // challenge on every pick step after first
+        if (step.type === "pick" && stepIdx > 1 && stepIdx < steps.length) {
+          // find next pick step
+          const nextPick = steps
+            .slice(stepIdx)
+            .find((s) => s.type === "pick" || s.type === "done");
+          if (nextPick && nextPick.type === "pick") {
+            clearInterval(timer);
+            setTimeout(() => showChallenge(nextPick.node), 400);
+            return;
+          }
+        }
+
+        if (step.type === "done") {
+          clearInterval(timer);
+          const src = parseInt(srcSel.value),
+            dst = parseInt(dstSel.value);
+          const lastStep = steps[steps.length - 1];
+          const path = getPath(lastStep.prev, src, dst);
+          showFinalPath(path);
+          setTimeout(
+            () => showAha(src, dst, lastStep.dist, lastStep.prev, path),
+            1200,
+          );
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════
+      // AHA MOMENT
+      // ═══════════════════════════════════════════════════════
+      function showAha(src, dst, dist, prev, path) {
+        const totalDist = dist[dst];
+        const pathNames = path.map((id) => NODES[id].name).join(" → ");
+        const numPaths = Math.min(Math.pow(2, NODES.length - 2), 1024);
+
+        document.getElementById("aha-path").textContent = "📍 " + pathNames;
+        document.getElementById("aha-stats").innerHTML = `
+    <div class="aha-chip"><div class="label">Total Distance</div><div class="val">${totalDist} min</div></div>
+    <div class="aha-chip"><div class="label">Stops</div><div class="val">${path.length - 1}</div></div>
+    <div class="aha-chip"><div class="label">Dijkstra Steps</div><div class="val">${steps.length}</div></div>
+  `;
+        document.getElementById("aha-brute").textContent =
+          `~${numPaths} paths checked`;
+        document.getElementById("aha-dijkstra").textContent =
+          `${steps.length} smart steps`;
+        document.getElementById("aha-insight").innerHTML =
+          `Dijkstra didn't check every possible path — it used a <b>greedy priority</b> strategy: always expand the closest unfinalized node. This is exactly how <b>Google Maps, Uber, and GPS devices</b> find shortest routes in milliseconds across cities with millions of roads.`;
+        document.getElementById("aha-panel").classList.add("active");
+      }
+
+      function closeAha() {
+        document.getElementById("aha-panel").classList.remove("active");
+        doReset();
+      }
+
+      // ═══════════════════════════════════════════════════════
+      // RUN + RESET
+      // ═══════════════════════════════════════════════════════
+      function doRun() {
+        if (isRunning) return;
+        const src = parseInt(srcSel.value),
+          dst = parseInt(dstSel.value);
+        if (src === dst) {
+          alert("Pick different start and destination!");
+          return;
+        }
+        isRunning = true;
+        document.getElementById("btn-run").disabled = true;
+
+        const result = dijkstra(src, dst);
+        steps = result.steps;
+        stepIdx = 0;
+        timer = setInterval(playStep, stepDelay);
+      }
+
+      function doReset() {
+        clearInterval(timer);
+        isRunning = false;
+        steps = [];
+        stepIdx = 0;
+        challengePending = false;
+        document.getElementById("btn-run").disabled = false;
+        document.getElementById("challenge-box").classList.remove("active");
+        document.getElementById("explain-phase").textContent = "WAITING";
+        document.getElementById("explain-text").innerHTML =
+          `Pick a <b>start</b> and <b>destination</b>, then click <span class="highlight">Find Route</span>.`;
+        document.getElementById("step-counter").textContent = "Step 0 / 0";
+        const INF = Infinity;
+        const emptyDist = Array(NODES.length).fill(INF);
+        const emptyPrev = Array(NODES.length).fill(-1);
+        const emptyVis = Array(NODES.length).fill(false);
+        renderDistTable(emptyDist, emptyPrev, emptyVis);
+        resetVisuals();
+      }
+
+      // ═══════════════════════════════════════════════════════
+      // INIT
+      // ═══════════════════════════════════════════════════════
+      document.getElementById("btn-run").onclick = doRun;
+      document.getElementById("btn-reset").onclick = doReset;
+      doReset();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,859 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>DS Dojo — Story: OPD Priority Queue</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: #0f0f1a;
+        color: #fff;
+        font-family: "Segoe UI", sans-serif;
+        overflow-x: hidden;
+      }
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 24px;
+        border-bottom: 1px solid #1e1e2e;
+      }
+      .topbar h1 {
+        font-size: 17px;
+      }
+      .topbar h1 span {
+        color: #ff9f43;
+      }
+      .back-btn {
+        background: #1e1e2e;
+        border: none;
+        color: #aaa;
+        padding: 7px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+      }
+      .story-banner {
+        background: linear-gradient(135deg, #0f0f1a, #1a1a2e, #0f0f1a);
+        border-bottom: 1px solid #1e1e2e;
+        padding: 18px 28px;
+      }
+      .story-tag {
+        font-size: 11px;
+        color: #ff9f43;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+      }
+      .story-title {
+        font-size: 24px;
+        font-weight: 800;
+        margin-bottom: 6px;
+      }
+      .story-title span {
+        color: #ff9f43;
+      }
+      .story-desc {
+        font-size: 13px;
+        color: #aaa;
+        line-height: 1.7;
+        max-width: 800px;
+      }
+      .story-desc b {
+        color: #fff;
+      }
+      .main {
+        display: flex;
+        height: calc(100vh - 165px);
+        gap: 0;
+      }
+
+      /* PATIENT INTAKE */
+      .left-col {
+        width: 300px;
+        border-right: 1px solid #1e1e2e;
+        display: flex;
+        flex-direction: column;
+      }
+      .col-header {
+        padding: 12px 14px;
+        border-bottom: 1px solid #1e1e2e;
+        font-size: 11px;
+        color: #555;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .patient-list {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .patient-card {
+        background: #1e1e2e;
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 10px 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        user-select: none;
+      }
+      .patient-card:hover {
+        border-color: #ff9f43;
+      }
+      .patient-card.selected {
+        border-color: #ff9f43;
+        background: #1a1510;
+      }
+      .patient-card.admitted {
+        border-color: #2ecc71;
+        background: #0a1a0a;
+        cursor: default;
+        opacity: 0.6;
+      }
+      .patient-card.treated {
+        border-color: #555;
+        background: #111;
+        cursor: default;
+        opacity: 0.4;
+      }
+      .pat-name {
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .pat-severity {
+        font-size: 12px;
+        margin-top: 3px;
+      }
+      .sev-bar {
+        display: inline-block;
+        height: 6px;
+        border-radius: 3px;
+        vertical-align: middle;
+        margin-left: 6px;
+      }
+      .pat-desc {
+        font-size: 11px;
+        color: #777;
+        margin-top: 3px;
+      }
+      .admit-btn {
+        width: 100%;
+        background: #ff9f43;
+        color: #000;
+        font-weight: 800;
+        border: none;
+        padding: 8px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        margin: 10px 10px 0;
+        width: calc(100% - 20px);
+      }
+      .admit-btn:disabled {
+        background: #333;
+        color: #666;
+        cursor: not-allowed;
+      }
+      .treat-btn {
+        width: calc(100%-20px);
+        margin: 6px 10px;
+        background: #2ecc71;
+        color: #000;
+        font-weight: 800;
+        border: none;
+        padding: 8px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        width: calc(100% - 20px);
+      }
+      .treat-btn:disabled {
+        background: #333;
+        color: #666;
+        cursor: not-allowed;
+      }
+
+      /* MID — HEAP */
+      .mid-col {
+        flex: 1;
+        border-right: 1px solid #1e1e2e;
+        display: flex;
+        flex-direction: column;
+      }
+      .heap-explain {
+        padding: 12px 14px;
+        border-bottom: 1px solid #1e1e2e;
+        min-height: 70px;
+      }
+      .ep {
+        font-size: 10px;
+        color: #ff9f43;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+      }
+      .et {
+        font-size: 13px;
+        color: #ccc;
+        line-height: 1.7;
+      }
+      .et b {
+        color: #ff9f43;
+      }
+      .et .hi {
+        color: #ffd700;
+        font-weight: 700;
+      }
+      .heap-svg-wrap {
+        flex: 1;
+        overflow: auto;
+        padding: 10px;
+      }
+      svg#heap-svg {
+        display: block;
+        margin: auto;
+        overflow: visible;
+      }
+      .h-link {
+        fill: none;
+        stroke: #2a2a3e;
+        stroke-width: 2;
+      }
+      .h-node circle {
+        stroke-width: 2.5;
+      }
+      .h-node text {
+        fill: #fff;
+        font-size: 11px;
+        font-weight: bold;
+        text-anchor: middle;
+        dominant-baseline: central;
+      }
+      .h-node .nlbl {
+        fill: #777;
+        font-size: 9px;
+        text-anchor: middle;
+      }
+
+      /* CHALLENGE */
+      .chal-strip {
+        padding: 10px 14px;
+        border-top: 1px solid #1e1e2e;
+        display: none;
+        background: #0a0a14;
+      }
+      .chal-strip.active {
+        display: block;
+      }
+      .chal-title {
+        font-size: 11px;
+        color: #ff9f43;
+        margin-bottom: 6px;
+        font-weight: 700;
+      }
+      .chal-opts {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .c-opt {
+        background: #1e1e2e;
+        border: 1px solid #333;
+        color: #aaa;
+        padding: 5px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+      }
+      .c-opt:hover {
+        border-color: #ff9f43;
+        color: #ff9f43;
+      }
+      .c-opt.correct {
+        background: #0a1a0a;
+        border-color: #2ecc71;
+        color: #2ecc71;
+      }
+      .c-opt.wrong {
+        background: #1a0a0a;
+        border-color: #e74c3c;
+        color: #e74c3c;
+      }
+
+      /* RIGHT — TREATMENT LOG */
+      .right-col {
+        width: 260px;
+        display: flex;
+        flex-direction: column;
+      }
+      .treat-log {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px;
+      }
+      .treat-row {
+        background: #1e1e2e;
+        border-radius: 6px;
+        padding: 8px 10px;
+        margin-bottom: 6px;
+        font-size: 12px;
+      }
+      .treat-row .tname {
+        font-weight: 700;
+        color: #fff;
+      }
+      .treat-row .tsev {
+        color: #ff9f43;
+        font-size: 11px;
+      }
+      .treat-row .ttime {
+        color: #555;
+        font-size: 10px;
+        margin-top: 2px;
+      }
+      .stats-box {
+        padding: 12px 14px;
+        border-top: 1px solid #1e1e2e;
+      }
+      .stat-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        margin-bottom: 6px;
+      }
+      .stat-row .k {
+        color: #555;
+      }
+      .stat-row .v {
+        color: #ffd700;
+        font-weight: 700;
+      }
+
+      /* AHA */
+      .aha-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 15, 26, 0.97);
+        z-index: 200;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 18px;
+        padding: 40px;
+        text-align: center;
+      }
+      .aha-overlay.active {
+        display: flex;
+      }
+      .aha-title {
+        font-size: 26px;
+        font-weight: 800;
+        color: #ff9f43;
+      }
+      .aha-stat-row {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .aha-chip {
+        background: #1e1e2e;
+        padding: 14px 22px;
+        border-radius: 10px;
+      }
+      .aha-chip .lbl {
+        font-size: 11px;
+        color: #555;
+        margin-bottom: 4px;
+      }
+      .aha-chip .val {
+        font-size: 22px;
+        font-weight: 800;
+        color: #ff9f43;
+      }
+      .aha-insight {
+        font-size: 13px;
+        color: #aaa;
+        max-width: 580px;
+        line-height: 1.8;
+      }
+      .aha-insight b {
+        color: #fff;
+      }
+      .btn-primary {
+        background: #ff9f43;
+        color: #000;
+        font-weight: 800;
+        border: none;
+        padding: 9px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      .btn-secondary {
+        background: #1e1e2e;
+        color: #aaa;
+        border: 1px solid #333;
+        padding: 9px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="topbar">
+      <h1>🏥 Story Mode — <span>OPD Emergency Room</span></h1>
+      <button class="back-btn" onclick="window.location.href = 'story_b.html'">
+        ← Story B
+      </button>
+    </div>
+
+    <div class="story-banner">
+      <div class="story-tag">📖 Story C — Max Heap / Priority Queue</div>
+      <div class="story-title">
+        120 patients. <span>3 doctors. Who gets treated first?</span>
+      </div>
+      <div class="story-desc">
+        It's Monday 9 AM at VIT Hospital OPD. Patients keep arriving with
+        different severity levels (1=minor, 10=critical). A
+        <b>Priority Queue (Max Heap)</b> ensures the most critical patient is
+        always treated first — no matter the arrival order.
+        <b>Admit patients</b>, watch the heap reorder itself, then
+        <b>treat</b> to extract the max.
+      </div>
+    </div>
+
+    <div class="main">
+      <!-- PATIENTS -->
+      <div class="left-col">
+        <div class="col-header">🚑 Patient Queue</div>
+        <div class="patient-list" id="patient-list"></div>
+        <button class="admit-btn" id="admit-btn" disabled>
+          🏥 Admit to OPD
+        </button>
+        <button class="treat-btn" id="treat-btn" disabled>
+          💊 Treat Highest Priority
+        </button>
+      </div>
+
+      <!-- HEAP VIZ -->
+      <div class="mid-col">
+        <div class="heap-explain">
+          <div class="ep" id="ep">WAITING</div>
+          <div class="et" id="et">
+            Admit a patient to insert into the Max Heap. The
+            <b>most critical</b> patient always stays at the root.
+          </div>
+        </div>
+        <div class="chal-strip" id="chal-strip">
+          <div class="chal-title">
+            🎯 After inserting this patient, who will be at the root?
+          </div>
+          <div class="chal-opts" id="chal-opts"></div>
+        </div>
+        <div class="heap-svg-wrap">
+          <svg
+            id="heap-svg"
+            width="700"
+            height="420"
+            viewBox="0 0 700 400"
+          ></svg>
+        </div>
+      </div>
+
+      <!-- TREATMENT LOG -->
+      <div class="right-col">
+        <div class="col-header">✅ Treatment Log</div>
+        <div class="treat-log" id="treat-log"></div>
+        <div class="stats-box">
+          <div class="stat-row">
+            <span class="k">In Queue</span><span class="v" id="stat-q">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="k">Treated</span><span class="v" id="stat-t">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="k">Heap Ops</span
+            ><span class="v" id="stat-ops">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="k">Current Root (Critical)</span
+            ><span class="v" id="stat-root">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AHA -->
+    <div class="aha-overlay" id="aha">
+      <div class="aha-title">🏆 All Critical Patients Treated!</div>
+      <div class="aha-stat-row" id="aha-stats"></div>
+      <div class="aha-insight" id="aha-insight"></div>
+      <div style="display: flex; gap: 12px">
+        <button
+          class="btn-primary"
+          onclick="
+            document.getElementById('aha').classList.remove('active');
+            doReset();
+          "
+        >
+          Try Again
+        </button>
+        <button
+          class="btn-secondary"
+          onclick="window.location.href = 'story_d.html'"
+        >
+          Next: Hash Table →
+        </button>
+      </div>
+    </div>
+
+    <script>
+      const PATIENTS = [
+        { name: "Ravi S.", severity: 3, desc: "Mild fever", emoji: "🤒" },
+        { name: "Priya M.", severity: 8, desc: "Chest pain", emoji: "💔" },
+        { name: "Arjun K.", severity: 1, desc: "Routine checkup", emoji: "😊" },
+        { name: "Meera D.", severity: 10, desc: "Cardiac arrest", emoji: "🚨" },
+        { name: "Suresh T.", severity: 5, desc: "Fracture", emoji: "🦴" },
+        { name: "Anita R.", severity: 9, desc: "Severe bleeding", emoji: "🩸" },
+        { name: "Kiran P.", severity: 2, desc: "Headache", emoji: "🤕" },
+        {
+          name: "Deepa N.",
+          severity: 7,
+          desc: "Breathing difficulty",
+          emoji: "😮‍💨",
+        },
+      ];
+
+      // MAX HEAP
+      let heap = [];
+      let heapOps = 0;
+      let treated = [];
+      let selectedPatientIdx = null;
+      let admittedIndices = new Set();
+
+      function sevColor(s) {
+        return s >= 9
+          ? "#e74c3c"
+          : s >= 7
+            ? "#ff7675"
+            : s >= 5
+              ? "#ff9f43"
+              : s >= 3
+                ? "#ffd700"
+                : "#2ecc71";
+      }
+
+      function heapUp(arr, i) {
+        while (i > 0) {
+          const p = Math.floor((i - 1) / 2);
+          if (arr[p].severity < arr[i].severity) {
+            [arr[p], arr[i]] = [arr[i], arr[p]];
+            i = p;
+            heapOps++;
+          } else break;
+        }
+      }
+      function heapDown(arr, i) {
+        const n = arr.length;
+        while (true) {
+          let largest = i,
+            l = 2 * i + 1,
+            r = 2 * i + 2;
+          if (l < n && arr[l].severity > arr[largest].severity) largest = l;
+          if (r < n && arr[r].severity > arr[largest].severity) largest = r;
+          if (largest !== i) {
+            [arr[largest], arr[i]] = [arr[i], arr[largest]];
+            i = largest;
+            heapOps++;
+          } else break;
+        }
+      }
+
+      function admitPatient(pat) {
+        heap.push({ ...pat });
+        heapOps++;
+        heapUp(heap, heap.length - 1);
+      }
+      function treatTop() {
+        if (!heap.length) return null;
+        const top = heap[0];
+        heap[0] = heap[heap.length - 1];
+        heap.pop();
+        heapOps++;
+        heapDown(heap, 0);
+        return top;
+      }
+
+      // RENDER PATIENTS
+      function renderPatients() {
+        const list = document.getElementById("patient-list");
+        list.innerHTML = "";
+        PATIENTS.forEach((p, i) => {
+          const div = document.createElement("div");
+          const isAdmitted = admittedIndices.has(i);
+          const isTreated = treated.some((t) => t.name === p.name);
+          div.className =
+            "patient-card" +
+            (isTreated
+              ? " treated"
+              : isAdmitted
+                ? " admitted"
+                : selectedPatientIdx === i
+                  ? " selected"
+                  : "");
+          const barW = Math.round(p.severity * 22);
+          div.innerHTML = `<div class="pat-name">${p.emoji} ${p.name}</div>
+      <div class="pat-severity">Severity: <b style="color:${sevColor(p.severity)}">${p.severity}/10</b>
+        <span class="sev-bar" style="width:${barW}px;background:${sevColor(p.severity)};"></span>
+      </div>
+      <div class="pat-desc">${p.desc}</div>`;
+          if (!isAdmitted && !isTreated) {
+            div.onclick = () => {
+              selectedPatientIdx = i;
+              renderPatients();
+              document.getElementById("admit-btn").disabled = false;
+            };
+          }
+          list.appendChild(div);
+        });
+      }
+
+      // HEAP SVG
+      function drawHeap(highlightIdx = -1) {
+        const svg = document.getElementById("heap-svg");
+        svg.innerHTML = "";
+        if (!heap.length) return;
+
+        const levelGap = 80,
+          nodeR = 22;
+        function getPos(i) {
+          const level = Math.floor(Math.log2(i + 1));
+          const levelStart = Math.pow(2, level) - 1;
+          const levelCount = Math.pow(2, level);
+          const slot = i - levelStart;
+          const x = ((slot + 0.5) / levelCount) * 680 + 10;
+          const y = level * levelGap + 40;
+          return { x, y };
+        }
+
+        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        svg.appendChild(g);
+
+        // edges
+        heap.forEach((_, i) => {
+          if (i === 0) return;
+          const p = Math.floor((i - 1) / 2);
+          const { x: px, y: py } = getPos(p),
+            { x: cx, y: cy } = getPos(i);
+          const line = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "line",
+          );
+          line.setAttribute("class", "h-link");
+          line.setAttribute("x1", px);
+          line.setAttribute("y1", py);
+          line.setAttribute("x2", cx);
+          line.setAttribute("y2", cy);
+          g.appendChild(line);
+        });
+
+        // nodes
+        heap.forEach((pat, i) => {
+          const { x, y } = getPos(i);
+          const ng = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "g",
+          );
+          ng.setAttribute("class", "h-node");
+          ng.setAttribute("transform", `translate(${x},${y})`);
+
+          const circ = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "circle",
+          );
+          circ.setAttribute("r", nodeR);
+          circ.setAttribute("fill", i === 0 ? "#1a0a0a" : "#1e1e2e");
+          circ.setAttribute(
+            "stroke",
+            i === highlightIdx ? "#fff" : sevColor(pat.severity),
+          );
+          ng.appendChild(circ);
+
+          const txt = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "text",
+          );
+          txt.setAttribute("y", "0");
+          txt.style.fill = sevColor(pat.severity);
+          txt.textContent = pat.severity;
+          ng.appendChild(txt);
+
+          const nlbl = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "text",
+          );
+          nlbl.setAttribute("class", "nlbl");
+          nlbl.setAttribute("y", "32");
+          nlbl.textContent = pat.emoji || "";
+          ng.appendChild(nlbl);
+
+          g.appendChild(ng);
+        });
+      }
+
+      function updateStats() {
+        document.getElementById("stat-q").textContent = heap.length;
+        document.getElementById("stat-t").textContent = treated.length;
+        document.getElementById("stat-ops").textContent = heapOps;
+        document.getElementById("stat-root").textContent = heap.length
+          ? heap[0].emoji + " " + heap[0].name + " (" + heap[0].severity + ")"
+          : "—";
+        document.getElementById("treat-btn").disabled = heap.length === 0;
+      }
+
+      function renderTreatLog() {
+        const log = document.getElementById("treat-log");
+        log.innerHTML = "";
+        [...treated].reverse().forEach((p, i) => {
+          const div = document.createElement("div");
+          div.className = "treat-row";
+          div.innerHTML = `<div class="tname">${p.emoji} ${p.name}</div>
+      <div class="tsev">Severity ${p.severity}/10</div>
+      <div class="ttime">#${treated.length - i} treated</div>`;
+          log.appendChild(div);
+        });
+      }
+
+      // CHALLENGE
+      function showChallenge(newPat) {
+        const strip = document.getElementById("chal-strip");
+        strip.classList.add("active");
+        const opts = document.getElementById("chal-opts");
+        opts.innerHTML = "";
+        // who will be root?
+        const tempHeap = [...heap, { ...newPat }];
+        heapUp(tempHeap, tempHeap.length - 1);
+        const correctRoot = tempHeap[0];
+
+        const choices = [];
+        choices.push(correctRoot);
+        PATIENTS.filter(
+          (p) =>
+            p.name !== correctRoot.name &&
+            admittedIndices.has(PATIENTS.indexOf(p)),
+        )
+          .slice(0, 2)
+          .forEach((p) => choices.push(p));
+        choices.push(newPat);
+        const uniqueChoices = [
+          ...new Map(choices.map((c) => [c.name, c])).values(),
+        ]
+          .sort(() => Math.random() - 0.5)
+          .slice(0, 4);
+        if (!uniqueChoices.some((c) => c.name === correctRoot.name))
+          uniqueChoices[0] = correctRoot;
+
+        uniqueChoices.forEach((c) => {
+          const btn = document.createElement("button");
+          btn.className = "c-opt";
+          btn.textContent =
+            c.emoji + " " + c.name + " (sev:" + c.severity + ")";
+          btn.onclick = () => {
+            document.querySelectorAll(".chal-opts .c-opt").forEach((b) => {
+              if (b.textContent.includes(correctRoot.name))
+                b.classList.add("correct");
+            });
+            if (c.name === correctRoot.name) btn.classList.add("correct");
+            else btn.classList.add("wrong");
+            setTimeout(() => strip.classList.remove("active"), 1200);
+          };
+          opts.appendChild(btn);
+        });
+      }
+
+      // ADMIT
+      document.getElementById("admit-btn").addEventListener("click", () => {
+        if (selectedPatientIdx === null) return;
+        const pat = PATIENTS[selectedPatientIdx];
+        const prevRoot = heap.length ? heap[0].severity : 0;
+
+        showChallenge(pat);
+        admitPatient(pat);
+        admittedIndices.add(selectedPatientIdx);
+        selectedPatientIdx = null;
+        document.getElementById("admit-btn").disabled = true;
+
+        const newRoot = heap[0];
+        const rootChanged = heap.length > 1 && newRoot.severity > prevRoot;
+        document.getElementById("ep").textContent = "HEAPIFY UP ⬆️";
+        document.getElementById("et").innerHTML =
+          `<b>${pat.emoji} ${pat.name}</b> (severity <span class="hi">${pat.severity}</span>) admitted. Bubble-up: O(log n). ` +
+          (rootChanged
+            ? `New root → <b style="color:#e74c3c">${newRoot.emoji} ${newRoot.name}</b> is now most critical!`
+            : `Root unchanged — ${newRoot.emoji} ${newRoot.name} remains most critical.`);
+
+        drawHeap(heap.length - 1);
+        renderPatients();
+        updateStats();
+        if (admittedIndices.size === PATIENTS.length)
+          setTimeout(() => document.getElementById("treat-btn").click(), 600);
+      });
+
+      // TREAT
+      document.getElementById("treat-btn").addEventListener("click", () => {
+        if (!heap.length) return;
+        const pat = treatTop();
+        treated.push(pat);
+        document.getElementById("ep").textContent = "EXTRACT MAX ⬇️";
+        document.getElementById("et").innerHTML =
+          `<b>${pat.emoji} ${pat.name}</b> (severity <b style="color:#e74c3c">${pat.severity}</b>) is being treated now. Root removed → heapify-down restores heap property in <b>O(log n)</b>.`;
+        drawHeap();
+        renderPatients();
+        renderTreatLog();
+        updateStats();
+        if (treated.length >= 6) setTimeout(showAha, 600);
+      });
+
+      function showAha() {
+        document.getElementById("aha-stats").innerHTML = `
+    <div class="aha-chip"><div class="lbl">Patients Treated</div><div class="val">${treated.length}</div></div>
+    <div class="aha-chip"><div class="lbl">Total Heap Ops</div><div class="val">${heapOps}</div></div>
+    <div class="aha-chip"><div class="lbl">Per Operation</div><div class="val">O(log n)</div></div>
+  `;
+        document.getElementById("aha-insight").innerHTML =
+          `Hospital ERP, emergency dispatch systems, and OS schedulers all use <b>Priority Queues (Binary Heap)</b>. Every admit and treat operation is <b>O(log n)</b>. For 1000 patients in queue — just 10 comparisons to find the most critical. <b>Naïve linear search would scan all 1000 every time.</b>`;
+        document.getElementById("aha").classList.add("active");
+      }
+
+      function doReset() {
+        heap = [];
+        heapOps = 0;
+        treated = [];
+        admittedIndices = new Set();
+        selectedPatientIdx = null;
+        document.getElementById("admit-btn").disabled = true;
+        document.getElementById("ep").textContent = "WAITING";
+        document.getElementById("et").innerHTML =
+          "Admit a patient to insert into the Max Heap.";
+        document.getElementById("chal-strip").classList.remove("active");
+        document.getElementById("heap-svg").innerHTML = "";
+        document.getElementById("treat-log").innerHTML = "";
+        renderPatients();
+        updateStats();
+      }
+
+      renderPatients();
+      updateStats();
+    </script>
+  </body>
+</html>

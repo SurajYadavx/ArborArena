@@ -1,0 +1,859 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>DS Dojo — Story: Timetable AVL</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: #0f0f1a;
+        color: #fff;
+        font-family: "Segoe UI", sans-serif;
+        overflow-x: hidden;
+      }
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 24px;
+        border-bottom: 1px solid #1e1e2e;
+      }
+      .topbar h1 {
+        font-size: 17px;
+      }
+      .topbar h1 span {
+        color: #a78bfa;
+      }
+      .back-btn {
+        background: #1e1e2e;
+        border: none;
+        color: #aaa;
+        padding: 7px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+      }
+      .story-banner {
+        background: linear-gradient(135deg, #0f0f1a, #1a1a2e, #0f0f1a);
+        border-bottom: 1px solid #1e1e2e;
+        padding: 18px 28px;
+      }
+      .story-tag {
+        font-size: 11px;
+        color: #a78bfa;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+      }
+      .story-title {
+        font-size: 24px;
+        font-weight: 800;
+        margin-bottom: 6px;
+      }
+      .story-title span {
+        color: #a78bfa;
+      }
+      .story-desc {
+        font-size: 13px;
+        color: #aaa;
+        line-height: 1.7;
+        max-width: 800px;
+      }
+      .story-desc b {
+        color: #fff;
+      }
+      .main {
+        display: flex;
+        height: calc(100vh - 170px);
+      }
+
+      /* LEFT */
+      .left-panel {
+        width: 340px;
+        border-right: 1px solid #1e1e2e;
+        display: flex;
+        flex-direction: column;
+      }
+      .panel-section {
+        padding: 14px 16px;
+        border-bottom: 1px solid #1e1e2e;
+      }
+      .panel-label {
+        font-size: 11px;
+        color: #555;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 10px;
+      }
+      .subject-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .subject-card {
+        background: #1e1e2e;
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 10px 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        user-select: none;
+      }
+      .subject-card:hover {
+        border-color: #a78bfa;
+      }
+      .subject-card.selected {
+        border-color: #a78bfa;
+        background: #1a1530;
+      }
+      .subject-card.added {
+        border-color: #2ecc71;
+        background: #0a1a0a;
+        cursor: default;
+      }
+      .subject-card.conflict {
+        border-color: #e74c3c;
+        background: #1a0a0a;
+        animation: shake 0.4s;
+      }
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-6px);
+        }
+        75% {
+          transform: translateX(6px);
+        }
+      }
+      .subj-name {
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .subj-slot {
+        font-size: 11px;
+        color: #777;
+        margin-top: 2px;
+      }
+      .subj-slot span {
+        color: #a78bfa;
+      }
+      .btn-add {
+        width: 100%;
+        background: #a78bfa;
+        color: #000;
+        font-weight: 800;
+        border: none;
+        padding: 9px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        margin-top: 10px;
+      }
+      .btn-add:hover {
+        background: #b99ef9;
+      }
+      .btn-add:disabled {
+        background: #333;
+        color: #666;
+        cursor: not-allowed;
+      }
+      .btn-reset-small {
+        width: 100%;
+        background: #1e1e2e;
+        color: #aaa;
+        border: 1px solid #333;
+        padding: 7px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        margin-top: 6px;
+      }
+
+      /* SCHEDULE TABLE */
+      .schedule-wrap {
+        flex: 1;
+        overflow-y: auto;
+        padding: 14px 16px;
+      }
+      .schedule-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+      }
+      .schedule-table th {
+        color: #555;
+        padding: 5px 8px;
+        border-bottom: 1px solid #1e1e2e;
+        text-align: left;
+      }
+      .schedule-table td {
+        padding: 6px 8px;
+        border-bottom: 1px solid #111;
+      }
+      .schedule-table tr.new-row td {
+        background: #1a1530;
+        color: #a78bfa;
+        font-weight: 700;
+      }
+      .schedule-table tr.conflict-row td {
+        background: #1a0a0a;
+        color: #e74c3c;
+      }
+      .slot-badge {
+        display: inline-block;
+        background: #1e1e2e;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        color: #a78bfa;
+      }
+
+      /* RIGHT — AVL TREE */
+      .right-panel {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .explain-bar {
+        padding: 12px 16px;
+        border-bottom: 1px solid #1e1e2e;
+        min-height: 70px;
+      }
+      .explain-phase {
+        font-size: 10px;
+        color: #a78bfa;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+      }
+      .explain-text {
+        font-size: 13px;
+        color: #ccc;
+        line-height: 1.7;
+      }
+      .explain-text b {
+        color: #a78bfa;
+      }
+      .explain-text .hi {
+        color: #ffd700;
+        font-weight: 700;
+      }
+      .tree-wrap {
+        flex: 1;
+        overflow: auto;
+        padding: 10px;
+      }
+      svg#avl-svg {
+        display: block;
+        margin: auto;
+        overflow: visible;
+      }
+      .avl-link {
+        fill: none;
+        stroke: #2a2a3e;
+        stroke-width: 2;
+      }
+      .avl-node circle {
+        stroke-width: 2.5;
+      }
+      .avl-node text {
+        fill: #fff;
+        font-size: 10px;
+        font-weight: bold;
+        text-anchor: middle;
+        dominant-baseline: central;
+      }
+      .avl-node .bf-lbl {
+        fill: #666;
+        font-size: 9px;
+        text-anchor: middle;
+      }
+      .avl-node .slot-lbl {
+        fill: #a78bfa;
+        font-size: 8px;
+        text-anchor: middle;
+      }
+
+      /* CHALLENGE */
+      .challenge-row {
+        padding: 10px 16px;
+        border-top: 1px solid #1e1e2e;
+        display: none;
+      }
+      .challenge-row.active {
+        display: block;
+      }
+      .challenge-title {
+        font-size: 11px;
+        color: #ff9f43;
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+      .c-opts {
+        display: flex;
+        gap: 8px;
+      }
+      .c-opt {
+        background: #1e1e2e;
+        border: 1px solid #333;
+        color: #aaa;
+        padding: 6px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+      }
+      .c-opt:hover {
+        border-color: #a78bfa;
+        color: #a78bfa;
+      }
+      .c-opt.correct {
+        background: #0a1a0a;
+        border-color: #2ecc71;
+        color: #2ecc71;
+      }
+      .c-opt.wrong {
+        background: #1a0a0a;
+        border-color: #e74c3c;
+        color: #e74c3c;
+      }
+
+      /* AHA */
+      .aha-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 15, 26, 0.97);
+        z-index: 200;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 18px;
+        padding: 40px;
+        text-align: center;
+      }
+      .aha-overlay.active {
+        display: flex;
+      }
+      .aha-title {
+        font-size: 26px;
+        font-weight: 800;
+        color: #a78bfa;
+      }
+      .aha-stat-row {
+        display: flex;
+        gap: 18px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .aha-chip {
+        background: #1e1e2e;
+        padding: 14px 24px;
+        border-radius: 10px;
+      }
+      .aha-chip .lbl {
+        font-size: 11px;
+        color: #555;
+        margin-bottom: 4px;
+      }
+      .aha-chip .val {
+        font-size: 22px;
+        font-weight: 800;
+        color: #a78bfa;
+      }
+      .aha-insight {
+        font-size: 13px;
+        color: #aaa;
+        max-width: 580px;
+        line-height: 1.8;
+      }
+      .aha-insight b {
+        color: #fff;
+      }
+      .btn-primary {
+        background: #a78bfa;
+        color: #000;
+        font-weight: 800;
+        border: none;
+        padding: 9px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      .btn-secondary {
+        background: #1e1e2e;
+        color: #aaa;
+        border: 1px solid #333;
+        padding: 9px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="topbar">
+      <h1>📅 Story Mode — <span>Timetable Conflict Detector</span></h1>
+      <button class="back-btn" onclick="window.location.href = 'story_a.html'">
+        ← Story A
+      </button>
+    </div>
+
+    <div class="story-banner">
+      <div class="story-tag">📖 Story B — AVL Tree</div>
+      <div class="story-title">
+        Build your <span>clash-free timetable</span>.
+      </div>
+      <div class="story-desc">
+        You're registering subjects for Semester 4. Each subject has a
+        <b>time slot (key)</b>. The system needs to instantly detect if two
+        subjects clash. <b>AVL Tree</b> inserts each slot in O(log n) and
+        detects conflicts in milliseconds — watch it balance itself as you build
+        your schedule.
+      </div>
+    </div>
+
+    <div class="main">
+      <!-- LEFT -->
+      <div class="left-panel">
+        <div class="panel-section">
+          <div class="panel-label">📚 Available Subjects</div>
+          <div class="subject-grid" id="subject-grid"></div>
+          <button class="btn-add" id="btn-add" disabled>
+            + Add Selected Subject
+          </button>
+          <button class="btn-reset-small" onclick="doReset()">
+            ↺ Reset Schedule
+          </button>
+        </div>
+        <div class="schedule-wrap">
+          <div class="panel-label">✅ Your Schedule</div>
+          <table class="schedule-table">
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th>Slot</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="sched-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="right-panel">
+        <div class="explain-bar">
+          <div class="explain-phase" id="ep">WAITING</div>
+          <div class="explain-text" id="et">
+            Click any subject on the left and press <b>Add</b> to insert it into
+            the AVL tree.
+          </div>
+        </div>
+        <div class="challenge-row" id="chal-row">
+          <div class="challenge-title">🎯 Predict the rotation!</div>
+          <div
+            style="font-size: 13px; color: #fff; margin-bottom: 8px"
+            id="chal-q"
+          ></div>
+          <div class="c-opts" id="chal-opts"></div>
+        </div>
+        <div class="tree-wrap">
+          <svg
+            id="avl-svg"
+            width="900"
+            height="500"
+            viewBox="0 0 900 480"
+          ></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- AHA -->
+    <div class="aha-overlay" id="aha">
+      <div class="aha-title">🎓 Timetable Complete!</div>
+      <div id="aha-path" style="font-size: 16px; color: #ccc"></div>
+      <div class="aha-stat-row" id="aha-stats"></div>
+      <div class="aha-insight" id="aha-insight"></div>
+      <div style="display: flex; gap: 12px">
+        <button
+          class="btn-primary"
+          onclick="
+            document.getElementById('aha').classList.remove('active');
+            doReset();
+          "
+        >
+          Try Again
+        </button>
+        <button
+          class="btn-secondary"
+          onclick="window.location.href = 'story_c.html'"
+        >
+          Next: OPD Queue →
+        </button>
+      </div>
+    </div>
+
+    <script>
+      const SUBJECTS = [
+        { name: "DBMS", code: "CS301", slot: 9, day: "Mon/Wed/Fri" },
+        { name: "Data Science", code: "CS302", slot: 11, day: "Tue/Thu" },
+        { name: "Java OOP", code: "CS303", slot: 9, day: "Tue/Thu" }, // clashes with DBMS if same slot
+        { name: "IoT", code: "CS304", slot: 14, day: "Mon/Wed" },
+        { name: "SAT", code: "CS305", slot: 11, day: "Mon/Fri" }, // clashes with Data Science
+        { name: "TFWS", code: "CS306", slot: 16, day: "Wed/Fri" },
+        { name: "Networks", code: "CS307", slot: 13, day: "Tue/Thu" },
+        { name: "OS", code: "CS308", slot: 14, day: "Tue/Thu" }, // clashes with IoT
+      ];
+
+      // AVL
+      let avlRoot = null;
+      let totalRotations = 0;
+      let addedSubjects = [];
+      let selectedIdx = null;
+
+      function avlH(n) {
+        return n ? n.h : 0;
+      }
+      function avlBF(n) {
+        return n ? avlH(n.left) - avlH(n.right) : 0;
+      }
+      function avlUH(n) {
+        if (n) n.h = 1 + Math.max(avlH(n.left), avlH(n.right));
+      }
+
+      function rr(y) {
+        let x = y.left,
+          T = x.right;
+        x.right = y;
+        y.left = T;
+        avlUH(y);
+        avlUH(x);
+        return x;
+      }
+      function rl(x) {
+        let y = x.right,
+          T = y.left;
+        y.left = x;
+        x.right = T;
+        avlUH(x);
+        avlUH(y);
+        return y;
+      }
+
+      let lastRotationType = "none";
+      let lastRotationNode = -1;
+
+      function rebal(n) {
+        avlUH(n);
+        let b = avlBF(n);
+        if (b > 1 && avlBF(n.left) >= 0) {
+          lastRotationType = "LL (Right Rotation)";
+          lastRotationNode = n.data;
+          totalRotations++;
+          return rr(n);
+        }
+        if (b > 1 && avlBF(n.left) < 0) {
+          lastRotationType = "LR (Left-Right Rotation)";
+          lastRotationNode = n.data;
+          totalRotations++;
+          n.left = rl(n.left);
+          return rr(n);
+        }
+        if (b < -1 && avlBF(n.right) <= 0) {
+          lastRotationType = "RR (Left Rotation)";
+          lastRotationNode = n.data;
+          totalRotations++;
+          return rl(n);
+        }
+        if (b < -1 && avlBF(n.right) > 0) {
+          lastRotationType = "RL (Right-Left Rotation)";
+          lastRotationNode = n.data;
+          totalRotations++;
+          n.right = rr(n.right);
+          return rl(n);
+        }
+        return n;
+      }
+
+      function avlSearch(n, slot) {
+        if (!n) return false;
+        if (slot === n.data) return true;
+        return slot < n.data
+          ? avlSearch(n.left, slot)
+          : avlSearch(n.right, slot);
+      }
+
+      function avlInsert(n, val, subj) {
+        if (!n) return { data: val, subj, left: null, right: null, h: 1 };
+        if (val < n.data) n.left = avlInsert(n.left, val, subj);
+        else if (val > n.data) n.right = avlInsert(n.right, val, subj);
+        else return n;
+        return rebal(n);
+      }
+
+      // RENDER SUBJECTS
+      function renderSubjectGrid() {
+        const grid = document.getElementById("subject-grid");
+        grid.innerHTML = "";
+        SUBJECTS.forEach((s, i) => {
+          const div = document.createElement("div");
+          const isAdded = addedSubjects.some((a) => a.idx === i);
+          div.className = "subject-card" + (isAdded ? " added" : "");
+          div.innerHTML = `<div class="subj-name">${s.name} <small style="color:#555">${s.code}</small></div>
+      <div class="subj-slot">Slot <span>${s.slot}:00</span> &nbsp;•&nbsp; ${s.day}</div>`;
+          if (!isAdded) {
+            div.onclick = () => {
+              document
+                .querySelectorAll(".subject-card")
+                .forEach((c) => c.classList.remove("selected"));
+              div.classList.add("selected");
+              selectedIdx = i;
+              document.getElementById("btn-add").disabled = false;
+            };
+          }
+          grid.appendChild(div);
+        });
+      }
+
+      // SCHEDULE TABLE
+      function renderScheduleTable() {
+        const tbody = document.getElementById("sched-tbody");
+        tbody.innerHTML = "";
+        addedSubjects.forEach((a, i) => {
+          const tr = document.createElement("tr");
+          tr.className = a.conflict
+            ? "conflict-row"
+            : i === addedSubjects.length - 1
+              ? "new-row"
+              : "";
+          tr.innerHTML = `<td>${a.name}</td><td><span class="slot-badge">${a.slot}:00</span></td>
+      <td style="font-size:11px;">${a.conflict ? "❌ Clash with " + a.clashWith : "✅ Added"}</td>`;
+          tbody.appendChild(tr);
+        });
+      }
+
+      // D3 AVL DRAW
+      function toHier(n) {
+        if (!n) return null;
+        const o = { name: n.data, subj: n.subj, bf: avlBF(n), children: [] };
+        if (n.left) o.children.push(toHier(n.left));
+        if (n.right) o.children.push(toHier(n.right));
+        if (!o.children.length) delete o.children;
+        return o;
+      }
+
+      function drawAVL(highlightVal = -1, isConflict = false) {
+        const svgEl = document.getElementById("avl-svg");
+        while (svgEl.firstChild) svgEl.removeChild(svgEl.firstChild);
+        if (!avlRoot) return;
+        const hier = toHier(avlRoot);
+        const root = d3.hierarchy(hier);
+        d3.tree().size([860, 400])(root);
+
+        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        g.setAttribute("transform", "translate(20,40)");
+        svgEl.appendChild(g);
+
+        // links
+        root.links().forEach((link) => {
+          const path = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "path",
+          );
+          path.setAttribute("class", "avl-link");
+          const sx = link.source.x,
+            sy = link.source.y,
+            tx = link.target.x,
+            ty = link.target.y;
+          path.setAttribute(
+            "d",
+            `M${sx},${sy}C${sx},${(sy + ty) / 2} ${tx},${(sy + ty) / 2} ${tx},${ty}`,
+          );
+          g.appendChild(path);
+        });
+
+        // nodes
+        root.descendants().forEach((d) => {
+          const ng = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "g",
+          );
+          ng.setAttribute("class", "avl-node");
+          ng.setAttribute("transform", `translate(${d.x},${d.y})`);
+
+          const circ = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "circle",
+          );
+          circ.setAttribute("r", "22");
+          const isHL = d.data.name === highlightVal;
+          circ.setAttribute(
+            "fill",
+            isHL && isConflict ? "#3a0a0a" : isHL ? "#1a1535" : "#1e1e2e",
+          );
+          circ.setAttribute(
+            "stroke",
+            isHL && isConflict ? "#e74c3c" : isHL ? "#a78bfa" : "#444",
+          );
+          ng.appendChild(circ);
+
+          const txt = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "text",
+          );
+          txt.textContent = d.data.name + ":00";
+          txt.setAttribute("y", "0");
+          ng.appendChild(txt);
+
+          const bflbl = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "text",
+          );
+          bflbl.setAttribute("class", "bf-lbl");
+          bflbl.setAttribute("y", "31");
+          bflbl.textContent = "bf:" + (d.data.bf || 0);
+          ng.appendChild(bflbl);
+
+          const slbl = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "text",
+          );
+          slbl.setAttribute("class", "slot-lbl");
+          slbl.setAttribute("y", "-28");
+          slbl.textContent = d.data.subj ? d.data.subj.name : "";
+          ng.appendChild(slbl);
+
+          g.appendChild(ng);
+        });
+      }
+
+      // ADD SUBJECT
+      function addSubject() {
+        if (selectedIdx === null) return;
+        const s = SUBJECTS[selectedIdx];
+        const conflict = avlSearch(avlRoot, s.slot);
+        document.getElementById("btn-add").disabled = true;
+
+        if (conflict) {
+          const clashSubj = addedSubjects.find((a) => a.slot === s.slot);
+          addedSubjects.push({
+            ...s,
+            idx: selectedIdx,
+            conflict: true,
+            clashWith: clashSubj ? clashSubj.name : "another subject",
+          });
+          document.getElementById("ep").textContent = "CONFLICT DETECTED ❌";
+          document.getElementById("et").innerHTML =
+            `<b style="color:#e74c3c">CLASH!</b> Slot <b>${s.slot}:00</b> is already taken by <b>${clashSubj ? clashSubj.name : "another subject"}</b>. AVL found this in <b>O(log n)</b> — just ${Math.ceil(Math.log2(addedSubjects.length + 1))} comparisons!`;
+          drawAVL(s.slot, true);
+        } else {
+          lastRotationType = "none";
+          lastRotationNode = -1;
+
+          // check if rotation will happen (simulate)
+          const prevRot = totalRotations;
+          avlRoot = avlInsert(avlRoot, s.slot, s);
+          addedSubjects.push({ ...s, idx: selectedIdx, conflict: false });
+          const rotHappened = totalRotations > prevRot;
+
+          document.getElementById("ep").textContent = rotHappened
+            ? "AVL ROTATION ⚖️"
+            : "NODE INSERTED ✅";
+          document.getElementById("et").innerHTML = rotHappened
+            ? `Node <b>${s.slot}:00</b> (${s.name}) inserted → imbalance detected → <b style="color:#ffd700">${lastRotationType}</b> applied at node <b>${lastRotationNode}:00</b>. Tree stays balanced!`
+            : `Node <b>${s.slot}:00</b> (${s.name}) inserted. Balance factors within [-1,+1] — no rotation needed. Height: <b>${avlH(avlRoot)}</b>`;
+          drawAVL(s.slot, false);
+
+          if (rotHappened) showChallenge(lastRotationType);
+        }
+
+        renderSubjectGrid();
+        renderScheduleTable();
+        selectedIdx = null;
+
+        // check if all added
+        const nonConflict = addedSubjects.filter((a) => !a.conflict);
+        if (nonConflict.length >= 5) setTimeout(showAha, 800);
+      }
+
+      // CHALLENGE
+      function showChallenge(rotType) {
+        const row = document.getElementById("chal-row");
+        row.classList.add("active");
+        document.getElementById("chal-q").textContent =
+          `What rotation just happened at the imbalanced node?`;
+        const opts = document.getElementById("chal-opts");
+        opts.innerHTML = "";
+        const choices = [
+          "LL (Right Rotation)",
+          "LR (Left-Right Rotation)",
+          "RR (Left Rotation)",
+          "RL (Right-Left Rotation)",
+        ];
+        choices.forEach((c) => {
+          const btn = document.createElement("button");
+          btn.className = "c-opt";
+          btn.textContent = c;
+          btn.onclick = () => {
+            document.querySelectorAll(".c-opt").forEach((b) => {
+              if (b.textContent === rotType) b.classList.add("correct");
+            });
+            if (c === rotType) btn.classList.add("correct");
+            else btn.classList.add("wrong");
+            setTimeout(() => row.classList.remove("active"), 1200);
+          };
+          opts.appendChild(btn);
+        });
+      }
+
+      // AHA
+      function showAha() {
+        const added = addedSubjects.filter((a) => !a.conflict).length;
+        const conflicts = addedSubjects.filter((a) => a.conflict).length;
+        document.getElementById("aha-path").textContent =
+          `${added} subjects scheduled • ${conflicts} conflicts detected`;
+        document.getElementById("aha-stats").innerHTML = `
+    <div class="aha-chip"><div class="lbl">AVL Height</div><div class="val">${avlH(avlRoot)}</div></div>
+    <div class="aha-chip"><div class="lbl">Rotations Done</div><div class="val">${totalRotations}</div></div>
+    <div class="aha-chip"><div class="lbl">Conflict Checks</div><div class="val">O(log n)</div></div>
+  `;
+        document.getElementById("aha-insight").innerHTML =
+          `University timetable systems use <b>balanced BSTs (AVL/RB)</b> internally to store time slots and detect clashes. Each conflict check is <b>O(log n)</b> — for 1000 courses, that's just 10 comparisons. A brute-force array scan would take 1000. <b>This is live in college ERP systems right now.</b>`;
+        document.getElementById("aha").classList.add("active");
+      }
+
+      function doReset() {
+        avlRoot = null;
+        totalRotations = 0;
+        addedSubjects = [];
+        selectedIdx = null;
+        document.getElementById("btn-add").disabled = true;
+        document.getElementById("ep").textContent = "WAITING";
+        document.getElementById("et").innerHTML =
+          "Click any subject on the left and press <b>Add</b>.";
+        document.getElementById("chal-row").classList.remove("active");
+        document.getElementById("avl-svg").innerHTML = "";
+        renderSubjectGrid();
+        renderScheduleTable();
+      }
+
+      // LOAD D3
+      const d3Script = document.createElement("script");
+      d3Script.src = "https://d3js.org/d3.v7.min.js";
+      d3Script.onload = () => {
+        renderSubjectGrid();
+        renderScheduleTable();
+      };
+      document.head.appendChild(d3Script);
+
+      document.getElementById("btn-add").onclick = addSubject;
+    </script>
+  </body>
+</html>
