@@ -67,3 +67,22 @@ int avl_get_height() { return avl_height(avl_root); }
 
 EMSCRIPTEN_KEEPALIVE
 void avl_reset() { avl_root = NULL; }
+
+#include "rbtree.h"
+
+static RBNode* rb_root = NULL;
+
+EMSCRIPTEN_KEEPALIVE
+void rb_insert_js(int value) { rb_root = rb_insert(rb_root, value); }
+
+EMSCRIPTEN_KEEPALIVE
+int rb_height_js()       { return rb_height(rb_root); }
+
+EMSCRIPTEN_KEEPALIVE
+int rb_black_height_js() { return rb_black_height(rb_root); }
+
+EMSCRIPTEN_KEEPALIVE
+int rb_count_js()        { return rb_count(rb_root); }
+
+EMSCRIPTEN_KEEPALIVE
+void rb_reset_js()       { rb_root = NULL; }
