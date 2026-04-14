@@ -1,576 +1,844 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>DS Dojo — Story: Hash Table Lookup</title>
-    <style>
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-      body {
-        background: #0f0f1a;
-        color: #fff;
-        font-family: "Segoe UI", sans-serif;
-        overflow-x: hidden;
-      }
-      .topbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 24px;
-        border-bottom: 1px solid #1e1e2e;
-      }
-      .topbar h1 {
-        font-size: 17px;
-      }
-      .topbar h1 span {
-        color: #00e5ff;
-      }
-      .back-btn {
-        background: #1e1e2e;
-        border: none;
-        color: #aaa;
-        padding: 7px 14px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 13px;
-      }
-      .story-banner {
-        background: linear-gradient(135deg, #0f0f1a, #1a1a2e, #0f0f1a);
-        border-bottom: 1px solid #1e1e2e;
-        padding: 18px 28px;
-      }
-      .story-tag {
-        font-size: 11px;
-        color: #00e5ff;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        margin-bottom: 6px;
-      }
-      .story-title {
-        font-size: 24px;
-        font-weight: 800;
-        margin-bottom: 6px;
-      }
-      .story-title span {
-        color: #00e5ff;
-      }
-      .story-desc {
-        font-size: 13px;
-        color: #aaa;
-        line-height: 1.7;
-        max-width: 800px;
-      }
-      .story-desc b {
-        color: #fff;
-      }
-      .main {
-        display: flex;
-        height: calc(100vh - 165px);
-      }
 
-      /* LEFT */
-      .left-col {
-        width: 340px;
-        border-right: 1px solid #1e1e2e;
-        display: flex;
-        flex-direction: column;
-      }
-      .panel-label {
-        padding: 10px 14px;
-        font-size: 11px;
-        color: #555;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        border-bottom: 1px solid #1e1e2e;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ARBOR ARENA — Story: Hash Table Lookup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-      /* INSERT */
-      .insert-section {
-        padding: 14px;
-        border-bottom: 1px solid #1e1e2e;
-      }
-      .input-row {
-        display: flex;
-        gap: 8px;
-        margin-bottom: 8px;
-      }
-      input.roll-input {
-        flex: 1;
-        background: #1e1e2e;
-        border: 1px solid #333;
-        color: #fff;
-        padding: 8px 10px;
-        border-radius: 6px;
-        font-size: 13px;
-        font-family: monospace;
-      }
-      input.roll-input:focus {
-        outline: none;
-        border-color: #00e5ff;
-      }
-      input.name-input {
-        flex: 1.5;
-        background: #1e1e2e;
-        border: 1px solid #333;
-        color: #fff;
-        padding: 8px 10px;
-        border-radius: 6px;
-        font-size: 13px;
-      }
-      input.name-input:focus {
-        outline: none;
-        border-color: #00e5ff;
-      }
-      .btn-insert {
-        background: #00e5ff;
-        color: #000;
-        font-weight: 800;
-        border: none;
-        padding: 8px 14px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 13px;
-      }
-      .btn-insert:hover {
-        background: #33eeff;
-      }
-      .quick-label {
-        font-size: 11px;
-        color: #555;
-        margin-bottom: 6px;
-      }
-      .quick-chips {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-      }
-      .quick-chip {
-        background: #1e1e2e;
-        border: 1px solid #333;
-        color: #aaa;
-        padding: 4px 10px;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 11px;
-        font-family: monospace;
-      }
-      .quick-chip:hover {
-        border-color: #00e5ff;
-        color: #00e5ff;
-      }
+    body {
+      background: #0d0d1a;
+      color: #fff;
+      font-family: "Inter", "Segoe UI", sans-serif;
+      overflow-x: hidden;
+    }
 
-      /* SEARCH */
-      .search-section {
-        padding: 14px;
-        border-bottom: 1px solid #1e1e2e;
-      }
-      .search-row {
-        display: flex;
-        gap: 8px;
-      }
-      .btn-search {
-        background: #1e1e2e;
-        color: #00e5ff;
-        border: 1px solid #00e5ff;
-        padding: 8px 14px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 13px;
-      }
-      .search-result {
-        margin-top: 10px;
-        font-size: 13px;
-        min-height: 36px;
-      }
-      .sr-found {
-        color: #2ecc71;
-      }
-      .sr-notfound {
-        color: #e74c3c;
-      }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+      height: 48px;
+      background: #0a0a14;
+      border-bottom: 1px solid #1e1e2e;
+      position: sticky;
+      top: 0;
+      z-index: 999;
+      flex-shrink: 0;
+    }
 
-      /* STUDENT LIST */
-      .student-scroll {
-        flex: 1;
-        overflow-y: auto;
-        padding: 10px;
-      }
-      .student-item {
-        background: #1e1e2e;
-        border-radius: 6px;
-        padding: 8px 10px;
-        margin-bottom: 5px;
-        font-size: 12px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-      .student-item .sroll {
-        font-family: monospace;
-        color: #00e5ff;
-      }
-      .student-item .sname {
-        color: #ccc;
-      }
-      .student-item .sbucket {
-        background: #0a1a1a;
-        color: #00e5ff;
-        border-radius: 4px;
-        padding: 2px 8px;
-        font-size: 11px;
-      }
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-      /* MID — HASH ANIMATION */
-      .mid-col {
-        flex: 1;
-        border-right: 1px solid #1e1e2e;
-        display: flex;
-        flex-direction: column;
-      }
-      .explain-bar {
-        padding: 12px 14px;
-        border-bottom: 1px solid #1e1e2e;
-        min-height: 80px;
-      }
-      .ep {
-        font-size: 10px;
-        color: #00e5ff;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        margin-bottom: 4px;
-      }
-      .et {
-        font-size: 13px;
-        color: #ccc;
-        line-height: 1.7;
-      }
-      .et b {
-        color: #00e5ff;
-      }
-      .et .hi {
-        color: #ffd700;
-        font-weight: 700;
-      }
+    .topbar-logo {
+      font-size: 15px;
+      font-weight: 800;
+      text-decoration: none;
+      color: #fff;
+      white-space: nowrap;
+    }
 
-      /* HASH STEPS */
-      .hash-steps {
-        padding: 12px 14px;
-        border-bottom: 1px solid #1e1e2e;
-      }
-      .hash-step-label {
-        font-size: 11px;
-        color: #555;
-        margin-bottom: 8px;
-      }
-      .hash-formula {
-        font-size: 13px;
-        font-family: monospace;
-        background: #0a0a14;
-        border: 1px solid #1e1e2e;
-        border-radius: 6px;
-        padding: 10px 14px;
-        margin-bottom: 8px;
-        color: #aaa;
-      }
-      .hash-formula .hl {
-        color: #00e5ff;
-        font-weight: 700;
-      }
-      .hash-formula .res {
-        color: #ffd700;
-        font-weight: 700;
-      }
-      .char-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 4px;
-        margin-bottom: 8px;
-      }
-      .char-box {
-        background: #1e1e2e;
-        border: 1px solid #333;
-        border-radius: 4px;
-        padding: 5px 8px;
-        font-family: monospace;
-        font-size: 13px;
-        text-align: center;
-        min-width: 32px;
-        transition: all 0.3s;
-      }
-      .char-box.active {
-        background: #001a1a;
-        border-color: #00e5ff;
-        color: #00e5ff;
-        transform: scale(1.15);
-      }
-      .char-box .cv {
-        font-size: 10px;
-        color: #555;
-        display: block;
-      }
+    .topbar-logo span {
+      color: #ffd700;
+    }
 
-      /* HASH TABLE */
-      .hash-table-wrap {
-        flex: 1;
-        overflow-y: auto;
-        padding: 12px 14px;
-      }
-      .ht-label {
-        font-size: 11px;
-        color: #555;
-        margin-bottom: 8px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-      }
-      .ht-bucket {
-        display: flex;
-        align-items: flex-start;
-        gap: 8px;
-        margin-bottom: 6px;
-      }
-      .ht-idx {
-        background: #0a0a14;
-        border: 1px solid #1e1e2e;
-        color: #555;
-        font-family: monospace;
-        font-size: 11px;
-        padding: 5px 8px;
-        border-radius: 4px;
-        min-width: 28px;
-        text-align: center;
-      }
-      .ht-chain {
-        display: flex;
-        gap: 6px;
-        flex-wrap: wrap;
-        align-items: center;
-      }
-      .ht-entry {
-        background: #1e1e2e;
-        border: 1px solid #333;
-        border-radius: 6px;
-        padding: 5px 10px;
-        font-size: 11px;
-        font-family: monospace;
-        color: #aaa;
-        transition: all 0.3s;
-      }
-      .ht-entry.new-entry {
-        border-color: #00e5ff;
-        background: #001a1a;
-        color: #00e5ff;
-      }
-      .ht-entry.collision {
-        border-color: #ff9f43;
-        background: #1a1000;
-        color: #ff9f43;
-      }
-      .ht-arrow {
-        color: #444;
-        font-size: 14px;
-      }
-      .ht-bucket.active-bucket .ht-idx {
-        border-color: #00e5ff;
-        color: #00e5ff;
-        background: #001a1a;
-      }
+    .topbar-crumb {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      color: #555;
+    }
 
-      /* RIGHT — CHALLENGE + STATS */
-      .right-col {
-        width: 260px;
-        display: flex;
-        flex-direction: column;
-      }
-      .chal-section {
-        padding: 14px;
-        border-bottom: 1px solid #1e1e2e;
-      }
-      .chal-title {
-        font-size: 12px;
-        color: #ffd700;
-        font-weight: 700;
-        margin-bottom: 8px;
-      }
-      .chal-q {
-        font-size: 13px;
-        color: #fff;
-        margin-bottom: 10px;
-        line-height: 1.6;
-      }
-      .c-opts {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-      }
-      .c-opt {
-        background: #1e1e2e;
-        border: 1px solid #333;
-        color: #aaa;
-        padding: 7px 12px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 13px;
-        text-align: left;
-      }
-      .c-opt:hover {
-        border-color: #ffd700;
-        color: #ffd700;
-      }
-      .c-opt.correct {
-        background: #0a1a0a;
-        border-color: #2ecc71;
-        color: #2ecc71;
-      }
-      .c-opt.wrong {
-        background: #1a0a0a;
-        border-color: #e74c3c;
-        color: #e74c3c;
-      }
-      .chal-hidden {
-        color: #555;
-        font-size: 12px;
-        font-style: italic;
-      }
-      .stats-section {
-        flex: 1;
-        padding: 14px;
-      }
-      .stat-row {
-        display: flex;
-        justify-content: space-between;
-        font-size: 12px;
-        margin-bottom: 8px;
-        padding-bottom: 8px;
-        border-bottom: 1px solid #111;
-      }
-      .stat-row .k {
-        color: #555;
-      }
-      .stat-row .v {
-        color: #ffd700;
-        font-weight: 700;
-      }
+    .topbar-crumb a {
+      color: #666;
+      text-decoration: none;
+      padding: 3px 7px;
+      border-radius: 4px;
+      transition:
+        color 0.18s,
+        background 0.18s;
+    }
 
-      /* AHA */
-      .aha-overlay {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(15, 15, 26, 0.97);
-        z-index: 200;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-        gap: 18px;
-        padding: 40px;
-        text-align: center;
-      }
-      .aha-overlay.active {
-        display: flex;
-      }
-      .aha-title {
-        font-size: 26px;
-        font-weight: 800;
-        color: #00e5ff;
-      }
-      .aha-stat-row {
-        display: flex;
-        gap: 16px;
-        justify-content: center;
-        flex-wrap: wrap;
-      }
-      .aha-chip {
-        background: #1e1e2e;
-        padding: 14px 22px;
-        border-radius: 10px;
-      }
-      .aha-chip .lbl {
-        font-size: 11px;
-        color: #555;
-        margin-bottom: 4px;
-      }
-      .aha-chip .val {
-        font-size: 22px;
-        font-weight: 800;
-        color: #00e5ff;
-      }
-      .aha-insight {
-        font-size: 13px;
-        color: #aaa;
-        max-width: 580px;
-        line-height: 1.8;
-      }
-      .aha-insight b {
-        color: #fff;
-      }
-      .btn-primary {
-        background: #00e5ff;
-        color: #000;
-        font-weight: 800;
-        border: none;
-        padding: 9px 20px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 14px;
-      }
-      .btn-secondary {
-        background: #1e1e2e;
-        color: #aaa;
-        border: 1px solid #333;
-        padding: 9px 16px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 13px;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="topbar">
-      <h1>🎓 Story Mode — <span>Student ID Lookup System</span></h1>
-      <button class="back-btn" onclick="window.location.href = 'story_c.html'">
-        ← Story C
+    .topbar-crumb a:hover {
+      color: #fff;
+      background: #1e1e2e;
+    }
+
+    .topbar-crumb .crumb-sep {
+      color: #333;
+    }
+
+    .topbar-crumb .crumb-active {
+      color: #00e5ff;
+      font-weight: 600;
+      padding: 3px 7px;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .back-btn {
+      background: #1e1e2e;
+      border: none;
+      color: #aaa;
+      padding: 5px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-family: inherit;
+      text-decoration: none;
+      transition:
+        background 0.18s,
+        color 0.18s;
+    }
+
+    .back-btn:hover {
+      background: #2a2a3e;
+      color: #fff;
+    }
+
+    /* ── PHASE 2: DUAL MODE ── */
+    :root {
+      --bg: #0d0d1a;
+      --bg-nav: #0a0a14;
+      --bg-surface: #111122;
+      --bg-card: #131326;
+      --bg-card-hover: #191932;
+      --border: #1a1a30;
+      --border-card: #24244a;
+      --text: #dde0f0;
+      --text-muted: #8888a8;
+      --text-dim: #44445a;
+      --shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
+    }
+
+    body.light-mode {
+      --bg: #f3f3fa;
+      --bg-nav: #ffffff;
+      --bg-surface: #ffffff;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f0f8ff;
+      --border: #e0e0ee;
+      --border-card: #d0d0ea;
+      --text: #1a1a2e;
+      --text-muted: #666688;
+      --text-dim: #aaaacc;
+      --shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      background-attachment: fixed;
+    }
+
+    .topbar {
+      background: var(--bg-nav) !important;
+      border-color: var(--border) !important;
+    }
+
+    .topbar-logo {
+      color: var(--text) !important;
+    }
+
+    .topbar-crumb a {
+      color: var(--text-muted) !important;
+    }
+
+    .back-btn {
+      background: var(--bg-card) !important;
+      color: var(--text-muted) !important;
+      border: 1px solid var(--border-card) !important;
+      font-family: "Inter", sans-serif;
+      font-weight: 600;
+    }
+
+    .back-btn:hover {
+      background: var(--bg-card-hover) !important;
+      color: var(--text) !important;
+    }
+
+    #theme-toggle {
+      background: none;
+      border: 1px solid var(--border-card);
+      color: var(--text-muted);
+      padding: 3px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1.6;
+      transition: all 0.18s;
+      margin-left: 2px;
+      font-family: inherit;
+    }
+
+    #theme-toggle:hover {
+      border-color: var(--text-muted);
+      color: var(--text);
+    }
+
+    .story-banner {
+      background: var(--bg-nav) !important;
+      border-color: var(--border) !important;
+    }
+
+    .story-title {
+      color: var(--text) !important;
+    }
+
+    .story-desc {
+      color: var(--text-muted) !important;
+    }
+
+    .main {
+      background: var(--bg) !important;
+    }
+
+    .panel {
+      background: var(--bg-surface) !important;
+      border: 1px solid var(--border) !important;
+      border-radius: 10px !important;
+      box-shadow: var(--shadow) !important;
+    }
+
+    .panel-title {
+      color: var(--text) !important;
+      border-color: var(--border) !important;
+    }
+
+    .log-box {
+      background: var(--bg-card) !important;
+      border-color: var(--border-card) !important;
+      color: var(--text-muted) !important;
+    }
+
+    .story-banner {
+      background: linear-gradient(135deg, #0f0f1a, #1a1a2e, #0f0f1a);
+      border-bottom: 1px solid #1e1e2e;
+      padding: 18px 28px;
+    }
+
+    .story-tag {
+      font-size: 11px;
+      color: #00e5ff;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .story-title {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .story-title span {
+      color: #00e5ff;
+    }
+
+    .story-desc {
+      font-size: 13px;
+      color: #aaa;
+      line-height: 1.7;
+      max-width: 800px;
+    }
+
+    .story-desc b {
+      color: #fff;
+    }
+
+    .main {
+      display: flex;
+      height: calc(100vh - 165px);
+    }
+
+    /* LEFT */
+    .left-col {
+      width: 340px;
+      border-right: 1px solid #1e1e2e;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-label {
+      padding: 10px 14px;
+      font-size: 11px;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 1px solid #1e1e2e;
+    }
+
+    /* INSERT */
+    .insert-section {
+      padding: 14px;
+      border-bottom: 1px solid #1e1e2e;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    input.roll-input {
+      flex: 1;
+      background: #1e1e2e;
+      border: 1px solid #333;
+      color: #fff;
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: monospace;
+    }
+
+    input.roll-input:focus {
+      outline: none;
+      border-color: #00e5ff;
+    }
+
+    input.name-input {
+      flex: 1.5;
+      background: #1e1e2e;
+      border: 1px solid #333;
+      color: #fff;
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    input.name-input:focus {
+      outline: none;
+      border-color: #00e5ff;
+    }
+
+    .btn-insert {
+      background: #00e5ff;
+      color: #000;
+      font-weight: 800;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .btn-insert:hover {
+      background: #33eeff;
+    }
+
+    .quick-label {
+      font-size: 11px;
+      color: #555;
+      margin-bottom: 6px;
+    }
+
+    .quick-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .quick-chip {
+      background: #1e1e2e;
+      border: 1px solid #333;
+      color: #aaa;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      font-family: monospace;
+    }
+
+    .quick-chip:hover {
+      border-color: #00e5ff;
+      color: #00e5ff;
+    }
+
+    /* SEARCH */
+    .search-section {
+      padding: 14px;
+      border-bottom: 1px solid #1e1e2e;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-search {
+      background: #1e1e2e;
+      color: #00e5ff;
+      border: 1px solid #00e5ff;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .search-result {
+      margin-top: 10px;
+      font-size: 13px;
+      min-height: 36px;
+    }
+
+    .sr-found {
+      color: #2ecc71;
+    }
+
+    .sr-notfound {
+      color: #e74c3c;
+    }
+
+    /* STUDENT LIST */
+    .student-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+    }
+
+    .student-item {
+      background: #1e1e2e;
+      border-radius: 6px;
+      padding: 8px 10px;
+      margin-bottom: 5px;
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .student-item .sroll {
+      font-family: monospace;
+      color: #00e5ff;
+    }
+
+    .student-item .sname {
+      color: #ccc;
+    }
+
+    .student-item .sbucket {
+      background: #0a1a1a;
+      color: #00e5ff;
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 11px;
+    }
+
+    /* MID — HASH ANIMATION */
+    .mid-col {
+      flex: 1;
+      border-right: 1px solid #1e1e2e;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .explain-bar {
+      padding: 12px 14px;
+      border-bottom: 1px solid #1e1e2e;
+      min-height: 80px;
+    }
+
+    .ep {
+      font-size: 10px;
+      color: #00e5ff;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .et {
+      font-size: 13px;
+      color: #ccc;
+      line-height: 1.7;
+    }
+
+    .et b {
+      color: #00e5ff;
+    }
+
+    .et .hi {
+      color: #ffd700;
+      font-weight: 700;
+    }
+
+    /* HASH STEPS */
+    .hash-steps {
+      padding: 12px 14px;
+      border-bottom: 1px solid #1e1e2e;
+    }
+
+    .hash-step-label {
+      font-size: 11px;
+      color: #555;
+      margin-bottom: 8px;
+    }
+
+    .hash-formula {
+      font-size: 13px;
+      font-family: monospace;
+      background: #0a0a14;
+      border: 1px solid #1e1e2e;
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      color: #aaa;
+    }
+
+    .hash-formula .hl {
+      color: #00e5ff;
+      font-weight: 700;
+    }
+
+    .hash-formula .res {
+      color: #ffd700;
+      font-weight: 700;
+    }
+
+    .char-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+
+    .char-box {
+      background: #1e1e2e;
+      border: 1px solid #333;
+      border-radius: 4px;
+      padding: 5px 8px;
+      font-family: monospace;
+      font-size: 13px;
+      text-align: center;
+      min-width: 32px;
+      transition: all 0.3s;
+    }
+
+    .char-box.active {
+      background: #001a1a;
+      border-color: #00e5ff;
+      color: #00e5ff;
+      transform: scale(1.15);
+    }
+
+    .char-box .cv {
+      font-size: 10px;
+      color: #555;
+      display: block;
+    }
+
+    /* HASH TABLE */
+    .hash-table-wrap {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 14px;
+    }
+
+    .ht-label {
+      font-size: 11px;
+      color: #555;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .ht-bucket {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .ht-idx {
+      background: #0a0a14;
+      border: 1px solid #1e1e2e;
+      color: #555;
+      font-family: monospace;
+      font-size: 11px;
+      padding: 5px 8px;
+      border-radius: 4px;
+      min-width: 28px;
+      text-align: center;
+    }
+
+    .ht-chain {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .ht-entry {
+      background: #1e1e2e;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 11px;
+      font-family: monospace;
+      color: #aaa;
+      transition: all 0.3s;
+    }
+
+    .ht-entry.new-entry {
+      border-color: #00e5ff;
+      background: #001a1a;
+      color: #00e5ff;
+    }
+
+    .ht-entry.collision {
+      border-color: #ff9f43;
+      background: #1a1000;
+      color: #ff9f43;
+    }
+
+    .ht-arrow {
+      color: #444;
+      font-size: 14px;
+    }
+
+    .ht-bucket.active-bucket .ht-idx {
+      border-color: #00e5ff;
+      color: #00e5ff;
+      background: #001a1a;
+    }
+
+    /* RIGHT — CHALLENGE + STATS */
+    .right-col {
+      width: 260px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chal-section {
+      padding: 14px;
+      border-bottom: 1px solid #1e1e2e;
+    }
+
+    .chal-title {
+      font-size: 12px;
+      color: #ffd700;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .chal-q {
+      font-size: 13px;
+      color: #fff;
+      margin-bottom: 10px;
+      line-height: 1.6;
+    }
+
+    .c-opts {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .c-opt {
+      background: #1e1e2e;
+      border: 1px solid #333;
+      color: #aaa;
+      padding: 7px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      text-align: left;
+    }
+
+    .c-opt:hover {
+      border-color: #ffd700;
+      color: #ffd700;
+    }
+
+    .c-opt.correct {
+      background: #0a1a0a;
+      border-color: #2ecc71;
+      color: #2ecc71;
+    }
+
+    .c-opt.wrong {
+      background: #1a0a0a;
+      border-color: #e74c3c;
+      color: #e74c3c;
+    }
+
+    .chal-hidden {
+      color: #555;
+      font-size: 12px;
+      font-style: italic;
+    }
+
+    .stats-section {
+      flex: 1;
+      padding: 14px;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #111;
+    }
+
+    .stat-row .k {
+      color: #555;
+    }
+
+    .stat-row .v {
+      color: #ffd700;
+      font-weight: 700;
+    }
+
+    /* AHA */
+    .aha-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 15, 26, 0.97);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 18px;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .aha-overlay.active {
+      display: flex;
+    }
+
+    .aha-title {
+      font-size: 26px;
+      font-weight: 800;
+      color: #00e5ff;
+    }
+
+    .aha-stat-row {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .aha-chip {
+      background: #1e1e2e;
+      padding: 14px 22px;
+      border-radius: 10px;
+    }
+
+    .aha-chip .lbl {
+      font-size: 11px;
+      color: #555;
+      margin-bottom: 4px;
+    }
+
+    .aha-chip .val {
+      font-size: 22px;
+      font-weight: 800;
+      color: #00e5ff;
+    }
+
+    .aha-insight {
+      font-size: 13px;
+      color: #aaa;
+      max-width: 580px;
+      line-height: 1.8;
+    }
+
+    .aha-insight b {
+      color: #fff;
+    }
+
+    .btn-primary {
+      background: #00e5ff;
+      color: #000;
+      font-weight: 800;
+      border: none;
+      padding: 9px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .btn-secondary {
+      background: #1e1e2e;
+      color: #aaa;
+      border: 1px solid #333;
+      padding: 9px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="topbar-left">
+      <a class="topbar-logo" href="./home.html">🌳 ARBOR <span>ARENA</span></a>
+      <div class="topbar-crumb">
+        <span class="crumb-sep">/</span>
+        <a href="./home.html">Home</a>
+        <span class="crumb-sep">/</span>
+        <a href="./story_a.html">Stories</a>
+        <span class="crumb-sep">/</span>
+        <span class="crumb-active">D — Hash Lookup</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <a class="back-btn" href="./story_c.html">← Story C</a>
+      <button class="back-btn" onclick="window.location.href = './home.html'">
+        Home
       </button>
+      <button id="theme-toggle" title="Toggle light / dark mode">🌙</button>
     </div>
+  </div>
 
-    <div class="story-banner">
-      <div class="story-tag">📖 Story D — Hash Table</div>
-      <div class="story-title">
-        10,000 students. Admin finds <span>any roll no in O(1)</span>.
-      </div>
-      <div class="story-desc">
-        VIT Pune admin needs to instantly look up any student's details by roll
-        number. A <b>Hash Table</b> converts the roll number into a bucket index
-        using a hash function — no searching, direct jump. Watch the hash
-        function work <b>character by character</b>, handle collisions, and find
-        any student in constant time.
-      </div>
+  <div class="story-banner">
+    <div class="story-tag">📖 Story D — Hash Table</div>
+    <div class="story-title">
+      10,000 students. Admin finds <span>any roll no in O(1)</span>.
     </div>
+    <div class="story-desc">
+      VIT Pune admin needs to instantly look up any student's details by roll
+      number. A <b>Hash Table</b> converts the roll number into a bucket index
+      using a hash function — no searching, direct jump. Watch the hash
+      function work <b>character by character</b>, handle collisions, and find
+      any student in constant time.
+    </div>
+  </div>
 
-    <div class="main">
-      <!-- LEFT -->
-      <div class="left-col">
-        <div class="panel-label">➕ Insert Student</div>
-        <div class="insert-section">
-          <div class="input-row">
-            <input
-              id="roll-input"
-              class="roll-input"
-              placeholder="22BCE1234"
-              maxlength="10"
-            />
-            <input
-              id="name-input"
-              class="name-input"
-              placeholder="Student Name"
-            />
-          </div>
-          <button class="btn-insert" onclick="doInsert()">Insert</button>
-          &nbsp;
-          <button
-            style="
+  <div class="main">
+    <!-- LEFT -->
+    <div class="left-col">
+      <div class="panel-label">➕ Insert Student</div>
+      <div class="insert-section">
+        <div class="input-row">
+          <input id="roll-input" class="roll-input" placeholder="22BCE1234" maxlength="10" />
+          <input id="name-input" class="name-input" placeholder="Student Name" />
+        </div>
+        <button class="btn-insert" onclick="doInsert()">Insert</button>
+        &nbsp;
+        <button style="
               background: #1e1e2e;
               border: 1px solid #333;
               color: #aaa;
@@ -578,100 +846,84 @@
               border-radius: 6px;
               cursor: pointer;
               font-size: 12px;
-            "
-            onclick="doReset()"
-          >
-            ↺ Reset
-          </button>
-          <div style="margin-top: 12px">
-            <div class="quick-label">⚡ Quick Add:</div>
-            <div class="quick-chips" id="quick-chips"></div>
-          </div>
-        </div>
-        <div class="panel-label">🔍 Search Roll No</div>
-        <div class="search-section">
-          <div class="search-row">
-            <input
-              id="search-input"
-              class="roll-input"
-              placeholder="Search roll no..."
-              maxlength="10"
-            />
-            <button class="btn-search" onclick="doSearch()">Find</button>
-          </div>
-          <div class="search-result" id="search-result"></div>
-        </div>
-        <div class="panel-label" style="border-top: 1px solid #1e1e2e">
-          📋 Inserted Students
-        </div>
-        <div class="student-scroll" id="student-scroll"></div>
-      </div>
-
-      <!-- MID -->
-      <div class="mid-col">
-        <div class="explain-bar">
-          <div class="ep" id="ep">WAITING</div>
-          <div class="et" id="et">
-            Insert a student roll number to watch the <b>hash function</b> work
-            character by character.
-          </div>
-        </div>
-        <div class="hash-steps" id="hash-steps" style="display: none">
-          <div class="hash-step-label">🔢 Hash Computation</div>
-          <div class="hash-formula" id="hash-formula"></div>
-          <div class="char-row" id="char-row"></div>
-        </div>
-        <div class="hash-table-wrap">
-          <div class="ht-label">📦 Hash Table (Size: 13 buckets)</div>
-          <div id="hash-table-render"></div>
+            " onclick="doReset()">
+          ↺ Reset
+        </button>
+        <div style="margin-top: 12px">
+          <div class="quick-label">⚡ Quick Add:</div>
+          <div class="quick-chips" id="quick-chips"></div>
         </div>
       </div>
-
-      <!-- RIGHT -->
-      <div class="right-col">
-        <div class="chal-section" id="chal-section" style="display: none">
-          <div class="chal-title">🎯 Challenge!</div>
-          <div class="chal-q" id="chal-q"></div>
-          <div class="c-opts" id="chal-opts"></div>
+      <div class="panel-label">🔍 Search Roll No</div>
+      <div class="search-section">
+        <div class="search-row">
+          <input id="search-input" class="roll-input" placeholder="Search roll no..." maxlength="10" />
+          <button class="btn-search" onclick="doSearch()">Find</button>
         </div>
-        <div class="stats-section">
-          <div
-            style="
+        <div class="search-result" id="search-result"></div>
+      </div>
+      <div class="panel-label" style="border-top: 1px solid #1e1e2e">
+        📋 Inserted Students
+      </div>
+      <div class="student-scroll" id="student-scroll"></div>
+    </div>
+
+    <!-- MID -->
+    <div class="mid-col">
+      <div class="explain-bar">
+        <div class="ep" id="ep">WAITING</div>
+        <div class="et" id="et">
+          Insert a student roll number to watch the <b>hash function</b> work
+          character by character.
+        </div>
+      </div>
+      <div class="hash-steps" id="hash-steps" style="display: none">
+        <div class="hash-step-label">🔢 Hash Computation</div>
+        <div class="hash-formula" id="hash-formula"></div>
+        <div class="char-row" id="char-row"></div>
+      </div>
+      <div class="hash-table-wrap">
+        <div class="ht-label">📦 Hash Table (Size: 13 buckets)</div>
+        <div id="hash-table-render"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="right-col">
+      <div class="chal-section" id="chal-section" style="display: none">
+        <div class="chal-title">🎯 Challenge!</div>
+        <div class="chal-q" id="chal-q"></div>
+        <div class="c-opts" id="chal-opts"></div>
+      </div>
+      <div class="stats-section">
+        <div style="
               font-size: 11px;
               color: #555;
               text-transform: uppercase;
               letter-spacing: 1px;
               margin-bottom: 12px;
-            "
-          >
-            📊 Stats
-          </div>
-          <div class="stat-row">
-            <span class="k">Students Stored</span
-            ><span class="v" id="s-count">0</span>
-          </div>
-          <div class="stat-row">
-            <span class="k">Collisions</span
-            ><span class="v" id="s-coll">0</span>
-          </div>
-          <div class="stat-row">
-            <span class="k">Load Factor</span
-            ><span class="v" id="s-load">0.00</span>
-          </div>
-          <div class="stat-row">
-            <span class="k">Avg Chain Length</span
-            ><span class="v" id="s-chain">0.0</span>
-          </div>
-          <div class="stat-row">
-            <span class="k">Search Complexity</span
-            ><span class="v">O(1) avg</span>
-          </div>
-          <div class="stat-row">
-            <span class="k">vs Linear Search</span
-            ><span class="v" id="s-linear">O(n)</span>
-          </div>
-          <div
-            style="
+            ">
+          📊 Stats
+        </div>
+        <div class="stat-row">
+          <span class="k">Students Stored</span><span class="v" id="s-count">0</span>
+        </div>
+        <div class="stat-row">
+          <span class="k">Collisions</span><span class="v" id="s-coll">0</span>
+        </div>
+        <div class="stat-row">
+          <span class="k">Load Factor</span><span class="v" id="s-load">0.00</span>
+        </div>
+        <div class="stat-row">
+          <span class="k">Avg Chain Length</span><span class="v" id="s-chain">0.0</span>
+        </div>
+        <div class="stat-row">
+          <span class="k">Search Complexity</span><span class="v">O(1) avg</span>
+        </div>
+        <div class="stat-row">
+          <span class="k">vs Linear Search</span><span class="v" id="s-linear">O(n)</span>
+        </div>
+        <div style="
               margin-top: 16px;
               padding: 12px;
               background: #0a0a14;
@@ -679,348 +931,353 @@
               font-size: 12px;
               color: #555;
               line-height: 1.8;
-            "
-          >
-            <b style="color: #aaa; display: block; margin-bottom: 6px"
-              >Hash Function Used:</b
-            >
-            <code style="color: #00e5ff; font-size: 11px"
-              >hash = 0<br />for each char c:<br />&nbsp;&nbsp;hash = hash*31 +
-              c.charCodeAt(0)<br />bucket = hash % TABLE_SIZE</code
-            >
-          </div>
+            ">
+          <b style="color: #aaa; display: block; margin-bottom: 6px">Hash Function Used:</b>
+          <code style="color: #00e5ff; font-size: 11px">hash = 0<br />for each char c:<br />&nbsp;&nbsp;hash = hash*31 +
+              c.charCodeAt(0)<br />bucket = hash % TABLE_SIZE</code>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- AHA -->
-    <div class="aha-overlay" id="aha">
-      <div class="aha-title">⚡ Hash Table Mastered!</div>
-      <div class="aha-stat-row" id="aha-stats"></div>
-      <div class="aha-insight" id="aha-insight"></div>
-      <div style="display: flex; gap: 12px">
-        <button
-          class="btn-primary"
-          onclick="
+  <!-- AHA -->
+  <div class="aha-overlay" id="aha">
+    <div class="aha-title">⚡ Hash Table Mastered!</div>
+    <div class="aha-stat-row" id="aha-stats"></div>
+    <div class="aha-insight" id="aha-insight"></div>
+    <div style="display: flex; gap: 12px">
+      <button class="btn-primary" onclick="
             document.getElementById('aha').classList.remove('active');
             doReset();
-          "
-        >
-          Try Again
-        </button>
-        <button
-          class="btn-secondary"
-          onclick="window.location.href = '../index.html'"
-        >
-          ← Back to Home
-        </button>
-      </div>
+          ">
+        Try Again
+      </button>
+      <button class="btn-secondary" onclick="window.location.href = '../index.html'">
+        ← Back to Home
+      </button>
     </div>
+  </div>
 
-    <script>
-      const TABLE_SIZE = 13;
-      let hashTable = Array.from({ length: TABLE_SIZE }, () => []);
-      let totalStudents = 0;
-      let totalCollisions = 0;
-      let animTimer = null;
+  <script>
+    const TABLE_SIZE = 13;
+    let hashTable = Array.from({ length: TABLE_SIZE }, () => []);
+    let totalStudents = 0;
+    let totalCollisions = 0;
+    let animTimer = null;
 
-      const QUICK_STUDENTS = [
-        { roll: "22BCE1001", name: "Suraj Yadav" },
-        { roll: "22BCE1234", name: "Priya Mehta" },
-        { roll: "22BCE1567", name: "Arjun Patel" },
-        { roll: "22BCE2001", name: "Meera Shah" },
-        { roll: "22BCE1001", name: "Duplicate!" }, // intentional collision demo
-        { roll: "21MCA3001", name: "Rohan Desai" },
-        { roll: "22BCE4321", name: "Ankita Joshi" },
-      ];
+    const QUICK_STUDENTS = [
+      { roll: "22BCE1001", name: "Suraj Yadav" },
+      { roll: "22BCE1234", name: "Priya Mehta" },
+      { roll: "22BCE1567", name: "Arjun Patel" },
+      { roll: "22BCE2001", name: "Meera Shah" },
+      { roll: "22BCE1001", name: "Duplicate!" }, // intentional collision demo
+      { roll: "21MCA3001", name: "Rohan Desai" },
+      { roll: "22BCE4321", name: "Ankita Joshi" },
+    ];
 
-      function hashFn(roll) {
-        let h = 0;
-        for (let i = 0; i < roll.length; i++)
-          h = Math.abs((h * 31 + roll.charCodeAt(i)) % TABLE_SIZE);
-        return h % TABLE_SIZE;
-      }
+    function hashFn(roll) {
+      let h = 0;
+      for (let i = 0; i < roll.length; i++)
+        h = Math.abs((h * 31 + roll.charCodeAt(i)) % TABLE_SIZE);
+      return h % TABLE_SIZE;
+    }
 
-      function hashStep(roll) {
-        // returns array of steps
-        const steps = [];
-        let h = 0;
-        steps.push({ type: "init", h, formula: `hash = 0` });
-        for (let i = 0; i < roll.length; i++) {
-          const c = roll[i];
-          const code = roll.charCodeAt(i);
-          const prev = h;
-          h = Math.abs((h * 31 + code) % TABLE_SIZE);
-          steps.push({
-            type: "char",
-            i,
-            c,
-            code,
-            prev,
-            h,
-            formula: `hash = (${prev} × 31 + ${code}) % ${TABLE_SIZE} = ${h}  [char '${c}']`,
-          });
-        }
-        steps.push({ type: "result", h, formula: `bucket = ${h}` });
-        return steps;
-      }
-
-      // RENDER HASH TABLE
-      function renderHashTable(
-        activeBucket = -1,
-        newEntry = null,
-        isCollision = false,
-      ) {
-        const wrap = document.getElementById("hash-table-render");
-        wrap.innerHTML = "";
-        hashTable.forEach((chain, i) => {
-          const row = document.createElement("div");
-          row.className =
-            "ht-bucket" + (i === activeBucket ? " active-bucket" : "");
-          const idx = document.createElement("div");
-          idx.className = "ht-idx";
-          idx.textContent = i;
-          row.appendChild(idx);
-          const chainDiv = document.createElement("div");
-          chainDiv.className = "ht-chain";
-          chain.forEach((entry, j) => {
-            if (j > 0) {
-              const arr = document.createElement("span");
-              arr.className = "ht-arrow";
-              arr.textContent = "→";
-              chainDiv.appendChild(arr);
-            }
-            const ent = document.createElement("div");
-            const isNew =
-              newEntry &&
-              entry.roll === newEntry.roll &&
-              i === activeBucket &&
-              j === chain.length - 1;
-            const isColl = isNew && isCollision;
-            ent.className =
-              "ht-entry" + (isColl ? " collision" : isNew ? " new-entry" : "");
-            ent.textContent = `${entry.roll} (${entry.name.split(" ")[0]})`;
-            chainDiv.appendChild(ent);
-          });
-          row.appendChild(chainDiv);
-          wrap.appendChild(row);
+    function hashStep(roll) {
+      // returns array of steps
+      const steps = [];
+      let h = 0;
+      steps.push({ type: "init", h, formula: `hash = 0` });
+      for (let i = 0; i < roll.length; i++) {
+        const c = roll[i];
+        const code = roll.charCodeAt(i);
+        const prev = h;
+        h = Math.abs((h * 31 + code) % TABLE_SIZE);
+        steps.push({
+          type: "char",
+          i,
+          c,
+          code,
+          prev,
+          h,
+          formula: `hash = (${prev} × 31 + ${code}) % ${TABLE_SIZE} = ${h}  [char '${c}']`,
         });
       }
+      steps.push({ type: "result", h, formula: `bucket = ${h}` });
+      return steps;
+    }
 
-      // ANIMATE HASH
-      function animateHash(roll, name, onDone) {
-        const steps = hashStep(roll);
-        let si = 0;
-        document.getElementById("hash-steps").style.display = "block";
-
-        // build char boxes
-        const charRow = document.getElementById("char-row");
-        charRow.innerHTML = "";
-        roll.split("").forEach((c, i) => {
-          const box = document.createElement("div");
-          box.className = "char-box";
-          box.id = `cb-${i}`;
-          box.innerHTML = `${c}<span class="cv">${roll.charCodeAt(i)}</span>`;
-          charRow.appendChild(box);
-        });
-
-        clearInterval(animTimer);
-        animTimer = setInterval(() => {
-          if (si >= steps.length) {
-            clearInterval(animTimer);
-            onDone();
-            return;
+    // RENDER HASH TABLE
+    function renderHashTable(
+      activeBucket = -1,
+      newEntry = null,
+      isCollision = false,
+    ) {
+      const wrap = document.getElementById("hash-table-render");
+      wrap.innerHTML = "";
+      hashTable.forEach((chain, i) => {
+        const row = document.createElement("div");
+        row.className =
+          "ht-bucket" + (i === activeBucket ? " active-bucket" : "");
+        const idx = document.createElement("div");
+        idx.className = "ht-idx";
+        idx.textContent = i;
+        row.appendChild(idx);
+        const chainDiv = document.createElement("div");
+        chainDiv.className = "ht-chain";
+        chain.forEach((entry, j) => {
+          if (j > 0) {
+            const arr = document.createElement("span");
+            arr.className = "ht-arrow";
+            arr.textContent = "→";
+            chainDiv.appendChild(arr);
           }
-          const step = steps[si++];
-          document.getElementById("hash-formula").innerHTML = step.formula
-            .replace(/bucket = (\d+)/, `bucket = <span class="res">$1</span>`)
-            .replace(/hash = /g, `<span class="hl">hash</span> = `);
+          const ent = document.createElement("div");
+          const isNew =
+            newEntry &&
+            entry.roll === newEntry.roll &&
+            i === activeBucket &&
+            j === chain.length - 1;
+          const isColl = isNew && isCollision;
+          ent.className =
+            "ht-entry" + (isColl ? " collision" : isNew ? " new-entry" : "");
+          ent.textContent = `${entry.roll} (${entry.name.split(" ")[0]})`;
+          chainDiv.appendChild(ent);
+        });
+        row.appendChild(chainDiv);
+        wrap.appendChild(row);
+      });
+    }
 
-          // deactivate all chars, activate current
-          document
-            .querySelectorAll(".char-box")
-            .forEach((b) => b.classList.remove("active"));
-          if (step.type === "char")
-            document.getElementById(`cb-${step.i}`)?.classList.add("active");
-          if (step.type === "result") renderHashTable(step.h);
-        }, 300);
-      }
+    // ANIMATE HASH
+    function animateHash(roll, name, onDone) {
+      const steps = hashStep(roll);
+      let si = 0;
+      document.getElementById("hash-steps").style.display = "block";
 
-      function doInsert() {
-        const roll = document
-          .getElementById("roll-input")
-          .value.trim()
-          .toUpperCase();
-        const name =
-          document.getElementById("name-input").value.trim() || "Unknown";
-        if (!roll) {
+      // build char boxes
+      const charRow = document.getElementById("char-row");
+      charRow.innerHTML = "";
+      roll.split("").forEach((c, i) => {
+        const box = document.createElement("div");
+        box.className = "char-box";
+        box.id = `cb-${i}`;
+        box.innerHTML = `${c}<span class="cv">${roll.charCodeAt(i)}</span>`;
+        charRow.appendChild(box);
+      });
+
+      clearInterval(animTimer);
+      animTimer = setInterval(() => {
+        if (si >= steps.length) {
+          clearInterval(animTimer);
+          onDone();
           return;
         }
+        const step = steps[si++];
+        document.getElementById("hash-formula").innerHTML = step.formula
+          .replace(/bucket = (\d+)/, `bucket = <span class="res">$1</span>`)
+          .replace(/hash = /g, `<span class="hl">hash</span> = `);
 
-        const bucket = hashFn(roll);
-        const isCollision = hashTable[bucket].length > 0;
-        if (isCollision) totalCollisions++;
+        // deactivate all chars, activate current
+        document
+          .querySelectorAll(".char-box")
+          .forEach((b) => b.classList.remove("active"));
+        if (step.type === "char")
+          document.getElementById(`cb-${step.i}`)?.classList.add("active");
+        if (step.type === "result") renderHashTable(step.h);
+      }, 300);
+    }
 
+    function doInsert() {
+      const roll = document
+        .getElementById("roll-input")
+        .value.trim()
+        .toUpperCase();
+      const name =
+        document.getElementById("name-input").value.trim() || "Unknown";
+      if (!roll) {
+        return;
+      }
+
+      const bucket = hashFn(roll);
+      const isCollision = hashTable[bucket].length > 0;
+      if (isCollision) totalCollisions++;
+
+      document.getElementById("ep").textContent = isCollision
+        ? "COLLISION — CHAINING 🔗"
+        : "INSERTING ✅";
+      document.getElementById("et").innerHTML = isCollision
+        ? `Roll <b>${roll}</b> hashes to bucket <b class="hi">${bucket}</b> — already occupied! Using <b>chaining</b> to append to linked list. This is a <b>collision</b>.`
+        : `Hashing <b>${roll}</b>... computing bucket index character by character using polynomial rolling hash.`;
+
+      animateHash(roll, name, () => {
+        hashTable[bucket].push({ roll, name });
+        totalStudents++;
+        renderHashTable(bucket, { roll, name }, isCollision);
+        updateStats();
+        renderStudentList();
+        if (isCollision) showChallenge(roll, bucket);
         document.getElementById("ep").textContent = isCollision
-          ? "COLLISION — CHAINING 🔗"
-          : "INSERTING ✅";
-        document.getElementById("et").innerHTML = isCollision
-          ? `Roll <b>${roll}</b> hashes to bucket <b class="hi">${bucket}</b> — already occupied! Using <b>chaining</b> to append to linked list. This is a <b>collision</b>.`
-          : `Hashing <b>${roll}</b>... computing bucket index character by character using polynomial rolling hash.`;
-
-        animateHash(roll, name, () => {
-          hashTable[bucket].push({ roll, name });
-          totalStudents++;
-          renderHashTable(bucket, { roll, name }, isCollision);
-          updateStats();
-          renderStudentList();
-          if (isCollision) showChallenge(roll, bucket);
-          document.getElementById("ep").textContent = isCollision
-            ? "COLLISION HANDLED ✅"
-            : "INSERT COMPLETE ✅";
-          document.getElementById("et").innerHTML =
-            `<b>${name}</b> (${roll}) stored at bucket <b class="hi">${bucket}</b>. ` +
-            (isCollision
-              ? `Chain length now <b>${hashTable[bucket].length}</b>. Lookup still fast!`
-              : `Direct access — O(1) lookup.`);
-          if (totalStudents >= 5) setTimeout(showAha, 600);
-        });
-
-        document.getElementById("roll-input").value = "";
-        document.getElementById("name-input").value = "";
-      }
-
-      function doSearch() {
-        const roll = document
-          .getElementById("search-input")
-          .value.trim()
-          .toUpperCase();
-        if (!roll) return;
-        const bucket = hashFn(roll);
-        const chain = hashTable[bucket];
-        const found = chain.find((e) => e.roll === roll);
-        renderHashTable(bucket);
-        document.getElementById("ep").textContent = "SEARCH ⚡";
+          ? "COLLISION HANDLED ✅"
+          : "INSERT COMPLETE ✅";
         document.getElementById("et").innerHTML =
-          `Searching <b>${roll}</b>: hash → bucket <b class="hi">${bucket}</b> in 1 step. ` +
-          (found
-            ? `Found <b>${found.name}</b>! Chain scan: ${chain.indexOf(found) + 1} comparison(s).`
-            : `Not found in bucket ${bucket}. Chain length: ${chain.length}.`);
-        const res = document.getElementById("search-result");
-        res.innerHTML = found
-          ? `<span class="sr-found">✅ Found: <b>${found.name}</b> at bucket [${bucket}]</span>`
-          : `<span class="sr-notfound">❌ Not found (bucket ${bucket} checked)</span>`;
-        document.getElementById("search-input").value = "";
-      }
+          `<b>${name}</b> (${roll}) stored at bucket <b class="hi">${bucket}</b>. ` +
+          (isCollision
+            ? `Chain length now <b>${hashTable[bucket].length}</b>. Lookup still fast!`
+            : `Direct access — O(1) lookup.`);
+        if (totalStudents >= 5) setTimeout(showAha, 600);
+      });
 
-      function showChallenge(roll, actualBucket) {
-        const sec = document.getElementById("chal-section");
-        sec.style.display = "block";
-        document.getElementById("chal-q").innerHTML =
-          `Collision at bucket <b>${actualBucket}</b>. How does Hash Table handle it?`;
-        const opts = document.getElementById("chal-opts");
-        opts.innerHTML = "";
-        const choices = [
-          { txt: "Chaining — append to linked list", correct: true },
-          { txt: "Reject the new entry", correct: false },
-          { txt: "Replace the existing entry", correct: false },
-          { txt: "Find a completely new table", correct: false },
-        ].sort(() => Math.random() - 0.5);
-        choices.forEach((c) => {
-          const btn = document.createElement("button");
-          btn.className = "c-opt";
-          btn.textContent = c.txt;
-          btn.onclick = () => {
-            document.querySelectorAll(".chal-opts .c-opt").forEach((b) => {
-              if (b.textContent.includes("Chaining"))
-                b.classList.add("correct");
-            });
-            btn.classList.add(c.correct ? "correct" : "wrong");
-            setTimeout(() => (sec.style.display = "none"), 1400);
-          };
-          opts.appendChild(btn);
-        });
-      }
+      document.getElementById("roll-input").value = "";
+      document.getElementById("name-input").value = "";
+    }
 
-      function updateStats() {
-        document.getElementById("s-count").textContent = totalStudents;
-        document.getElementById("s-coll").textContent = totalCollisions;
-        document.getElementById("s-load").textContent = (
-          totalStudents / TABLE_SIZE
-        ).toFixed(2);
-        const occupied = hashTable.filter((b) => b.length > 0).length || 1;
-        document.getElementById("s-chain").textContent = (
-          totalStudents / occupied
-        ).toFixed(1);
-        document.getElementById("s-linear").textContent =
-          `O(${totalStudents}) = ${totalStudents} steps`;
-      }
+    function doSearch() {
+      const roll = document
+        .getElementById("search-input")
+        .value.trim()
+        .toUpperCase();
+      if (!roll) return;
+      const bucket = hashFn(roll);
+      const chain = hashTable[bucket];
+      const found = chain.find((e) => e.roll === roll);
+      renderHashTable(bucket);
+      document.getElementById("ep").textContent = "SEARCH ⚡";
+      document.getElementById("et").innerHTML =
+        `Searching <b>${roll}</b>: hash → bucket <b class="hi">${bucket}</b> in 1 step. ` +
+        (found
+          ? `Found <b>${found.name}</b>! Chain scan: ${chain.indexOf(found) + 1} comparison(s).`
+          : `Not found in bucket ${bucket}. Chain length: ${chain.length}.`);
+      const res = document.getElementById("search-result");
+      res.innerHTML = found
+        ? `<span class="sr-found">✅ Found: <b>${found.name}</b> at bucket [${bucket}]</span>`
+        : `<span class="sr-notfound">❌ Not found (bucket ${bucket} checked)</span>`;
+      document.getElementById("search-input").value = "";
+    }
 
-      function renderStudentList() {
-        const wrap = document.getElementById("student-scroll");
-        wrap.innerHTML = "";
-        hashTable.forEach((chain, i) => {
-          chain.forEach((e) => {
-            const div = document.createElement("div");
-            div.className = "student-item";
-            div.innerHTML = `<span class="sroll">${e.roll}</span><span class="sname">${e.name}</span><span class="sbucket">[${i}]</span>`;
-            wrap.appendChild(div);
+    function showChallenge(roll, actualBucket) {
+      const sec = document.getElementById("chal-section");
+      sec.style.display = "block";
+      document.getElementById("chal-q").innerHTML =
+        `Collision at bucket <b>${actualBucket}</b>. How does Hash Table handle it?`;
+      const opts = document.getElementById("chal-opts");
+      opts.innerHTML = "";
+      const choices = [
+        { txt: "Chaining — append to linked list", correct: true },
+        { txt: "Reject the new entry", correct: false },
+        { txt: "Replace the existing entry", correct: false },
+        { txt: "Find a completely new table", correct: false },
+      ].sort(() => Math.random() - 0.5);
+      choices.forEach((c) => {
+        const btn = document.createElement("button");
+        btn.className = "c-opt";
+        btn.textContent = c.txt;
+        btn.onclick = () => {
+          document.querySelectorAll(".chal-opts .c-opt").forEach((b) => {
+            if (b.textContent.includes("Chaining"))
+              b.classList.add("correct");
           });
-        });
-      }
+          btn.classList.add(c.correct ? "correct" : "wrong");
+          setTimeout(() => (sec.style.display = "none"), 1400);
+        };
+        opts.appendChild(btn);
+      });
+    }
 
-      function showAha() {
-        document.getElementById("aha-stats").innerHTML = `
+    function updateStats() {
+      document.getElementById("s-count").textContent = totalStudents;
+      document.getElementById("s-coll").textContent = totalCollisions;
+      document.getElementById("s-load").textContent = (
+        totalStudents / TABLE_SIZE
+      ).toFixed(2);
+      const occupied = hashTable.filter((b) => b.length > 0).length || 1;
+      document.getElementById("s-chain").textContent = (
+        totalStudents / occupied
+      ).toFixed(1);
+      document.getElementById("s-linear").textContent =
+        `O(${totalStudents}) = ${totalStudents} steps`;
+    }
+
+    function renderStudentList() {
+      const wrap = document.getElementById("student-scroll");
+      wrap.innerHTML = "";
+      hashTable.forEach((chain, i) => {
+        chain.forEach((e) => {
+          const div = document.createElement("div");
+          div.className = "student-item";
+          div.innerHTML = `<span class="sroll">${e.roll}</span><span class="sname">${e.name}</span><span class="sbucket">[${i}]</span>`;
+          wrap.appendChild(div);
+        });
+      });
+    }
+
+    function showAha() {
+      document.getElementById("aha-stats").innerHTML = `
     <div class="aha-chip"><div class="lbl">Students Stored</div><div class="val">${totalStudents}</div></div>
     <div class="aha-chip"><div class="lbl">Collisions</div><div class="val">${totalCollisions}</div></div>
     <div class="aha-chip"><div class="lbl">Search Time</div><div class="val">O(1)</div></div>
   `;
-        document.getElementById("aha-insight").innerHTML =
-          `VIT's ERP, attendance systems, and exam portals all use <b>Hash Tables</b> internally to store and retrieve student records by roll number. A direct-access lookup for 50,000 students takes the <b>same time</b> as for 50 students — <b>O(1) average</b>. Without hashing, every lookup would scan the full database: O(n) = 50,000 comparisons.`;
-        document.getElementById("aha").classList.add("active");
-      }
+      document.getElementById("aha-insight").innerHTML =
+        `VIT's ERP, attendance systems, and exam portals all use <b>Hash Tables</b> internally to store and retrieve student records by roll number. A direct-access lookup for 50,000 students takes the <b>same time</b> as for 50 students — <b>O(1) average</b>. Without hashing, every lookup would scan the full database: O(n) = 50,000 comparisons.`;
+      document.getElementById("aha").classList.add("active");
+    }
 
-      function doReset() {
-        hashTable = Array.from({ length: TABLE_SIZE }, () => []);
-        totalStudents = 0;
-        totalCollisions = 0;
-        clearInterval(animTimer);
-        document.getElementById("ep").textContent = "WAITING";
-        document.getElementById("et").innerHTML =
-          "Insert a student roll number to watch the <b>hash function</b> work character by character.";
-        document.getElementById("hash-steps").style.display = "none";
-        document.getElementById("chal-section").style.display = "none";
-        document.getElementById("search-result").innerHTML = "";
-        renderHashTable();
-        renderStudentList();
-        updateStats();
-      }
+    function doReset() {
+      hashTable = Array.from({ length: TABLE_SIZE }, () => []);
+      totalStudents = 0;
+      totalCollisions = 0;
+      clearInterval(animTimer);
+      document.getElementById("ep").textContent = "WAITING";
+      document.getElementById("et").innerHTML =
+        "Insert a student roll number to watch the <b>hash function</b> work character by character.";
+      document.getElementById("hash-steps").style.display = "none";
+      document.getElementById("chal-section").style.display = "none";
+      document.getElementById("search-result").innerHTML = "";
+      renderHashTable();
+      renderStudentList();
+      updateStats();
+    }
 
-      // Quick chips
-      const qc = document.getElementById("quick-chips");
-      QUICK_STUDENTS.forEach((s) => {
-        const chip = document.createElement("div");
-        chip.className = "quick-chip";
-        chip.textContent = s.roll;
-        chip.onclick = () => {
-          document.getElementById("roll-input").value = s.roll;
-          document.getElementById("name-input").value = s.name;
-          doInsert();
-        };
-        qc.appendChild(chip);
+    // Quick chips
+    const qc = document.getElementById("quick-chips");
+    QUICK_STUDENTS.forEach((s) => {
+      const chip = document.createElement("div");
+      chip.className = "quick-chip";
+      chip.textContent = s.roll;
+      chip.onclick = () => {
+        document.getElementById("roll-input").value = s.roll;
+        document.getElementById("name-input").value = s.name;
+        doInsert();
+      };
+      qc.appendChild(chip);
+    });
+
+    // enter key
+    document.getElementById("roll-input").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") doInsert();
+    });
+    document
+      .getElementById("search-input")
+      .addEventListener("keydown", (e) => {
+        if (e.key === "Enter") doSearch();
       });
 
-      // enter key
-      document.getElementById("roll-input").addEventListener("keydown", (e) => {
-        if (e.key === "Enter") doInsert();
+    doReset();
+  </script>
+</body>
+<script>
+  (function () {
+    var btn = document.getElementById("theme-toggle");
+    if (localStorage.getItem("ds-theme") === "light") {
+      document.body.classList.add("light-mode");
+      if (btn) btn.textContent = "☀️";
+    }
+    if (btn)
+      btn.addEventListener("click", function () {
+        var l = document.body.classList.toggle("light-mode");
+        localStorage.setItem("ds-theme", l ? "light" : "dark");
+        btn.textContent = l ? "☀️" : "🌙";
       });
-      document
-        .getElementById("search-input")
-        .addEventListener("keydown", (e) => {
-          if (e.key === "Enter") doSearch();
-        });
+  })();
+</script>
 
-      doReset();
-    </script>
-  </body>
 </html>

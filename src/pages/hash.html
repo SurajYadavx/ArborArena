@@ -2,28 +2,143 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>DS Dojo — Hash Collision</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ARBOR ARENA — Hash Collision</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
     <style>
+      /* ═══════════════════════════════════════════════
+       ARBOR ARENA — DESIGN SYSTEM TOKENS
+    ═══════════════════════════════════════════════ */
+      :root {
+        --bg: #0d0d14;
+        --bg-nav: #09090f;
+        --bg-surface: #111118;
+        --bg-card: #16161f;
+        --bg-card-hover: #1c1c28;
+        --border: #1e1e2e;
+        --border-card: #26263a;
+        --text: #e2e4f0;
+        --text-muted: #7878a0;
+        --text-dim: #3a3a52;
+        --accent: #ffd700;
+        --accent-amber: #fbbf24;
+        --green: #22c55e;
+        --red: #ef4444;
+        --cyan: #06b6d4;
+        --purple: #a78bfa;
+        --orange: #ff9f43;
+        --shadow-card: 0 2px 16px rgba(0, 0, 0, 0.35);
+        --shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.45);
+        --radius: 12px;
+        --radius-sm: 8px;
+        --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      body.light-mode {
+        --bg: #f5f5fa;
+        --bg-nav: #ffffff;
+        --bg-surface: #fafaff;
+        --bg-card: #ffffff;
+        --bg-card-hover: #f0f0fa;
+        --border: #e2e2f0;
+        --border-card: #d0d0e8;
+        --text: #0f0f1e;
+        --text-muted: #5a5a80;
+        --text-dim: #b0b0d0;
+        --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.08);
+        --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.14);
+      }
+
+      /* ── SHARED DS NAV ── */
+      .ds-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 24px;
+        height: 44px;
+        background: #0a0a14;
+        border-bottom: 1px solid #1e1e2e;
+        position: sticky;
+        top: 0;
+        z-index: 999;
+        flex-shrink: 0;
+      }
+
+      .ds-nav-logo {
+        font-size: 16px;
+        font-weight: 800;
+        text-decoration: none;
+        color: #fff;
+      }
+
+      .ds-nav-logo span {
+        color: #ffd700;
+      }
+
+      .ds-nav-links {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+      }
+
+      .ds-nav-links a {
+        color: #777;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 500;
+        padding: 4px 9px;
+        border-radius: 5px;
+        transition:
+          color 0.18s,
+          background 0.18s;
+      }
+
+      .ds-nav-links a:hover {
+        color: #fff;
+        background: #1e1e2e;
+      }
+
+      .ds-nav-links a.ds-active {
+        color: #ffd700;
+        background: rgba(255, 215, 0, 0.08);
+      }
+
+      .ds-nav-sep {
+        color: #252535;
+        font-size: 14px;
+        padding: 0 3px;
+        user-select: none;
+      }
+
       * {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
       }
+
       body {
-        background: #0f0f1a;
+        background: #0d0d1a;
         color: #fff;
-        font-family: sans-serif;
+        font-family: "Inter", "Segoe UI", sans-serif;
       }
+
       h1 {
         text-align: center;
         padding: 18px;
         color: #ffd700;
         font-size: 22px;
       }
+
       #controls {
         text-align: center;
         margin: 10px 0 16px;
       }
+
       input {
         padding: 8px;
         font-size: 16px;
@@ -32,6 +147,7 @@
         width: 80px;
         text-align: center;
       }
+
       select {
         padding: 8px;
         font-size: 15px;
@@ -40,6 +156,7 @@
         background: #1e1e2e;
         color: #fff;
       }
+
       button {
         padding: 8px 18px;
         margin: 4px;
@@ -48,14 +165,17 @@
         border-radius: 6px;
         cursor: pointer;
       }
+
       #btn-insert {
         background: #ffd700;
         color: #000;
       }
+
       #btn-reset {
         background: #444;
         color: #fff;
       }
+
       #methods {
         display: flex;
         justify-content: center;
@@ -63,6 +183,7 @@
         flex-wrap: wrap;
         padding: 0 16px 16px;
       }
+
       .method-card {
         background: #1e1e2e;
         border-radius: 12px;
@@ -70,10 +191,12 @@
         width: 300px;
         border-top: 3px solid;
       }
+
       .method-card h3 {
         font-size: 15px;
         margin-bottom: 8px;
       }
+
       .method-card .stats {
         font-size: 12px;
         color: #aaa;
@@ -81,52 +204,64 @@
         display: flex;
         gap: 12px;
       }
+
       .method-card .stats span {
         color: #ffd700;
         font-weight: bold;
       }
+
       .table-wrap {
         overflow-x: auto;
       }
+
       table {
         width: 100%;
         border-collapse: collapse;
         font-size: 13px;
       }
+
       th {
         background: #111;
         padding: 5px;
         color: #aaa;
       }
+
       td {
         padding: 5px;
         text-align: center;
         border-bottom: 1px solid #222;
         transition: background 0.3s;
       }
+
       td.empty {
         color: #333;
       }
+
       td.filled {
         color: #fff;
         font-weight: bold;
       }
+
       td.new {
         animation: flash 0.8s ease;
       }
+
       td.probed {
         background: #2a2a00 !important;
         color: #ffd700;
       }
+
       td.chained {
         background: #1a2a1a;
         color: #88ff88;
       }
+
       @keyframes flash {
         0% {
           background: #ffd700;
           color: #000;
         }
+
         100% {
           background: inherit;
           color: inherit;
@@ -137,30 +272,244 @@
       .card-chain {
         border-color: #00e5ff;
       }
+
       .card-chain h3 {
         color: #00e5ff;
       }
+
       .card-linear {
         border-color: #a78bfa;
       }
+
       .card-linear h3 {
         color: #a78bfa;
       }
+
       .card-quad {
         border-color: #ff9f43;
       }
+
       .card-quad h3 {
         color: #ff9f43;
       }
+
       .card-double {
         border-color: #ff4f4f;
       }
+
       .card-double h3 {
         color: #ff4f4f;
       }
+
+      /* ── PHASE 2: DUAL MODE ── */
+      :root {
+        --bg: #0d0d1a;
+        --bg-nav: #0a0a14;
+        --bg-surface: #111122;
+        --bg-card: #131326;
+        --bg-card-hover: #1e1e38;
+        --border: #1a1a30;
+        --border-card: #24244a;
+        --text: #dde0f0;
+        --text-muted: #8888a8;
+        --text-dim: #44445a;
+        --shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
+      }
+
+      body.light-mode {
+        --bg: #f3f3fa;
+        --bg-nav: #ffffff;
+        --bg-surface: #ffffff;
+        --bg-card: #ffffff;
+        --bg-card-hover: #f0f0ff;
+        --border: #e0e0ee;
+        --border-card: #d0d0ea;
+        --text: #1a1a2e;
+        --text-muted: #666688;
+        --text-dim: #aaaacc;
+        --shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        background-attachment: fixed;
+      }
+
+      .ds-nav {
+        background: var(--bg-nav);
+        border-color: var(--border);
+      }
+
+      .ds-nav-logo {
+        color: var(--text);
+      }
+
+      .ds-nav-links a {
+        color: var(--text-muted);
+      }
+
+      .ds-nav-links a:hover {
+        color: var(--text);
+        background: var(--bg-card);
+      }
+
+      .ds-nav-sep {
+        color: var(--border-card);
+      }
+
+      #theme-toggle {
+        background: none;
+        border: 1px solid var(--border-card);
+        color: var(--text-muted);
+        padding: 3px 8px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        line-height: 1.6;
+        transition: all 0.18s;
+        margin-left: 2px;
+        font-family: inherit;
+      }
+
+      #theme-toggle:hover {
+        border-color: var(--text-muted);
+        color: var(--text);
+      }
+
+      h1 {
+        color: var(--text);
+      }
+
+      input,
+      select {
+        background: var(--bg-card) !important;
+        color: var(--text) !important;
+        border: 1px solid var(--border-card) !important;
+        font-family: "Inter", sans-serif;
+      }
+
+      body.light-mode input,
+      body.light-mode select {
+        background: #fff !important;
+      }
+
+      button {
+        font-family: "Inter", sans-serif;
+        font-weight: 600;
+        border-radius: 6px !important;
+        transition:
+          opacity 0.18s,
+          transform 0.1s !important;
+      }
+
+      button:hover {
+        opacity: 0.85;
+        transform: translateY(-1px);
+      }
+
+      .method-card {
+        background: var(--bg-card);
+        box-shadow: var(--shadow);
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+      }
+
+      .method-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
+      }
+
+      .method-card .stats {
+        color: var(--text-muted);
+      }
+
+      th {
+        background: var(--bg-surface);
+        color: var(--text-muted);
+      }
+
+      td {
+        border-color: var(--border);
+        color: var(--text);
+      }
+
+      td.empty {
+        color: var(--text-dim);
+      }
     </style>
   </head>
+
   <body>
+    <!-- ARBOR ARENA NAV -->
+    <nav class="ds-nav">
+      <a class="ds-nav-logo" href="./home.html">🌳 ARBOR <span>ARENA</span></a>
+      <div class="ds-nav-links">
+        <a href="./home.html">← Home</a>
+        <span class="ds-nav-sep">|</span>
+        <a href="./bst.html">BST</a>
+        <a href="./avl.html">AVL</a>
+        <a href="./battle.html">Battle</a>
+        <a href="./battle3.html">3-Way</a>
+        <a href="./hash.html" class="ds-active">Hash</a>
+        <a href="./story_a.html">Stories</a>
+        <span class="ds-nav-sep">|</span>
+        <a href="./arena.html" style="color: var(--accent); font-weight: 700"
+          >⚔️ Arena</a
+        >
+        <button
+          id="theme-toggle"
+          aria-label="Toggle theme"
+          onclick="toggleTheme()"
+          style="
+            background: transparent;
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-sm);
+            padding: 6px 8px;
+            cursor: pointer;
+            color: var(--text-muted);
+            line-height: 0;
+            display: flex;
+            align-items: center;
+            margin-left: 4px;
+            flex-shrink: 0;
+          "
+        >
+          <svg
+            id="icon-moon"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
+          <svg
+            id="icon-sun"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            style="display: none"
+          >
+            <circle cx="12" cy="12" r="5" />
+            <line x1="12" y1="1" x2="12" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="23" />
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+            <line x1="1" y1="12" x2="3" y2="12" />
+            <line x1="21" y1="12" x2="23" y2="12" />
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+          </svg>
+        </button>
+      </div>
+    </nav>
     <h1>🔑 Hash Collision Comparator</h1>
     <div id="controls">
       <input id="val-input" type="number" placeholder="key" />
@@ -185,7 +534,9 @@
           Collisions: <span id="chain-coll">0</span> &nbsp; Load:
           <span id="chain-load">0.00</span>
         </div>
-        <div class="table-wrap"><table id="chain-table"></table></div>
+        <div class="table-wrap">
+          <table id="chain-table"></table>
+        </div>
       </div>
       <div class="method-card card-linear" id="card-linear">
         <h3>📏 Linear Probing</h3>
@@ -193,7 +544,9 @@
           Collisions: <span id="linear-coll">0</span> &nbsp; Probes:
           <span id="linear-probes">0</span>
         </div>
-        <div class="table-wrap"><table id="linear-table"></table></div>
+        <div class="table-wrap">
+          <table id="linear-table"></table>
+        </div>
       </div>
       <div class="method-card card-quad" id="card-quad">
         <h3>📐 Quadratic Probing</h3>
@@ -201,7 +554,9 @@
           Collisions: <span id="quad-coll">0</span> &nbsp; Probes:
           <span id="quad-probes">0</span>
         </div>
-        <div class="table-wrap"><table id="quad-table"></table></div>
+        <div class="table-wrap">
+          <table id="quad-table"></table>
+        </div>
       </div>
       <div class="method-card card-double" id="card-double">
         <h3>🔂 Double Hashing</h3>
@@ -209,7 +564,9 @@
           Collisions: <span id="double-coll">0</span> &nbsp; Probes:
           <span id="double-probes">0</span>
         </div>
-        <div class="table-wrap"><table id="double-table"></table></div>
+        <div class="table-wrap">
+          <table id="double-table"></table>
+        </div>
       </div>
     </div>
 
@@ -397,4 +754,25 @@
       };
     </script>
   </body>
+  <script>
+    function toggleTheme() {
+      var isLight = document.body.classList.toggle("light-mode");
+      localStorage.setItem("ds-theme", isLight ? "light" : "dark");
+      document.getElementById("icon-moon").style.display = isLight
+        ? "none"
+        : "block";
+      document.getElementById("icon-sun").style.display = isLight
+        ? "block"
+        : "none";
+    }
+    (function () {
+      if (localStorage.getItem("ds-theme") === "light") {
+        document.body.classList.add("light-mode");
+        var m = document.getElementById("icon-moon"),
+          s = document.getElementById("icon-sun");
+        if (m) m.style.display = "none";
+        if (s) s.style.display = "block";
+      }
+    })();
+  </script>
 </html>

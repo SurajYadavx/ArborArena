@@ -2,18 +2,276 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>DS Dojo — AVL Tree</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ARBOR ARENA — AVL Tree</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
+      /* ═══════════════════════════════════════════════
+       ARBOR ARENA — DESIGN SYSTEM TOKENS
+    ═══════════════════════════════════════════════ */
+      :root {
+        --bg: #0d0d14;
+        --bg-nav: #09090f;
+        --bg-surface: #111118;
+        --bg-card: #16161f;
+        --bg-card-hover: #1c1c28;
+        --border: #1e1e2e;
+        --border-card: #26263a;
+        --text: #e2e4f0;
+        --text-muted: #7878a0;
+        --text-dim: #3a3a52;
+        --accent: #ffd700;
+        --accent-amber: #fbbf24;
+        --green: #22c55e;
+        --red: #ef4444;
+        --cyan: #06b6d4;
+        --purple: #a78bfa;
+        --orange: #ff9f43;
+        --shadow-card: 0 2px 16px rgba(0, 0, 0, 0.35);
+        --shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.45);
+        --radius: 12px;
+        --radius-sm: 8px;
+        --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        --accent-avl: #a78bfa;
+      }
+
+      body.light-mode {
+        --bg: #f5f5fa;
+        --bg-nav: #ffffff;
+        --bg-surface: #fafaff;
+        --bg-card: #ffffff;
+        --bg-card-hover: #f0f0fa;
+        --border: #e2e2f0;
+        --border-card: #d0d0e8;
+        --text: #0f0f1e;
+        --text-muted: #5a5a80;
+        --text-dim: #b0b0d0;
+        --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.08);
+        --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.14);
+      }
+
+      /* ── SHARED DS NAV ── */
+      .ds-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 24px;
+        height: 44px;
+        background: #0a0a14;
+        border-bottom: 1px solid #1e1e2e;
+        position: sticky;
+        top: 0;
+        z-index: 999;
+        flex-shrink: 0;
+      }
+
+      .ds-nav-logo {
+        font-size: 16px;
+        font-weight: 800;
+        text-decoration: none;
+        color: #fff;
+      }
+
+      .ds-nav-logo span {
+        color: #ffd700;
+      }
+
+      .ds-nav-links {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+      }
+
+      .ds-nav-links a {
+        color: #777;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 500;
+        padding: 4px 9px;
+        border-radius: 5px;
+        transition:
+          color 0.18s,
+          background 0.18s;
+      }
+
+      .ds-nav-links a:hover {
+        color: #fff;
+        background: #1e1e2e;
+      }
+
+      .ds-nav-links a.ds-active {
+        color: #a78bfa;
+        background: rgba(167, 139, 250, 0.08);
+      }
+
+      .ds-nav-sep {
+        color: #252535;
+        font-size: 14px;
+        padding: 0 3px;
+        user-select: none;
+      }
+
+      /* ── PHASE 2: DUAL MODE ── */
+      :root {
+        --bg: #0d0d1a;
+        --bg-nav: #0a0a14;
+        --bg-surface: #111122;
+        --bg-card: #131326;
+        --bg-card-hover: #191932;
+        --border: #1a1a30;
+        --border-card: #24244a;
+        --text: #dde0f0;
+        --text-muted: #8888a8;
+        --text-dim: #44445a;
+        --shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
+        --accent-avl: #a78bfa;
+      }
+
+      body.light-mode {
+        --bg: #f3f3fa;
+        --bg-nav: #ffffff;
+        --bg-surface: #ffffff;
+        --bg-card: #ffffff;
+        --bg-card-hover: #f5f0ff;
+        --border: #e0e0ee;
+        --border-card: #d0d0ea;
+        --text: #1a1a2e;
+        --text-muted: #666688;
+        --text-dim: #aaaacc;
+        --shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        background-image: radial-gradient(
+          ellipse 70% 50% at 80% 30%,
+          rgba(167, 139, 250, 0.05) 0%,
+          transparent 65%
+        );
+        background-attachment: fixed;
+      }
+
+      .ds-nav {
+        background: var(--bg-nav);
+        border-color: var(--border);
+      }
+
+      .ds-nav-logo {
+        color: var(--text);
+      }
+
+      .ds-nav-links a {
+        color: var(--text-muted);
+      }
+
+      .ds-nav-links a:hover {
+        color: var(--text);
+        background: var(--bg-card);
+      }
+
+      #theme-toggle {
+        background: none;
+        border: 1px solid var(--border-card);
+        color: var(--text-muted);
+        padding: 3px 8px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        line-height: 1.6;
+        transition: all 0.18s;
+        margin-left: 2px;
+        font-family: inherit;
+      }
+
+      #theme-toggle:hover {
+        border-color: var(--text-muted);
+        color: var(--text);
+      }
+
+      /* topbar & controls */
+      .topbar {
+        background: var(--bg-nav) !important;
+        border-color: var(--border) !important;
+      }
+
+      .topbar h2 {
+        color: var(--text);
+      }
+
+      .topbar button,
+      .topbar select {
+        background: var(--bg-card) !important;
+        color: var(--text) !important;
+        border: 1px solid var(--border-card) !important;
+        font-family: "Inter", sans-serif;
+        font-weight: 600;
+        border-radius: 6px !important;
+        transition:
+          opacity 0.18s,
+          transform 0.1s !important;
+      }
+
+      .topbar button:hover {
+        opacity: 0.85;
+        transform: translateY(-1px);
+      }
+
+      input[type="number"] {
+        background: var(--bg-card);
+        color: var(--text);
+        border: 1px solid var(--border-card);
+        border-radius: 6px;
+        padding: 6px 10px;
+        font-family: "Inter", sans-serif;
+        outline: none;
+        transition: border-color 0.18s;
+      }
+
+      input[type="number"]:focus {
+        border-color: var(--accent-avl);
+      }
+
+      body.light-mode input[type="number"] {
+        background: #fff;
+      }
+
+      /* stats boxes */
+      .stat-box {
+        background: var(--bg-surface) !important;
+        border: 1px solid var(--border-card) !important;
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+      }
+
+      .stat-box .label {
+        color: var(--text-muted) !important;
+      }
+
+      .stat-box .val {
+        color: var(--accent-avl) !important;
+      }
+
+      .link {
+        stroke: var(--border-card) !important;
+      }
+
       * {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
       }
+
       body {
-        background: #0f0f1a;
+        background: #0d0d1a;
         color: #fff;
-        font-family: "Segoe UI", sans-serif;
+        font-family: "Inter", "Segoe UI", sans-serif;
       }
 
       /* ── TOP BAR ── */
@@ -24,10 +282,12 @@
         padding: 14px 32px;
         border-bottom: 1px solid #1e1e2e;
       }
+
       .topbar h2 {
         color: #a78bfa;
         font-size: 20px;
       }
+
       .mode-toggle {
         display: flex;
         align-items: center;
@@ -35,16 +295,19 @@
         font-size: 14px;
         color: #aaa;
       }
+
       .toggle-switch {
         position: relative;
         width: 52px;
         height: 26px;
       }
+
       .toggle-switch input {
         opacity: 0;
         width: 0;
         height: 0;
       }
+
       .slider {
         position: absolute;
         cursor: pointer;
@@ -53,6 +316,7 @@
         border-radius: 26px;
         transition: 0.3s;
       }
+
       .slider:before {
         content: "";
         position: absolute;
@@ -64,15 +328,19 @@
         border-radius: 50%;
         transition: 0.3s;
       }
+
       input:checked + .slider {
         background: #a78bfa;
       }
+
       input:checked + .slider:before {
         transform: translateX(26px);
       }
+
       .mode-label {
         font-weight: 700;
       }
+
       .mode-label.predict {
         color: #a78bfa;
       }
@@ -82,6 +350,7 @@
         text-align: center;
         padding: 16px;
       }
+
       input[type="number"] {
         padding: 8px;
         font-size: 16px;
@@ -90,6 +359,7 @@
         width: 80px;
         text-align: center;
       }
+
       button {
         padding: 8px 18px;
         margin: 4px;
@@ -99,19 +369,23 @@
         cursor: pointer;
         transition: opacity 0.2s;
       }
+
       button:disabled {
         opacity: 0.4;
         cursor: not-allowed;
       }
+
       #btn-insert {
         background: #a78bfa;
         color: #000;
         font-weight: 700;
       }
+
       #btn-delete {
         background: #ff4f4f;
         color: #fff;
       }
+
       #btn-reset {
         background: #444;
         color: #fff;
@@ -125,6 +399,7 @@
         margin: 8px 0;
         flex-wrap: wrap;
       }
+
       .stat-box {
         background: #1e1e2e;
         padding: 6px 20px;
@@ -132,15 +407,18 @@
         text-align: center;
         font-size: 13px;
       }
+
       .stat-box span {
         font-size: 20px;
         font-weight: 800;
         display: block;
         color: #a78bfa;
       }
+
       #streak-box span {
         color: #ffd700;
       }
+
       #score-box span {
         color: #00e5ff;
       }
@@ -155,9 +433,11 @@
         justify-content: center;
         align-items: center;
       }
+
       #predict-overlay.active {
         display: flex;
       }
+
       #predict-panel {
         background: #1a1a2e;
         border: 2px solid #a78bfa;
@@ -167,27 +447,32 @@
         width: 90%;
         animation: slideUp 0.3s ease;
       }
+
       @keyframes slideUp {
         from {
           transform: translateY(30px);
           opacity: 0;
         }
+
         to {
           transform: translateY(0);
           opacity: 1;
         }
       }
+
       #predict-panel h3 {
         color: #a78bfa;
         font-size: 18px;
         margin-bottom: 6px;
       }
+
       #predict-question {
         font-size: 16px;
         line-height: 1.6;
         color: #ddd;
         margin-bottom: 20px;
       }
+
       #predict-question .highlight {
         color: #ffd700;
         font-weight: 700;
@@ -207,6 +492,7 @@
         gap: 10px;
         margin-bottom: 16px;
       }
+
       .opt-btn {
         background: #1e1e2e;
         border: 2px solid #333;
@@ -218,33 +504,40 @@
         transition: all 0.2s;
         text-align: left;
       }
+
       .opt-btn:hover {
         border-color: #a78bfa;
         background: #2a1e4e;
       }
+
       .opt-btn.correct {
         border-color: #00ff88;
         background: #0a2a1a;
         color: #00ff88;
         animation: pulse 0.5s ease;
       }
+
       .opt-btn.wrong {
         border-color: #ff4f4f;
         background: #2a0a0a;
         color: #ff4f4f;
       }
+
       .opt-btn.reveal {
         border-color: #00ff88;
         background: #0a2a1a;
         color: #00ff88;
       }
+
       @keyframes pulse {
         0% {
           transform: scale(1);
         }
+
         50% {
           transform: scale(1.04);
         }
+
         100% {
           transform: scale(1);
         }
@@ -257,17 +550,21 @@
         min-height: 36px;
         margin-bottom: 12px;
       }
+
       #feedback-msg {
         font-size: 15px;
         font-weight: 700;
         flex: 1;
       }
+
       #feedback-msg.correct {
         color: #00ff88;
       }
+
       #feedback-msg.wrong {
         color: #ff4f4f;
       }
+
       #btn-hint {
         background: #2a2a00;
         border: 1px solid #ffd700;
@@ -278,6 +575,7 @@
         cursor: pointer;
         display: none;
       }
+
       #btn-continue {
         background: #a78bfa;
         color: #000;
@@ -302,15 +600,18 @@
         line-height: 1.8;
         color: #ddd;
       }
+
       #hint-card h4 {
         color: #ffd700;
         margin-bottom: 6px;
         font-size: 14px;
       }
+
       #hint-card .rule {
         color: #a78bfa;
         font-weight: 700;
       }
+
       #hint-card .example {
         color: #00e5ff;
         font-style: italic;
@@ -329,6 +630,7 @@
         font-size: 13px;
         color: #ddd;
       }
+
       #rule-card h4 {
         color: #00ff88;
         margin-bottom: 4px;
@@ -353,14 +655,17 @@
         color: #aaa;
         border-bottom: 1px solid #333;
       }
+
       #challenge-bar.active {
         display: block;
       }
+
       #challenge-bar .cseq {
         color: #ffd700;
         font-weight: 700;
         letter-spacing: 2px;
       }
+
       #challenge-bar .cprog {
         color: #a78bfa;
       }
@@ -370,9 +675,11 @@
         display: block;
         margin: auto;
       }
+
       .node circle {
         stroke-width: 2.5px;
       }
+
       .node text {
         fill: #fff;
         font-size: 13px;
@@ -380,22 +687,94 @@
         text-anchor: middle;
         dominant-baseline: central;
       }
+
       .node .bf {
         fill: #888;
         font-size: 10px;
         text-anchor: middle;
       }
+
       .link {
         fill: none;
         stroke: #444;
         stroke-width: 2px;
       }
+
       .node.unbalanced circle {
         stroke: #ff4f4f !important;
       }
     </style>
   </head>
+
   <body>
+    <!-- ARBOR ARENA NAV -->
+    <nav class="ds-nav">
+      <a class="ds-nav-logo" href="./home.html">🌳 ARBOR <span>ARENA</span></a>
+      <div class="ds-nav-links">
+        <a href="./home.html">← Home</a>
+        <span class="ds-nav-sep">|</span>
+        <a href="./bst.html">BST</a>
+        <a href="./avl.html" class="ds-active">AVL</a>
+        <a href="./battle.html">Battle</a>
+        <a href="./battle3.html">3-Way</a>
+        <a href="./hash.html">Hash</a>
+        <a href="./story_a.html">Stories</a>
+        <span class="ds-nav-sep">|</span>
+        <a href="./arena.html" style="color: var(--accent); font-weight: 700"
+          >⚔️ Arena</a
+        >
+        <button
+          id="theme-toggle"
+          aria-label="Toggle theme"
+          onclick="toggleTheme()"
+          style="
+            background: transparent;
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-sm);
+            padding: 6px 8px;
+            cursor: pointer;
+            color: var(--text-muted);
+            line-height: 0;
+            display: flex;
+            align-items: center;
+            margin-left: 4px;
+            flex-shrink: 0;
+          "
+        >
+          <svg
+            id="icon-moon"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
+          <svg
+            id="icon-sun"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            style="display: none"
+          >
+            <circle cx="12" cy="12" r="5" />
+            <line x1="12" y1="1" x2="12" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="23" />
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+            <line x1="1" y1="12" x2="3" y2="12" />
+            <line x1="21" y1="12" x2="23" y2="12" />
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+          </svg>
+        </button>
+      </div>
+    </nav>
     <!-- TOP BAR -->
     <div class="topbar">
       <h2>⚖️ AVL Tree</h2>
@@ -1602,4 +1981,25 @@
       </div>
     </div>
   </body>
+  <script>
+    function toggleTheme() {
+      var isLight = document.body.classList.toggle("light-mode");
+      localStorage.setItem("ds-theme", isLight ? "light" : "dark");
+      document.getElementById("icon-moon").style.display = isLight
+        ? "none"
+        : "block";
+      document.getElementById("icon-sun").style.display = isLight
+        ? "block"
+        : "none";
+    }
+    (function () {
+      if (localStorage.getItem("ds-theme") === "light") {
+        document.body.classList.add("light-mode");
+        var m = document.getElementById("icon-moon"),
+          s = document.getElementById("icon-sun");
+        if (m) m.style.display = "none";
+        if (s) s.style.display = "block";
+      }
+    })();
+  </script>
 </html>

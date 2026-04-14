@@ -2,79 +2,339 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>DS Dojo — BST</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ARBOR ARENA — BST</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
+      /* ═══════════════════════════════════════════════
+       ARBOR ARENA — DESIGN SYSTEM TOKENS
+    ═══════════════════════════════════════════════ */
+      :root {
+        --bg: #0d0d14;
+        --bg-nav: #09090f;
+        --bg-surface: #111118;
+        --bg-card: #16161f;
+        --bg-card-hover: #1c1c28;
+        --border: #1e1e2e;
+        --border-card: #26263a;
+        --text: #e2e4f0;
+        --text-muted: #7878a0;
+        --text-dim: #3a3a52;
+        --accent: #ffd700;
+        --accent-amber: #fbbf24;
+        --green: #22c55e;
+        --red: #ef4444;
+        --cyan: #06b6d4;
+        --purple: #a78bfa;
+        --orange: #ff9f43;
+        --shadow-card: 0 2px 16px rgba(0, 0, 0, 0.35);
+        --shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.45);
+        --radius: 12px;
+        --radius-sm: 8px;
+        --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        --accent-bst: #06b6d4;
+      }
+
+      body.light-mode {
+        --bg: #f5f5fa;
+        --bg-nav: #ffffff;
+        --bg-surface: #fafaff;
+        --bg-card: #ffffff;
+        --bg-card-hover: #f0f0fa;
+        --border: #e2e2f0;
+        --border-card: #d0d0e8;
+        --text: #0f0f1e;
+        --text-muted: #5a5a80;
+        --text-dim: #b0b0d0;
+        --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.08);
+        --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.14);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
       body {
-        background: #0f0f1a;
-        color: #fff;
-        font-family: sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Inter", sans-serif;
         text-align: center;
+        background-image: radial-gradient(
+          ellipse 70% 50% at 15% 30%,
+          rgba(6, 182, 212, 0.04) 0%,
+          transparent 65%
+        );
+        background-attachment: fixed;
+        -webkit-font-smoothing: antialiased;
       }
-      h2 {
-        color: #00e5ff;
-        margin-top: 20px;
+
+      /* ── NAV ── */
+      .ds-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 28px;
+        height: 48px;
+        background: var(--bg-nav);
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        z-index: 999;
+        flex-shrink: 0;
+        text-align: left;
+        backdrop-filter: blur(8px);
       }
-      #controls {
-        margin: 20px;
-      }
-      input {
-        padding: 8px;
+
+      .ds-nav-logo {
         font-size: 16px;
+        font-weight: 800;
+        letter-spacing: -0.3px;
+        text-decoration: none;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .ds-nav-logo span {
+        color: var(--accent);
+      }
+
+      .ds-nav-links {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+      }
+
+      .ds-nav-links a {
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 500;
+        padding: 5px 10px;
         border-radius: 6px;
-        border: none;
+        transition:
+          color 0.15s ease,
+          background 0.15s ease;
+      }
+
+      .ds-nav-links a:hover {
+        color: var(--text);
+        background: var(--bg-card);
+      }
+
+      .ds-nav-links a.ds-active {
+        color: var(--accent-bst);
+        background: rgba(6, 182, 212, 0.08);
+        font-weight: 600;
+      }
+
+      .ds-nav-sep,
+      .ds-nav-links .ds-nav-sep {
+        color: var(--border-card);
+        font-size: 14px;
+        padding: 0 3px;
+        user-select: none;
+      }
+
+      #theme-toggle {
+        background: transparent;
+        border: 1px solid var(--border-card);
+        border-radius: var(--radius-sm);
+        padding: 6px 8px;
+        cursor: pointer;
+        color: var(--text-muted);
+        line-height: 0;
+        transition: var(--transition);
+        margin-left: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      #theme-toggle:hover {
+        border-color: var(--text-muted);
+        color: var(--text);
+        background: var(--bg-card);
+      }
+
+      /* ── PAGE CONTENT ── */
+      h2 {
+        color: var(--accent-bst);
+        margin-top: 0;
+        padding: 24px 0 4px;
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+      }
+
+      #controls {
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 20px;
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        margin: 12px auto;
+        box-shadow: var(--shadow-card);
+      }
+
+      #val-input {
+        background: var(--bg-card);
+        border: 1px solid var(--border-card) !important;
+        color: var(--text);
+        padding: 7px 12px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-family: "Inter", sans-serif;
+        outline: none;
         width: 80px;
         text-align: center;
+        transition: border-color 0.18s;
       }
+
+      #val-input:focus {
+        border-color: var(--accent-bst) !important;
+      }
+
       button {
         padding: 8px 16px;
-        margin: 4px;
-        font-size: 15px;
+        margin: 0;
+        font-size: 13px;
         border: none;
         border-radius: 6px;
         cursor: pointer;
+        font-family: "Inter", sans-serif;
+        font-weight: 600;
+        transition: var(--transition);
       }
+
+      button:hover {
+        filter: brightness(1.08);
+        transform: translateY(-1px);
+      }
+
       #btn-insert {
-        background: #00e5ff;
+        background: var(--accent-bst);
         color: #000;
       }
+
       #btn-delete {
-        background: #ff4f4f;
+        background: var(--red);
         color: #fff;
       }
+
       #btn-reset {
-        background: #444;
-        color: #fff;
+        background: var(--bg-card);
+        color: var(--text-muted);
+        border: 1px solid var(--border-card);
       }
+
       #inorder {
         margin-top: 10px;
-        color: #aaa;
-        font-size: 14px;
+        color: var(--text-muted);
+        font-size: 13px;
+        font-family: "JetBrains Mono", monospace;
+        background: var(--bg-surface);
+        display: inline-block;
+        padding: 4px 14px;
+        border-radius: 20px;
+        border: 1px solid var(--border);
       }
+
       svg {
         display: block;
         margin: auto;
       }
+
       .node circle {
-        fill: #1e1e2e;
-        stroke: #00e5ff;
+        fill: var(--bg-card);
+        stroke: var(--accent-bst);
         stroke-width: 2.5px;
       }
+
       .node text {
-        fill: #fff;
+        fill: var(--text);
         font-size: 14px;
         font-weight: bold;
         text-anchor: middle;
         dominant-baseline: central;
       }
+
       .link {
         fill: none;
-        stroke: #444;
+        stroke: var(--border-card);
         stroke-width: 2px;
       }
     </style>
   </head>
+
   <body>
+    <!-- ARBOR ARENA NAV -->
+    <nav class="ds-nav">
+      <a class="ds-nav-logo" href="./home.html">🌳 ARBOR <span>ARENA</span></a>
+      <div class="ds-nav-links">
+        <a href="./home.html">← Home</a>
+        <span class="ds-nav-sep">|</span>
+        <a href="./bst.html" class="ds-active">BST</a>
+        <a href="./avl.html">AVL</a>
+        <a href="./battle.html">Battle</a>
+        <a href="./battle3.html">3-Way</a>
+        <a href="./hash.html">Hash</a>
+        <a href="./story_a.html">Stories</a>
+        <span class="ds-nav-sep">|</span>
+        <a href="./arena.html" style="color: var(--accent); font-weight: 700"
+          >⚔️ Arena</a
+        >
+        <button
+          id="theme-toggle"
+          aria-label="Toggle theme"
+          onclick="toggleTheme()"
+        >
+          <svg
+            id="icon-moon"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
+          <svg
+            id="icon-sun"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            style="display: none"
+          >
+            <circle cx="12" cy="12" r="5" />
+            <line x1="12" y1="1" x2="12" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="23" />
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+            <line x1="1" y1="12" x2="3" y2="12" />
+            <line x1="21" y1="12" x2="23" y2="12" />
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+          </svg>
+        </button>
+      </div>
+    </nav>
     <h2>Binary Search Tree</h2>
     <div id="controls">
       <input id="val-input" type="number" placeholder="value" />
@@ -250,4 +510,25 @@
       };
     </script>
   </body>
+  <script>
+    function toggleTheme() {
+      var isLight = document.body.classList.toggle("light-mode");
+      localStorage.setItem("ds-theme", isLight ? "light" : "dark");
+      document.getElementById("icon-moon").style.display = isLight
+        ? "none"
+        : "block";
+      document.getElementById("icon-sun").style.display = isLight
+        ? "block"
+        : "none";
+    }
+    (function () {
+      if (localStorage.getItem("ds-theme") === "light") {
+        document.body.classList.add("light-mode");
+        var m = document.getElementById("icon-moon"),
+          s = document.getElementById("icon-sun");
+        if (m) m.style.display = "none";
+        if (s) s.style.display = "block";
+      }
+    })();
+  </script>
 </html>

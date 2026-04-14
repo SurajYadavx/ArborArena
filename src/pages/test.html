@@ -1,22 +1,22 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>DS Dojo — WASM Test</title>
-</head>
-<body>
-  <h2>WASM Pipeline Test</h2>
-  <p id="result">Loading...</p>
+  <head>
+    <meta charset="UTF-8" />
+    <title>ARBOR ARENA — WASM Test</title>
+  </head>
+  <body>
+    <h2>WASM Pipeline Test</h2>
+    <p id="result">Loading...</p>
 
-  <script src="../wasm/ds_dojo.js"></script>
-  <script>
-    Module.onRuntimeInitialized = function () {
-      const result = Module.ccall('ping', 'number', [], []);
-      document.getElementById('result').textContent =
-        result === 42
-          ? '✅ WASM works! ping() returned: ' + result
-          : '❌ Something went wrong: ' + result;
-    };
-  </script>
-</body>
+    <script src="../wasm/ds_dojo.js"></script>
+    <script>
+      Module.onRuntimeInitialized = function () {
+        const result = Module.ccall("ping", "number", [], []);
+        document.getElementById("result").textContent =
+          result === 42
+            ? "✅ WASM works! ping() returned: " + result
+            : "❌ Something went wrong: " + result;
+      };
+    </script>
+  </body>
 </html>

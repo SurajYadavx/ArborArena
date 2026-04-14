@@ -2,284 +2,618 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>DS Dojo — Learn Data Structures by Fighting Them</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ARBOR ARENA — Learn Data Structures by Fighting Them</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
     <style>
+      /* ═══════════════════════════════════════════════
+           ARBOR ARENA — DESIGN SYSTEM TOKENS
+        ═══════════════════════════════════════════════ */
+      :root {
+        --bg: #0d0d14;
+        --bg-nav: #09090f;
+        --bg-surface: #111118;
+        --bg-card: #16161f;
+        --bg-card-hover: #1c1c28;
+        --border: #1e1e2e;
+        --border-card: #26263a;
+        --text: #e2e4f0;
+        --text-muted: #7878a0;
+        --text-dim: #3a3a52;
+        --accent: #ffd700;
+        --accent-amber: #fbbf24;
+        --green: #22c55e;
+        --red: #ef4444;
+        --cyan: #06b6d4;
+        --purple: #a78bfa;
+        --orange: #ff9f43;
+        --shadow-card: 0 2px 16px rgba(0, 0, 0, 0.35);
+        --shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.45);
+        --radius: 12px;
+        --radius-sm: 8px;
+        --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      body.light-mode {
+        --bg: #f5f5fa;
+        --bg-nav: #ffffff;
+        --bg-surface: #fafaff;
+        --bg-card: #ffffff;
+        --bg-card-hover: #f0f0fa;
+        --border: #e2e2f0;
+        --border-card: #d0d0e8;
+        --text: #0f0f1e;
+        --text-muted: #5a5a80;
+        --text-dim: #b0b0d0;
+        --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.08);
+        --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.14);
+      }
+
+      /* ═══════════════════════════════════════════════
+           BASE
+        ═══════════════════════════════════════════════ */
       * {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
       }
+
       body {
-        background: #0f0f1a;
-        color: #fff;
-        font-family: "Segoe UI", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Inter", "Segoe UI", sans-serif;
         min-height: 100vh;
+        background-image:
+          radial-gradient(ellipse 70% 50% at 10% 40%, rgba(100, 60, 200, 0.05) 0%, transparent 65%),
+          radial-gradient(ellipse 60% 40% at 90% 15%, rgba(0, 160, 220, 0.04) 0%, transparent 60%);
+        background-attachment: fixed;
+        -webkit-font-smoothing: antialiased;
       }
 
-      /* ── NAV ── */
-      nav {
+      body.light-mode {
+        background-image:
+          radial-gradient(ellipse 70% 50% at 10% 40%, rgba(100, 60, 200, 0.04) 0%, transparent 65%),
+          radial-gradient(ellipse 60% 40% at 90% 15%, rgba(0, 120, 200, 0.03) 0%, transparent 60%);
+      }
+
+      /* ═══════════════════════════════════════════════
+           NAVIGATION
+        ═══════════════════════════════════════════════ */
+      .ds-nav {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 16px 40px;
-        border-bottom: 1px solid #1e1e2e;
-      }
-      .logo {
-        font-size: 22px;
-        font-weight: 800;
-        letter-spacing: 1px;
-      }
-      .logo span {
-        color: #ffd700;
-      }
-      .nav-links a {
-        color: #aaa;
-        text-decoration: none;
-        margin-left: 24px;
-        font-size: 14px;
-        transition: color 0.2s;
-      }
-      .nav-links a:hover {
-        color: #fff;
+        padding: 0 28px;
+        height: 48px;
+        background: var(--bg-nav);
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        z-index: 999;
+        flex-shrink: 0;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
       }
 
-      /* ── HERO ── */
+      .ds-nav-logo {
+        font-size: 16px;
+        font-weight: 800;
+        letter-spacing: -0.3px;
+        text-decoration: none;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .ds-nav-logo span {
+        color: var(--accent);
+      }
+
+      .ds-nav-links {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+      }
+
+      .ds-nav-links a {
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 500;
+        padding: 5px 10px;
+        border-radius: 6px;
+        transition: color 0.15s ease, background 0.15s ease;
+      }
+
+      .ds-nav-links a:hover {
+        color: var(--text);
+        background: var(--bg-card);
+      }
+
+      .ds-nav-links a.ds-active {
+        color: var(--accent);
+        background: rgba(255, 215, 0, 0.08);
+        font-weight: 600;
+      }
+
+      .ds-nav-links .ds-sep {
+        color: var(--border-card);
+        font-size: 16px;
+        padding: 0 4px;
+        user-select: none;
+      }
+
+      /* ═══════════════════════════════════════════════
+           HERO
+        ═══════════════════════════════════════════════ */
       .hero {
         text-align: center;
-        padding: 80px 20px 60px;
+        padding: 80px 20px 64px;
+        background: transparent;
+        position: relative;
       }
+
+      .hero::before {
+        content: '';
+        position: absolute;
+        top: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 600px;
+        height: 320px;
+        background: radial-gradient(ellipse at center, rgba(255, 215, 0, 0.055) 0%, transparent 70%);
+        pointer-events: none;
+      }
+
       .hero h1 {
         font-size: 48px;
         font-weight: 900;
-        line-height: 1.2;
+        line-height: 1.15;
+        letter-spacing: -1px;
+        color: var(--text);
       }
+
       .hero h1 .fight {
-        color: #ffd700;
+        color: var(--accent);
+        position: relative;
       }
+
+      /* shimmer sweep on .fight */
+      .hero h1 .fight::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.18) 50%, transparent 100%);
+        background-size: 200% 100%;
+        animation: shimmer 3s infinite;
+        border-radius: 4px;
+      }
+
+      @keyframes shimmer {
+        0% {
+          background-position: -100% 0;
+        }
+
+        100% {
+          background-position: 200% 0;
+        }
+      }
+
       .hero p {
-        color: #aaa;
-        font-size: 18px;
-        margin: 20px auto;
-        max-width: 560px;
-        line-height: 1.7;
+        color: var(--text-muted);
+        font-size: 17px;
+        margin: 22px auto;
+        max-width: 540px;
+        line-height: 1.75;
       }
+
       .hero-btns {
         margin-top: 32px;
         display: flex;
         justify-content: center;
-        gap: 16px;
+        gap: 14px;
         flex-wrap: wrap;
       }
+
       .btn-primary {
-        background: #ffd700;
+        background: var(--accent);
         color: #000;
-        padding: 14px 32px;
-        border-radius: 8px;
-        font-size: 16px;
+        padding: 13px 30px;
+        border-radius: var(--radius-sm);
+        font-size: 15px;
         font-weight: 700;
+        letter-spacing: 0.2px;
         text-decoration: none;
-        transition: transform 0.15s;
-      }
-      .btn-primary:hover {
-        transform: scale(1.04);
-      }
-      .btn-secondary {
-        background: transparent;
-        color: #fff;
-        border: 1px solid #333;
-        padding: 14px 32px;
-        border-radius: 8px;
-        font-size: 16px;
-        text-decoration: none;
-        transition: border-color 0.2s;
-      }
-      .btn-secondary:hover {
-        border-color: #ffd700;
-        color: #ffd700;
+        transition: var(--transition);
+        box-shadow: 0 2px 14px rgba(255, 215, 0, 0.22);
       }
 
-      /* ── MODULES ── */
+      .btn-primary:hover {
+        filter: brightness(1.08);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 24px rgba(255, 215, 0, 0.35);
+      }
+
+      .btn-secondary {
+        background: transparent;
+        color: var(--text-muted);
+        border: 1px solid var(--border-card);
+        padding: 13px 30px;
+        border-radius: var(--radius-sm);
+        font-size: 15px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: var(--transition);
+      }
+
+      .btn-secondary:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: rgba(255, 215, 0, 0.05);
+        transform: translateY(-1px);
+      }
+
+      /* ═══════════════════════════════════════════════
+           SECTIONS & CARDS
+        ═══════════════════════════════════════════════ */
       .section-title {
         text-align: center;
-        font-size: 28px;
+        font-size: 26px;
         font-weight: 800;
-        margin: 20px 0 10px;
+        letter-spacing: -0.5px;
+        margin: 20px 0 8px;
+        color: var(--text);
       }
+
       .section-sub {
         text-align: center;
-        color: #aaa;
-        font-size: 15px;
-        margin-bottom: 40px;
+        color: var(--text-muted);
+        font-size: 14px;
+        margin-bottom: 36px;
       }
+
       .cards {
         display: flex;
         justify-content: center;
-        gap: 24px;
+        gap: 20px;
         flex-wrap: wrap;
-        padding: 0 40px 60px;
+        padding: 0 40px 64px;
       }
+
       .card {
-        background: #1e1e2e;
-        border-radius: 16px;
-        padding: 28px 24px;
-        width: 280px;
-        border-top: 4px solid;
+        background: var(--bg-card);
+        border-radius: var(--radius);
+        padding: 26px 22px;
+        width: 276px;
+        border: 1px solid var(--border-card);
+        border-top: 3px solid;
         text-decoration: none;
-        color: #fff;
-        transition:
-          transform 0.2s,
-          box-shadow 0.2s;
+        color: var(--text);
+        transition: var(--transition);
         position: relative;
         overflow: hidden;
+        box-shadow: var(--shadow-card);
       }
+
       .card:hover {
-        transform: translateY(-6px);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-hover);
+        background: var(--bg-card-hover);
       }
+
       .card .icon {
-        font-size: 36px;
+        font-size: 32px;
         margin-bottom: 14px;
+        display: block;
       }
+
       .card h3 {
-        font-size: 18px;
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: -0.3px;
         margin-bottom: 8px;
       }
+
       .card p {
-        color: #888;
-        font-size: 14px;
-        line-height: 1.6;
+        color: var(--text-muted);
+        font-size: 13.5px;
+        line-height: 1.65;
       }
+
       .card .tag {
         position: absolute;
-        top: 16px;
-        right: 16px;
-        font-size: 11px;
-        padding: 3px 10px;
+        top: 14px;
+        right: 14px;
+        font-size: 10px;
+        padding: 2px 9px;
         border-radius: 20px;
         font-weight: 700;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
       }
+
       .tag-new {
-        background: #ffd700;
+        background: var(--accent);
         color: #000;
       }
+
       .tag-core {
-        background: #333;
-        color: #aaa;
+        background: var(--border-card);
+        color: var(--text-muted);
       }
 
       .card-bst {
-        border-color: #00e5ff;
-      }
-      .card-bst h3 {
-        color: #00e5ff;
-      }
-      .card-avl {
-        border-color: #a78bfa;
-      }
-      .card-avl h3 {
-        color: #a78bfa;
-      }
-      .card-battle {
-        border-color: #ff9f43;
-      }
-      .card-battle h3 {
-        color: #ff9f43;
-      }
-      .card-hash {
-        border-color: #ffd700;
-      }
-      .card-hash h3 {
-        color: #ffd700;
+        border-top-color: var(--cyan);
       }
 
-      /* ── WHY SECTION ── */
+      .card-bst h3 {
+        color: var(--cyan);
+      }
+
+      .card-avl {
+        border-top-color: var(--purple);
+      }
+
+      .card-avl h3 {
+        color: var(--purple);
+      }
+
+      .card-battle {
+        border-top-color: var(--orange);
+      }
+
+      .card-battle h3 {
+        color: var(--orange);
+      }
+
+      .card-hash {
+        border-top-color: var(--accent);
+      }
+
+      .card-hash h3 {
+        color: var(--accent);
+      }
+
+      /* ═══════════════════════════════════════════════
+           WHY SECTION
+        ═══════════════════════════════════════════════ */
       .why {
-        background: #13131f;
+        background: var(--bg-surface);
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
         padding: 60px 40px;
         text-align: center;
       }
+
       .why h2 {
-        font-size: 26px;
+        font-size: 24px;
+        font-weight: 800;
+        letter-spacing: -0.4px;
         margin-bottom: 40px;
+        color: var(--text);
       }
+
       .why-grid {
         display: flex;
         justify-content: center;
-        gap: 32px;
+        gap: 36px;
         flex-wrap: wrap;
       }
+
       .why-item {
-        max-width: 220px;
-      }
-      .why-item .ico {
-        font-size: 32px;
-        margin-bottom: 12px;
-      }
-      .why-item h4 {
-        font-size: 15px;
-        margin-bottom: 6px;
-        color: #ffd700;
-      }
-      .why-item p {
-        font-size: 13px;
-        color: #888;
-        line-height: 1.6;
+        max-width: 210px;
       }
 
-      /* ── FOOTER ── */
+      .why-item .ico {
+        font-size: 28px;
+        s margin-bottom: 12px;
+        opacity: 0.9;
+      }
+
+      .why-item h4 {
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 6px;
+        color: var(--accent);
+        letter-spacing: -0.2px;
+      }
+
+      .why-item p {
+        font-size: 13px;
+        color: var(--text-muted);
+        line-height: 1.65;
+      }
+
+      /* ═══════════════════════════════════════════════
+           FOOTER
+        ═══════════════════════════════════════════════ */
       footer {
         text-align: center;
         padding: 24px;
-        color: #444;
+        color: var(--text-dim);
         font-size: 13px;
-        border-top: 1px solid #1e1e2e;
+        border-top: 1px solid var(--border);
+        background: var(--bg-nav);
       }
+
       footer span {
-        color: #ffd700;
+        color: var(--accent);
       }
-      /* ── STORY CARDS ── */
+
+      /* ═══════════════════════════════════════════════
+           STORY CARDS
+        ═══════════════════════════════════════════════ */
       .card-story-a {
-        border-color: #00e5ff;
+        border-top-color: var(--cyan);
       }
+
       .card-story-a h3 {
-        color: #00e5ff;
+        color: var(--cyan);
       }
+
       .card-story-b {
-        border-color: #a78bfa;
+        border-top-color: var(--purple);
       }
+
       .card-story-b h3 {
-        color: #a78bfa;
+        color: var(--purple);
       }
+
       .card-story-c {
-        border-color: #ff9f43;
+        border-top-color: var(--orange);
       }
+
       .card-story-c h3 {
-        color: #ff9f43;
+        color: var(--orange);
       }
+
       .card-story-d {
-        border-color: #ffd700;
+        border-top-color: var(--accent);
       }
+
       .card-story-d h3 {
-        color: #ffd700;
+        color: var(--accent);
       }
+
       .tag-story {
-        background: #2ecc71;
+        background: var(--green);
         color: #000;
+      }
+
+      /* ═══════════════════════════════════════════════
+           THEME TOGGLE (SVG)
+        ═══════════════════════════════════════════════ */
+      #theme-toggle {
+        background: transparent;
+        border: 1px solid var(--border-card);
+        border-radius: var(--radius-sm);
+        padding: 6px 8px;
+        cursor: pointer;
+        color: var(--text-muted);
+        line-height: 0;
+        transition: var(--transition);
+        margin-left: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      #theme-toggle:hover {
+        border-color: var(--text-muted);
+        color: var(--text);
+        background: var(--bg-card);
+      }
+
+      /* ═══════════════════════════════════════════════
+           CODE ARENA HOME CARD
+        ═══════════════════════════════════════════════ */
+      .arena-home-card {
+        border-color: var(--accent) !important;
+      }
+
+      .arena-home-card h3 {
+        color: var(--accent);
+      }
+
+      .arena-home-card p {
+        color: var(--text-muted);
+      }
+
+      .diff-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+      }
+
+      .pill-easy {
+        background: rgba(34, 197, 94, 0.12);
+        color: var(--green);
+      }
+
+      .pill-medium {
+        background: rgba(251, 191, 36, 0.12);
+        color: var(--accent-amber);
+      }
+
+      .pill-hard {
+        background: rgba(239, 68, 68, 0.12);
+        color: var(--red);
+      }
+
+      .pill-lang {
+        background: var(--bg-card);
+        color: var(--text-muted);
+        border: 1px solid var(--border-card);
       }
     </style>
   </head>
+
   <body>
-    <!-- NAV -->
-    <nav>
-      <div class="logo">DS <span>Dojo</span></div>
-      <div class="nav-links">
-        <a href="bst.html">BST</a>
-        <a href="avl.html">AVL</a>
-        <a href="battle.html">Battle</a>
-        <a href="hash.html">Hash</a>
-        <a href="story_a.html">Stories</a>
-        <a href="battle3.html">Battle 3-Way</a>
-        <a href="arena.html" style="color: #ffd700">⚔️ Arena</a>
+    <!-- ARBOR ARENA NAV -->
+    <nav class="ds-nav">
+      <a class="ds-nav-logo" href="./home.html">🌳 ARBOR <span>ARENA</span></a>
+      <div class="ds-nav-links">
+        <a href="./home.html" class="ds-active">Home</a>
+        <span class="ds-sep">|</span>
+        <a href="./bst.html">BST</a>
+        <a href="./avl.html">AVL</a>
+        <a href="./battle.html">Battle</a>
+        <a href="./battle3.html">3-Way</a>
+        <a href="./hash.html">Hash</a>
+        <a href="./story_a.html">Stories</a>
+        <span class="ds-sep">|</span>
+        <a href="./arena.html" style="color: var(--accent); font-weight: 700"
+          >⚔️ Arena</a
+        >
+        <button
+          id="theme-toggle"
+          aria-label="Toggle theme"
+          onclick="toggleTheme()"
+        >
+          <svg
+            id="icon-moon"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
+          <svg
+            id="icon-sun"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            style="display: none"
+          >
+            <circle cx="12" cy="12" r="5" />
+            <line x1="12" y1="1" x2="12" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="23" />
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+            <line x1="1" y1="12" x2="3" y2="12" />
+            <line x1="21" y1="12" x2="23" y2="12" />
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+          </svg>
+        </button>
       </div>
     </nav>
 
@@ -390,75 +724,32 @@
         </p>
       </a>
     </div>
+
     <!-- CODE ARENA SECTION -->
     <div class="section-title" style="margin-top: 28px">⚔️ Code Arena</div>
     <div class="section-sub">LeetCode-style. Real judge. DS problems only.</div>
     <div class="cards" style="padding-bottom: 80px">
       <a
         href="arena.html"
-        class="card"
-        style="
-          border-color: #ffd700;
-          width: 620px;
-          max-width: 100%;
-          text-decoration: none;
-        "
+        class="card arena-home-card"
+        style="width: 620px; max-width: 100%"
       >
         <div class="icon">⚔️</div>
-        <h3 style="color: #ffd700">Code Arena — DS Practice</h3>
-        <p
-          style="
-            margin-top: 8px;
-            color: #aaa;
-            font-size: 13px;
-            line-height: 1.7;
-          "
-        >
+        <h3>Code Arena — DS Practice</h3>
+        <p style="margin-top: 8px; font-size: 13px; line-height: 1.7">
           Top problems across BST, AVL, Hash Table, Graph, Priority Queue,
           Union-Find and Stack. Monaco editor, real code execution via Judge0,
           sequential hints, streak tracker and full submission history.
         </p>
-        <div style="display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap">
+        <div style="display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap">
+          <span class="diff-pill pill-easy">🟢 Easy</span>
+          <span class="diff-pill pill-medium">🟡 Medium</span>
+          <span class="diff-pill pill-hard">🔴 Hard</span>
           <span
+            class="diff-pill pill-lang"
             style="
-              background: #1a3a1a;
-              color: #2ecc71;
-              padding: 4px 12px;
-              border-radius: 10px;
-              font-size: 11px;
-              font-weight: 700;
-            "
-            >🟢 Easy</span
-          >
-          <span
-            style="
-              background: #3a2a00;
-              color: #ffd700;
-              padding: 4px 12px;
-              border-radius: 10px;
-              font-size: 11px;
-              font-weight: 700;
-            "
-            >🟡 Medium</span
-          >
-          <span
-            style="
-              background: #3a0a0a;
-              color: #e74c3c;
-              padding: 4px 12px;
-              border-radius: 10px;
-              font-size: 11px;
-              font-weight: 700;
-            "
-            >🔴 Hard</span
-          >
-          <span
-            style="
-              background: #1e1e2e;
-              color: #aaa;
-              padding: 4px 12px;
-              border-radius: 10px;
-              font-size: 11px;
+              font-family: &quot;JetBrains Mono&quot;, monospace;
+              font-size: 10px;
             "
             >C / C++ / Java / Python</span
           >
@@ -468,7 +759,7 @@
 
     <!-- WHY SECTION -->
     <div class="why">
-      <h2>Why DS Dojo?</h2>
+      <h2>Why ARBOR ARENA?</h2>
       <div class="why-grid">
         <div class="why-item">
           <div class="ico">🧠</div>
@@ -506,6 +797,27 @@
     </div>
 
     <!-- FOOTER -->
-    <footer>Built with ❤️ at <span>VIT Pune</span> — DS Dojo 2026</footer>
+    <footer>Built with ❤️ at <span>VIT Pune</span> — ARBOR ARENA 2026</footer>
   </body>
+  <script>
+    function toggleTheme() {
+      var isLight = document.body.classList.toggle("light-mode");
+      localStorage.setItem("ds-theme", isLight ? "light" : "dark");
+      document.getElementById("icon-moon").style.display = isLight
+        ? "none"
+        : "block";
+      document.getElementById("icon-sun").style.display = isLight
+        ? "block"
+        : "none";
+    }
+    (function () {
+      if (localStorage.getItem("ds-theme") === "light") {
+        document.body.classList.add("light-mode");
+        var m = document.getElementById("icon-moon");
+        var s = document.getElementById("icon-sun");
+        if (m) m.style.display = "none";
+        if (s) s.style.display = "block";
+      }
+    })();
+  </script>
 </html>

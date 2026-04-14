@@ -2,34 +2,234 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>DS Dojo — DS Battle</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ARBOR ARENA — DS Battle</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
+      /* ── SHARED DS NAV ── */
+      .ds-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 24px;
+        height: 44px;
+        background: #0a0a14;
+        border-bottom: 1px solid #1e1e2e;
+        position: sticky;
+        top: 0;
+        z-index: 999;
+        flex-shrink: 0;
+      }
+
+      .ds-nav-logo {
+        font-size: 16px;
+        font-weight: 800;
+        text-decoration: none;
+        color: #fff;
+      }
+
+      .ds-nav-logo span {
+        color: #ffd700;
+      }
+
+      .ds-nav-links {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+      }
+
+      .ds-nav-links a {
+        color: #777;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 500;
+        padding: 4px 9px;
+        border-radius: 5px;
+        transition:
+          color 0.18s,
+          background 0.18s;
+      }
+
+      .ds-nav-links a:hover {
+        color: #fff;
+        background: #1e1e2e;
+      }
+
+      .ds-nav-links a.ds-active {
+        color: #ff9f43;
+        background: rgba(255, 159, 67, 0.08);
+      }
+
+      .ds-nav-sep {
+        color: #252535;
+        font-size: 14px;
+        padding: 0 3px;
+        user-select: none;
+      }
+
+      /* ── PHASE 2: DUAL MODE ── */
+      :root {
+        --bg: #0d0d1a;
+        --bg-nav: #0a0a14;
+        --bg-surface: #111122;
+        --bg-card: #131326;
+        --bg-card-hover: #191932;
+        --border: #1a1a30;
+        --border-card: #24244a;
+        --text: #dde0f0;
+        --text-muted: #8888a8;
+        --text-dim: #44445a;
+        --shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
+      }
+
+      body.light-mode {
+        --bg: #f3f3fa;
+        --bg-nav: #ffffff;
+        --bg-surface: #ffffff;
+        --bg-card: #ffffff;
+        --bg-card-hover: #fff8f0;
+        --border: #e0e0ee;
+        --border-card: #d0d0ea;
+        --text: #1a1a2e;
+        --text-muted: #666688;
+        --text-dim: #aaaacc;
+        --shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        background-attachment: fixed;
+      }
+
+      .ds-nav {
+        background: var(--bg-nav);
+        border-color: var(--border);
+      }
+
+      .ds-nav-logo {
+        color: var(--text);
+      }
+
+      .ds-nav-links a {
+        color: var(--text-muted);
+      }
+
+      .ds-nav-links a:hover {
+        color: var(--text);
+        background: var(--bg-card);
+      }
+
+      #theme-toggle {
+        background: none;
+        border: 1px solid var(--border-card);
+        color: var(--text-muted);
+        padding: 3px 8px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        line-height: 1.6;
+        transition: all 0.18s;
+        margin-left: 2px;
+        font-family: inherit;
+      }
+
+      #theme-toggle:hover {
+        border-color: var(--text-muted);
+        color: var(--text);
+      }
+
+      h1 {
+        color: var(--text);
+        letter-spacing: -0.5px;
+      }
+
+      #controls {
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        box-shadow: var(--shadow);
+      }
+
+      #controls button,
+      #controls input {
+        background: var(--bg-card) !important;
+        color: var(--text) !important;
+        border: 1px solid var(--border-card) !important;
+        border-radius: 6px !important;
+        font-family: "Inter", sans-serif;
+        font-weight: 600;
+        transition:
+          opacity 0.18s,
+          transform 0.1s !important;
+      }
+
+      #controls button:hover {
+        opacity: 0.85;
+        transform: translateY(-1px);
+      }
+
+      .panel {
+        background: var(--bg-surface) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 10px;
+        box-shadow: var(--shadow);
+      }
+
+      .panel h2 {
+        color: var(--text) !important;
+      }
+
+      .stat-row {
+        border-color: var(--border) !important;
+      }
+
+      .stat-label {
+        color: var(--text-muted) !important;
+      }
+
+      .link,
+      line {
+        stroke: var(--border-card) !important;
+      }
+
       * {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
       }
+
       body {
-        background: #0f0f1a;
+        background: #0d0d1a;
         color: #fff;
-        font-family: sans-serif;
+        font-family: "Inter", "Segoe UI", sans-serif;
       }
+
       h1 {
         text-align: center;
         padding: 20px;
         font-size: 24px;
       }
+
       h1 span.bst {
         color: #00e5ff;
       }
+
       h1 span.avl {
         color: #a78bfa;
       }
+
       #controls {
         text-align: center;
         margin: 10px;
       }
+
       input {
         padding: 8px;
         font-size: 16px;
@@ -38,6 +238,7 @@
         width: 80px;
         text-align: center;
       }
+
       button {
         padding: 8px 18px;
         margin: 4px;
@@ -46,41 +247,51 @@
         border-radius: 6px;
         cursor: pointer;
       }
+
       #btn-insert {
         background: #00e5ff;
         color: #000;
       }
+
       #btn-reset {
         background: #444;
         color: #fff;
       }
+
       #battle-area {
         display: flex;
         justify-content: center;
         gap: 0;
       }
+
       .panel {
         width: 50%;
         padding: 10px;
         border-top: 3px solid;
       }
+
       .panel.bst {
         border-color: #00e5ff;
       }
+
       .panel.avl {
         border-color: #a78bfa;
       }
+
       .panel h3 {
         text-align: center;
         font-size: 18px;
         margin-bottom: 6px;
       }
+
       .panel.bst h3 {
         color: #00e5ff;
       }
+
       .panel.avl h3 {
         color: #a78bfa;
       }
+
       .stat-row {
         display: flex;
         justify-content: center;
@@ -88,6 +299,7 @@
         margin-bottom: 8px;
         flex-wrap: wrap;
       }
+
       .stat-box {
         background: #1e1e2e;
         padding: 6px 14px;
@@ -95,17 +307,21 @@
         text-align: center;
         font-size: 13px;
       }
+
       .stat-box span {
         font-size: 18px;
         font-weight: bold;
         display: block;
       }
+
       .bst .stat-box span {
         color: #00e5ff;
       }
+
       .avl .stat-box span {
         color: #a78bfa;
       }
+
       .winner-banner {
         text-align: center;
         font-size: 15px;
@@ -113,13 +329,16 @@
         min-height: 22px;
         margin: 6px 0;
       }
+
       svg {
         display: block;
         margin: auto;
       }
+
       .node circle {
         stroke-width: 2.5px;
       }
+
       .node text {
         fill: #fff;
         font-size: 12px;
@@ -127,16 +346,19 @@
         text-anchor: middle;
         dominant-baseline: central;
       }
+
       .node .bf {
         fill: #888;
         font-size: 9px;
         text-anchor: middle;
       }
+
       .link {
         fill: none;
         stroke: #333;
         stroke-width: 1.8px;
       }
+
       #verdict {
         text-align: center;
         padding: 10px;
@@ -147,7 +369,27 @@
       }
     </style>
   </head>
+
   <body>
+    <!-- ARBOR ARENA NAV -->
+    <nav class="ds-nav">
+      <a class="ds-nav-logo" href="./home.html">🌳 ARBOR <span>ARENA</span></a>
+      <div class="ds-nav-links">
+        <a href="./home.html">← Home</a>
+        <span class="ds-nav-sep">|</span>
+        <a href="./bst.html">BST</a>
+        <a href="./avl.html">AVL</a>
+        <a href="./battle.html" class="ds-active">Battle</a>
+        <a href="./battle3.html">3-Way</a>
+        <a href="./hash.html">Hash</a>
+        <a href="./story_a.html">Stories</a>
+        <span class="ds-nav-sep">|</span>
+        <a href="./arena.html" style="color: #ffd700; font-weight: 700"
+          >⚔️ Arena</a
+        >
+        <button id="theme-toggle" title="Toggle light / dark mode">🌙</button>
+      </div>
+    </nav>
     <h1>
       ⚔️ DS Battle: <span class="bst">BST</span> vs <span class="avl">AVL</span>
     </h1>
@@ -450,4 +692,19 @@
       };
     </script>
   </body>
+  <script>
+    (function () {
+      var btn = document.getElementById("theme-toggle");
+      if (localStorage.getItem("ds-theme") === "light") {
+        document.body.classList.add("light-mode");
+        if (btn) btn.textContent = "☀️";
+      }
+      if (btn)
+        btn.addEventListener("click", function () {
+          var l = document.body.classList.toggle("light-mode");
+          localStorage.setItem("ds-theme", l ? "light" : "dark");
+          btn.textContent = l ? "☀️" : "🌙";
+        });
+    })();
+  </script>
 </html>

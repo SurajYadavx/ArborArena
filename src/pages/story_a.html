@@ -2,17 +2,25 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>DS Dojo — Story: VIT Campus Route</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ARBOR ARENA — Story: VIT Campus Route</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
     <style>
       * {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
       }
+
       body {
-        background: #0f0f1a;
+        background: #0d0d1a;
         color: #fff;
-        font-family: "Segoe UI", sans-serif;
+        font-family: "Inter", "Segoe UI", sans-serif;
         overflow-x: hidden;
       }
 
@@ -21,27 +29,229 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 12px 24px;
+        padding: 0 20px;
+        height: 48px;
+        background: #0a0a14;
         border-bottom: 1px solid #1e1e2e;
+        position: sticky;
+        top: 0;
+        z-index: 999;
+        flex-shrink: 0;
       }
-      .topbar h1 {
-        font-size: 17px;
+
+      .topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
       }
-      .topbar h1 span {
+
+      .topbar-logo {
+        font-size: 15px;
+        font-weight: 800;
+        text-decoration: none;
+        color: #fff;
+        white-space: nowrap;
+      }
+
+      .topbar-logo span {
         color: #ffd700;
       }
+
+      .topbar-crumb {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 12px;
+        color: #555;
+      }
+
+      .topbar-crumb a {
+        color: #666;
+        text-decoration: none;
+        padding: 3px 7px;
+        border-radius: 4px;
+        transition:
+          color 0.18s,
+          background 0.18s;
+      }
+
+      .topbar-crumb a:hover {
+        color: #fff;
+        background: #1e1e2e;
+      }
+
+      .topbar-crumb .crumb-sep {
+        color: #333;
+      }
+
+      .topbar-crumb .crumb-active {
+        color: #00e5ff;
+        font-weight: 600;
+        padding: 3px 7px;
+      }
+
+      .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
       .back-btn {
         background: #1e1e2e;
         border: none;
         color: #aaa;
-        padding: 7px 14px;
+        padding: 5px 12px;
         border-radius: 6px;
         cursor: pointer;
-        font-size: 13px;
+        font-size: 12px;
+        font-family: inherit;
+        text-decoration: none;
+        transition:
+          background 0.18s,
+          color 0.18s;
       }
+
       .back-btn:hover {
         background: #2a2a3e;
         color: #fff;
+      }
+
+      .next-btn {
+        background: #00e5ff;
+        border: none;
+        color: #000;
+        padding: 5px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 700;
+        font-family: inherit;
+        text-decoration: none;
+        transition: background 0.18s;
+      }
+
+      .next-btn:hover {
+        background: #33eeff;
+      }
+
+      /* ── PHASE 2: DUAL MODE ── */
+      :root {
+        --bg: #0d0d1a;
+        --bg-nav: #0a0a14;
+        --bg-surface: #111122;
+        --bg-card: #131326;
+        --bg-card-hover: #191932;
+        --border: #1a1a30;
+        --border-card: #24244a;
+        --text: #dde0f0;
+        --text-muted: #8888a8;
+        --text-dim: #44445a;
+        --shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
+      }
+
+      body.light-mode {
+        --bg: #f3f3fa;
+        --bg-nav: #ffffff;
+        --bg-surface: #ffffff;
+        --bg-card: #ffffff;
+        --bg-card-hover: #f0f8ff;
+        --border: #e0e0ee;
+        --border-card: #d0d0ea;
+        --text: #1a1a2e;
+        --text-muted: #666688;
+        --text-dim: #aaaacc;
+        --shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        background-attachment: fixed;
+      }
+
+      .topbar {
+        background: var(--bg-nav) !important;
+        border-color: var(--border) !important;
+      }
+
+      .topbar-logo {
+        color: var(--text) !important;
+      }
+
+      .topbar-crumb a {
+        color: var(--text-muted) !important;
+      }
+
+      .topbar-crumb a:hover {
+        color: var(--text) !important;
+        background: var(--bg-card) !important;
+      }
+
+      .back-btn {
+        background: var(--bg-card) !important;
+        color: var(--text-muted) !important;
+        border: 1px solid var(--border-card) !important;
+        font-family: "Inter", sans-serif;
+        font-weight: 600;
+      }
+
+      .back-btn:hover {
+        background: var(--bg-card-hover) !important;
+        color: var(--text) !important;
+      }
+
+      #theme-toggle {
+        background: none;
+        border: 1px solid var(--border-card);
+        color: var(--text-muted);
+        padding: 3px 8px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        line-height: 1.6;
+        transition: all 0.18s;
+        margin-left: 2px;
+        font-family: inherit;
+      }
+
+      #theme-toggle:hover {
+        border-color: var(--text-muted);
+        color: var(--text);
+      }
+
+      .story-banner {
+        background: var(--bg-nav) !important;
+        border-color: var(--border) !important;
+      }
+
+      .story-title {
+        color: var(--text) !important;
+      }
+
+      .story-desc {
+        color: var(--text-muted) !important;
+      }
+
+      .main {
+        background: var(--bg) !important;
+      }
+
+      .panel {
+        background: var(--bg-surface) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 10px !important;
+        box-shadow: var(--shadow) !important;
+      }
+
+      .panel-title {
+        color: var(--text) !important;
+        border-color: var(--border) !important;
+      }
+
+      .log-box {
+        background: var(--bg-card) !important;
+        border-color: var(--border-card) !important;
+        color: var(--text-muted) !important;
       }
 
       /* STORY BANNER */
@@ -50,6 +260,7 @@
         border-bottom: 1px solid #1e1e2e;
         padding: 20px 28px;
       }
+
       .story-tag {
         font-size: 11px;
         color: #ffd700;
@@ -57,20 +268,24 @@
         text-transform: uppercase;
         margin-bottom: 8px;
       }
+
       .story-title {
         font-size: 26px;
         font-weight: 800;
         margin-bottom: 8px;
       }
+
       .story-title span {
         color: #00e5ff;
       }
+
       .story-desc {
         font-size: 14px;
         color: #aaa;
         line-height: 1.7;
         max-width: 800px;
       }
+
       .story-desc b {
         color: #fff;
       }
@@ -91,12 +306,14 @@
         gap: 10px;
         overflow: hidden;
       }
+
       .panel-label {
         font-size: 11px;
         color: #555;
         text-transform: uppercase;
         letter-spacing: 1px;
       }
+
       #campus-svg {
         width: 100%;
         flex: 1;
@@ -115,6 +332,7 @@
         padding: 14px 16px;
         border-bottom: 1px solid #1e1e2e;
       }
+
       .controls-row {
         display: flex;
         gap: 10px;
@@ -122,10 +340,12 @@
         flex-wrap: wrap;
         margin-bottom: 10px;
       }
+
       .ctrl-label {
         font-size: 12px;
         color: #666;
       }
+
       select {
         background: #1e1e2e;
         color: #fff;
@@ -135,6 +355,7 @@
         font-size: 13px;
         cursor: pointer;
       }
+
       .btn-primary {
         background: #ffd700;
         color: #000;
@@ -145,14 +366,17 @@
         cursor: pointer;
         font-size: 13px;
       }
+
       .btn-primary:hover {
         background: #ffe033;
       }
+
       .btn-primary:disabled {
         background: #444;
         color: #888;
         cursor: not-allowed;
       }
+
       .btn-secondary {
         background: #1e1e2e;
         color: #aaa;
@@ -162,10 +386,12 @@
         cursor: pointer;
         font-size: 13px;
       }
+
       .btn-secondary:hover {
         background: #2a2a3e;
         color: #fff;
       }
+
       .speed-row {
         display: flex;
         align-items: center;
@@ -173,9 +399,11 @@
         font-size: 12px;
         color: #555;
       }
+
       .speed-row input {
         width: 90px;
       }
+
       #speed-label {
         color: #ffd700;
         font-size: 12px;
@@ -187,6 +415,7 @@
         border-bottom: 1px solid #1e1e2e;
         min-height: 80px;
       }
+
       .explain-phase {
         font-size: 10px;
         color: #ffd700;
@@ -194,14 +423,17 @@
         text-transform: uppercase;
         margin-bottom: 5px;
       }
+
       .explain-text {
         font-size: 13px;
         color: #ccc;
         line-height: 1.7;
       }
+
       .explain-text b {
         color: #00e5ff;
       }
+
       .explain-text .highlight {
         color: #ffd700;
         font-weight: 700;
@@ -213,25 +445,30 @@
         border-bottom: 1px solid #1e1e2e;
         display: none;
       }
+
       .challenge-box.active {
         display: block;
       }
+
       .challenge-title {
         font-size: 12px;
         color: #ff9f43;
         font-weight: 700;
         margin-bottom: 8px;
       }
+
       .challenge-q {
         font-size: 13px;
         color: #fff;
         margin-bottom: 10px;
       }
+
       .challenge-opts {
         display: flex;
         gap: 8px;
         flex-wrap: wrap;
       }
+
       .c-opt {
         background: #1e1e2e;
         border: 1px solid #333;
@@ -242,15 +479,18 @@
         font-size: 13px;
         transition: all 0.2s;
       }
+
       .c-opt:hover {
         border-color: #ffd700;
         color: #ffd700;
       }
+
       .c-opt.correct {
         background: #1a3a1a;
         border-color: #2ecc71;
         color: #2ecc71;
       }
+
       .c-opt.wrong {
         background: #3a1a1a;
         border-color: #e74c3c;
@@ -263,6 +503,7 @@
         padding: 14px 16px;
         overflow-y: auto;
       }
+
       .dist-title {
         font-size: 11px;
         color: #555;
@@ -270,11 +511,13 @@
         letter-spacing: 1px;
         margin-bottom: 8px;
       }
+
       .dist-table {
         width: 100%;
         border-collapse: collapse;
         font-size: 12px;
       }
+
       .dist-table th {
         color: #555;
         text-align: left;
@@ -282,23 +525,28 @@
         border-bottom: 1px solid #1e1e2e;
         font-weight: 600;
       }
+
       .dist-table td {
         padding: 5px 8px;
         border-bottom: 1px solid #111;
         transition: background 0.3s;
       }
+
       .dist-table tr.visited td {
         color: #555;
       }
+
       .dist-table tr.current td {
         background: #1a1a0a;
         color: #ffd700;
         font-weight: 700;
       }
+
       .dist-table tr.updated td {
         background: #0a1a1a;
         color: #00e5ff;
       }
+
       .dist-table .inf {
         color: #333;
       }
@@ -317,74 +565,89 @@
         padding: 40px;
         text-align: center;
       }
+
       .aha-panel.active {
         display: flex;
       }
+
       .aha-title {
         font-size: 28px;
         font-weight: 800;
         color: #ffd700;
       }
+
       .aha-path {
         font-size: 18px;
         color: #00e5ff;
         font-weight: 700;
         letter-spacing: 1px;
       }
+
       .aha-stats {
         display: flex;
         gap: 20px;
         justify-content: center;
         flex-wrap: wrap;
       }
+
       .aha-chip {
         background: #1e1e2e;
         padding: 16px 28px;
         border-radius: 10px;
       }
+
       .aha-chip .label {
         font-size: 11px;
         color: #555;
         margin-bottom: 6px;
       }
+
       .aha-chip .val {
         font-size: 22px;
         font-weight: 800;
         color: #ffd700;
       }
+
       .aha-vs {
         display: flex;
         gap: 40px;
         justify-content: center;
         margin: 10px 0;
       }
+
       .aha-vs-box {
         background: #1e1e2e;
         padding: 14px 24px;
         border-radius: 10px;
         text-align: center;
       }
+
       .aha-vs-box .method {
         font-size: 11px;
         color: #555;
         margin-bottom: 6px;
       }
+
       .aha-vs-box .time {
         font-size: 20px;
         font-weight: 800;
       }
+
       .aha-vs-box .time.bad {
         color: #e74c3c;
       }
+
       .aha-vs-box .time.good {
         color: #2ecc71;
       }
+
       .aha-insight {
         font-size: 13px;
         color: #aaa;
         max-width: 600px;
         line-height: 1.7;
       }
+
       .aha-insight b {
         color: #fff;
       }
@@ -398,23 +661,28 @@
           stroke 0.4s,
           stroke-width 0.4s;
       }
+
       .campus-edge.active {
         stroke: #ffd700;
         stroke-width: 4;
       }
+
       .campus-edge.visited {
         stroke: #00e5ff;
         stroke-width: 3.5;
       }
+
       .campus-edge.path {
         stroke: #2ecc71;
         stroke-width: 5;
       }
+
       .campus-node circle {
         stroke-width: 2.5;
         transition: all 0.4s;
         cursor: pointer;
       }
+
       .campus-node text {
         font-size: 11px;
         font-weight: 700;
@@ -423,20 +691,25 @@
         dominant-baseline: central;
         pointer-events: none;
       }
+
       .campus-node .node-label {
         font-size: 9px;
         fill: #777;
         text-anchor: middle;
       }
+
       .campus-node.current circle {
         filter: drop-shadow(0 0 8px #ffd700);
       }
+
       .campus-node.visited circle {
         opacity: 0.7;
       }
+
       .campus-node.path-node circle {
         filter: drop-shadow(0 0 10px #2ecc71);
       }
+
       .edge-weight {
         font-size: 9px;
         fill: #444;
@@ -444,13 +717,30 @@
       }
     </style>
   </head>
+
   <body>
     <!-- TOPBAR -->
     <div class="topbar">
-      <h1>🗺️ Story Mode — <span>VIT Campus Route Finder</span></h1>
-      <button class="back-btn" onclick="window.location.href = '../index.html'">
-        ← Home
-      </button>
+      <div class="topbar-left">
+        <a class="topbar-logo" href="./home.html"
+          >🌳 ARBOR <span>ARENA</span></a
+        >
+        <div class="topbar-crumb">
+          <span class="crumb-sep">/</span>
+          <a href="./home.html">Home</a>
+          <span class="crumb-sep">/</span>
+          <a href="./story_a.html">Stories</a>
+          <span class="crumb-sep">/</span>
+          <span class="crumb-active">A — Campus Route</span>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="back-btn" onclick="window.location.href = './home.html'">
+          ← Home
+        </button>
+        <a class="next-btn" href="./story_b.html">Story B →</a>
+        <button id="theme-toggle" title="Toggle light / dark mode">🌙</button>
+      </div>
     </div>
 
     <!-- STORY BANNER -->
@@ -1156,4 +1446,19 @@
       doReset();
     </script>
   </body>
+  <script>
+    (function () {
+      var btn = document.getElementById("theme-toggle");
+      if (localStorage.getItem("ds-theme") === "light") {
+        document.body.classList.add("light-mode");
+        if (btn) btn.textContent = "☀️";
+      }
+      if (btn)
+        btn.addEventListener("click", function () {
+          var l = document.body.classList.toggle("light-mode");
+          localStorage.setItem("ds-theme", l ? "light" : "dark");
+          btn.textContent = l ? "☀️" : "🌙";
+        });
+    })();
+  </script>
 </html>

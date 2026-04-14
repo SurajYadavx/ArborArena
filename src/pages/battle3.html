@@ -1,403 +1,647 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>DS Dojo — 3-Way Battle</title>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <style>
-      /* add to your <style> block */
-      svg.tree-svg {
-        display: block;
-        margin: auto;
-        overflow: visible;
-      }
-      #focus-svg {
-        overflow: visible;
-      }
 
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-      body {
-        background: #0f0f1a;
-        color: #fff;
-        font-family: "Segoe UI", sans-serif;
-        overflow-x: hidden;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ARBOR ARENA — 3-Way Battle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    /* ── SHARED DS NAV ── */
+    .ds-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 24px;
+      height: 44px;
+      background: #0a0a14;
+      border-bottom: 1px solid #1e1e2e;
+      position: sticky;
+      top: 0;
+      z-index: 999;
+      flex-shrink: 0;
+    }
 
-      /* ── TOP ── */
-      .topbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 28px;
-        border-bottom: 1px solid #1e1e2e;
-        flex-wrap: wrap;
-        gap: 10px;
-      }
-      .topbar h1 {
-        font-size: 18px;
-      }
-      .topbar h1 span.b {
-        color: #00e5ff;
-      }
-      .topbar h1 span.a {
-        color: #a78bfa;
-      }
-      .topbar h1 span.r {
-        color: #ff4f4f;
-      }
-      .top-controls {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        align-items: center;
-      }
-      input[type="number"] {
-        padding: 7px;
-        font-size: 15px;
-        border-radius: 6px;
-        border: none;
-        width: 75px;
-        text-align: center;
-      }
-      button {
-        padding: 7px 14px;
-        font-size: 14px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-      }
-      #btn-insert {
-        background: #fff;
-        color: #000;
-        font-weight: 700;
-      }
-      #btn-reset {
-        background: #444;
-        color: #fff;
-      }
-      select {
-        padding: 7px;
-        border-radius: 6px;
-        border: none;
-        background: #1e1e2e;
-        color: #fff;
-        font-size: 14px;
-      }
+    .ds-nav-logo {
+      font-size: 16px;
+      font-weight: 800;
+      text-decoration: none;
+      color: #fff;
+    }
 
-      /* ── AUTOPLAY ── */
-      .autoplay-row {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 12px;
-        padding: 8px;
-        background: #13131f;
-        border-bottom: 1px solid #1e1e2e;
-        font-size: 13px;
-        color: #aaa;
-      }
-      #btn-autoplay {
-        background: #ffd700;
-        color: #000;
-        font-weight: 700;
-      }
-      #btn-autoplay.running {
-        background: #ff4f4f;
-        color: #fff;
-      }
-      .speed-label {
-        color: #ffd700;
-        font-weight: 700;
-      }
+    .ds-nav-logo span {
+      color: #ffd700;
+    }
 
-      /* ── STATS ROW ── */
-      .stats-row {
-        display: flex;
-        justify-content: center;
-        gap: 0;
-        border-bottom: 1px solid #1e1e2e;
-      }
-      .stats-panel {
-        flex: 1;
-        padding: 10px 8px;
-        text-align: center;
-        border-right: 1px solid #1e1e2e;
-      }
-      .stats-panel:last-child {
-        border-right: none;
-      }
-      .stats-panel h3 {
-        font-size: 14px;
-        margin-bottom: 8px;
-      }
-      .stats-panel h3.bst {
-        color: #00e5ff;
-      }
-      .stats-panel h3.avl {
-        color: #a78bfa;
-      }
-      .stats-panel h3.rb {
-        color: #ff4f4f;
-      }
-      .stat-chips {
-        display: flex;
-        justify-content: center;
-        gap: 8px;
-        flex-wrap: wrap;
-      }
-      .chip {
-        background: #1e1e2e;
-        padding: 4px 12px;
-        border-radius: 6px;
-        font-size: 12px;
-      }
-      .chip span {
-        font-weight: 800;
-        font-size: 15px;
-        display: block;
-      }
-      .chip span.bst {
-        color: #00e5ff;
-      }
-      .chip span.avl {
-        color: #a78bfa;
-      }
-      .chip span.rb {
-        color: #ff4f4f;
-      }
-      .winner-badge {
-        font-size: 12px;
-        margin-top: 6px;
-        min-height: 18px;
-        color: #ffd700;
-      }
+    .ds-nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
 
-      /* ── EXPLAIN PANEL ── */
-      .explain-row {
-        display: flex;
-        border-bottom: 1px solid #1e1e2e;
-      }
-      .explain-box {
-        flex: 1;
-        padding: 8px 12px;
-        font-size: 12px;
-        border-right: 1px solid #1e1e2e;
-        min-height: 44px;
-        line-height: 1.6;
-        color: #aaa;
-        cursor: pointer;
-        transition: background 0.2s;
-      }
-      .explain-box:last-child {
-        border-right: none;
-      }
-      .explain-box:hover {
-        background: #1e1e2e;
-      }
-      .explain-box .etitle {
-        font-size: 11px;
-        color: #555;
-        margin-bottom: 2px;
-      }
-      .explain-box.active .etitle {
-        color: #ffd700;
-      }
-      .explain-box.bst-ex .emsg {
-        color: #00e5ff;
-      }
-      .explain-box.avl-ex .emsg {
-        color: #a78bfa;
-      }
-      .explain-box.rb-ex .emsg {
-        color: #ff9090;
-      }
+    .ds-nav-links a {
+      color: #777;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 4px 9px;
+      border-radius: 5px;
+      transition:
+        color 0.18s,
+        background 0.18s;
+    }
 
-      /* ── HEIGHT CHART ── */
-      #chart-row {
-        text-align: center;
-        padding: 6px 0 2px;
-        background: #0a0a14;
-        border-bottom: 1px solid #1e1e2e;
-      }
-      #chart-row span {
-        font-size: 11px;
-        color: #555;
-      }
-      #height-chart {
-        display: block;
-        margin: auto;
-      }
+    .ds-nav-links a:hover {
+      color: #fff;
+      background: #1e1e2e;
+    }
 
-      /* ── TREES ── */
-      .trees-row {
-        display: flex;
-      }
-      .tree-panel {
-        flex: 1;
-        border-right: 1px solid #1e1e2e;
-        padding: 4px 0;
-      }
-      .tree-panel:last-child {
-        border-right: none;
-      }
-      svg.tree-svg {
-        display: block;
-        margin: auto;
-      }
-      .link {
-        fill: none;
-        stroke: #333;
-        stroke-width: 1.8px;
-      }
-      .node circle {
-        stroke-width: 2px;
-      }
-      .node text {
-        fill: #fff;
-        font-size: 11px;
-        font-weight: bold;
-        text-anchor: middle;
-        dominant-baseline: central;
-      }
-      .node .lbl {
-        fill: #777;
-        font-size: 9px;
-        text-anchor: middle;
-      }
-      /* ── FOCUS MODE ── */
-      .tree-panel {
-        cursor: pointer;
-        transition: all 0.3s;
-      }
-      .tree-panel:hover {
-        background: #13131f;
-      }
-      #focus-overlay {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: #0f0f1a;
-        z-index: 300;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-start;
-        padding: 20px;
-      }
-      #focus-overlay.active {
-        display: flex;
-      }
-      #focus-header {
-        width: 100%;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 12px;
-      }
-      #focus-title {
-        font-size: 22px;
-        font-weight: 800;
-      }
-      #focus-close {
-        background: #444;
-        color: #fff;
-        padding: 8px 18px;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 14px;
-      }
-      #focus-svg-wrap {
-        width: 100%;
-        flex: 1;
-        overflow: auto;
-      }
-      #focus-stats {
-        display: flex;
-        gap: 16px;
-        margin-bottom: 10px;
-        flex-wrap: wrap;
-      }
-      .focus-chip {
-        background: #1e1e2e;
-        padding: 6px 18px;
-        border-radius: 8px;
-        font-size: 13px;
-      }
-      .focus-chip span {
-        font-size: 20px;
-        font-weight: 800;
-        display: block;
-      }
+    .ds-nav-links a.ds-active {
+      color: #ff9f43;
+      background: rgba(255, 159, 67, 0.08);
+    }
 
-      /* ── VERDICT ── */
-      #verdict {
-        text-align: center;
-        padding: 10px 20px;
-        font-size: 13px;
-        color: #aaa;
-        border-top: 1px solid #1e1e2e;
-        min-height: 36px;
-      }
-    </style>
-  </head>
-  <body>
-    <!-- TOP BAR -->
-    <div class="topbar">
-      <h1>
-        ⚔️ <span class="b">BST</span> vs <span class="a">AVL</span> vs
-        <span class="r">Red-Black</span> Tree
-      </h1>
-      <div class="top-controls">
-        <input
-          id="val-input"
-          type="text"
-          placeholder="10, 20, 30"
-          style="width: 140px"
-        />
+    .ds-nav-sep {
+      color: #252535;
+      font-size: 14px;
+      padding: 0 3px;
+      user-select: none;
+    }
 
-        <button id="btn-insert">Insert All</button>
-        <select id="preset-select" onchange="loadPreset(this.value)">
-          <option value="">📦 Preset Scenarios</option>
-          <option value="sorted">📈 Sorted (BST worst case)</option>
-          <option value="reverse">📉 Reverse Sorted</option>
-          <option value="random">🎲 Random 10</option>
-          <option value="zigzag">〰️ Zig-Zag Pattern</option>
-        </select>
-        <button id="btn-reset">Reset</button>
-      </div>
+    /* ── PHASE 2: DUAL MODE ── */
+    :root {
+      --bg: #0d0d1a;
+      --bg-nav: #0a0a14;
+      --bg-surface: #111122;
+      --bg-card: #131326;
+      --bg-card-hover: #191932;
+      --border: #1a1a30;
+      --border-card: #24244a;
+      --text: #dde0f0;
+      --text-muted: #8888a8;
+      --text-dim: #44445a;
+      --shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
+    }
+
+    body.light-mode {
+      --bg: #f3f3fa;
+      --bg-nav: #ffffff;
+      --bg-surface: #ffffff;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f8f5ff;
+      --border: #e0e0ee;
+      --border-card: #d0d0ea;
+      --text: #1a1a2e;
+      --text-muted: #666688;
+      --text-dim: #aaaacc;
+      --shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      background-attachment: fixed;
+    }
+
+    .ds-nav {
+      background: var(--bg-nav);
+      border-color: var(--border);
+    }
+
+    .ds-nav-logo {
+      color: var(--text);
+    }
+
+    .ds-nav-links a {
+      color: var(--text-muted);
+    }
+
+    .ds-nav-links a:hover {
+      color: var(--text);
+      background: var(--bg-card);
+    }
+
+    #theme-toggle {
+      background: none;
+      border: 1px solid var(--border-card);
+      color: var(--text-muted);
+      padding: 3px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1.6;
+      transition: all 0.18s;
+      margin-left: 2px;
+      font-family: inherit;
+    }
+
+    #theme-toggle:hover {
+      border-color: var(--text-muted);
+      color: var(--text);
+    }
+
+    .topbar {
+      background: var(--bg-nav) !important;
+      border-color: var(--border) !important;
+    }
+
+    .topbar h1 {
+      color: var(--text) !important;
+      letter-spacing: -0.5px;
+    }
+
+    .topbar button,
+    .topbar input {
+      background: var(--bg-card) !important;
+      color: var(--text) !important;
+      border: 1px solid var(--border-card) !important;
+      border-radius: 6px !important;
+      font-family: "Inter", sans-serif;
+      font-weight: 600;
+      transition:
+        opacity 0.18s,
+        transform 0.1s !important;
+    }
+
+    .topbar button:hover {
+      opacity: 0.85;
+      transform: translateY(-1px);
+    }
+
+    .tree-col {
+      background: var(--bg-surface) !important;
+      border: 1px solid var(--border) !important;
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+    }
+
+    .tree-col h3 {
+      color: var(--text) !important;
+    }
+
+    .tree-stats {
+      color: var(--text-muted) !important;
+      border-color: var(--border) !important;
+    }
+
+    .stat-val {
+      color: inherit !important;
+    }
+
+    .link {
+      stroke: var(--border-card) !important;
+    }
+
+    /* add to your <style> block */
+    svg.tree-svg {
+      display: block;
+      margin: auto;
+      overflow: visible;
+    }
+
+    #focus-svg {
+      overflow: visible;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #0d0d1a;
+      color: #fff;
+      font-family: "Inter", "Segoe UI", sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ── TOP ── */
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 28px;
+      border-bottom: 1px solid #1e1e2e;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .topbar h1 {
+      font-size: 18px;
+    }
+
+    .topbar h1 span.b {
+      color: #00e5ff;
+    }
+
+    .topbar h1 span.a {
+      color: #a78bfa;
+    }
+
+    .topbar h1 span.r {
+      color: #ff4f4f;
+    }
+
+    .top-controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    input[type="number"] {
+      padding: 7px;
+      font-size: 15px;
+      border-radius: 6px;
+      border: none;
+      width: 75px;
+      text-align: center;
+    }
+
+    button {
+      padding: 7px 14px;
+      font-size: 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    #btn-insert {
+      background: #fff;
+      color: #000;
+      font-weight: 700;
+    }
+
+    #btn-reset {
+      background: #444;
+      color: #fff;
+    }
+
+    select {
+      padding: 7px;
+      border-radius: 6px;
+      border: none;
+      background: #1e1e2e;
+      color: #fff;
+      font-size: 14px;
+    }
+
+    /* ── AUTOPLAY ── */
+    .autoplay-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      padding: 8px;
+      background: #13131f;
+      border-bottom: 1px solid #1e1e2e;
+      font-size: 13px;
+      color: #aaa;
+    }
+
+    #btn-autoplay {
+      background: #ffd700;
+      color: #000;
+      font-weight: 700;
+    }
+
+    #btn-autoplay.running {
+      background: #ff4f4f;
+      color: #fff;
+    }
+
+    .speed-label {
+      color: #ffd700;
+      font-weight: 700;
+    }
+
+    /* ── STATS ROW ── */
+    .stats-row {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      border-bottom: 1px solid #1e1e2e;
+    }
+
+    .stats-panel {
+      flex: 1;
+      padding: 10px 8px;
+      text-align: center;
+      border-right: 1px solid #1e1e2e;
+    }
+
+    .stats-panel:last-child {
+      border-right: none;
+    }
+
+    .stats-panel h3 {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .stats-panel h3.bst {
+      color: #00e5ff;
+    }
+
+    .stats-panel h3.avl {
+      color: #a78bfa;
+    }
+
+    .stats-panel h3.rb {
+      color: #ff4f4f;
+    }
+
+    .stat-chips {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      background: #1e1e2e;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+
+    .chip span {
+      font-weight: 800;
+      font-size: 15px;
+      display: block;
+    }
+
+    .chip span.bst {
+      color: #00e5ff;
+    }
+
+    .chip span.avl {
+      color: #a78bfa;
+    }
+
+    .chip span.rb {
+      color: #ff4f4f;
+    }
+
+    .winner-badge {
+      font-size: 12px;
+      margin-top: 6px;
+      min-height: 18px;
+      color: #ffd700;
+    }
+
+    /* ── EXPLAIN PANEL ── */
+    .explain-row {
+      display: flex;
+      border-bottom: 1px solid #1e1e2e;
+    }
+
+    .explain-box {
+      flex: 1;
+      padding: 8px 12px;
+      font-size: 12px;
+      border-right: 1px solid #1e1e2e;
+      min-height: 44px;
+      line-height: 1.6;
+      color: #aaa;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .explain-box:last-child {
+      border-right: none;
+    }
+
+    .explain-box:hover {
+      background: #1e1e2e;
+    }
+
+    .explain-box .etitle {
+      font-size: 11px;
+      color: #555;
+      margin-bottom: 2px;
+    }
+
+    .explain-box.active .etitle {
+      color: #ffd700;
+    }
+
+    .explain-box.bst-ex .emsg {
+      color: #00e5ff;
+    }
+
+    .explain-box.avl-ex .emsg {
+      color: #a78bfa;
+    }
+
+    .explain-box.rb-ex .emsg {
+      color: #ff9090;
+    }
+
+    /* ── HEIGHT CHART ── */
+    #chart-row {
+      text-align: center;
+      padding: 6px 0 2px;
+      background: #0a0a14;
+      border-bottom: 1px solid #1e1e2e;
+    }
+
+    #chart-row span {
+      font-size: 11px;
+      color: #555;
+    }
+
+    #height-chart {
+      display: block;
+      margin: auto;
+    }
+
+    /* ── TREES ── */
+    .trees-row {
+      display: flex;
+    }
+
+    .tree-panel {
+      flex: 1;
+      border-right: 1px solid #1e1e2e;
+      padding: 4px 0;
+    }
+
+    .tree-panel:last-child {
+      border-right: none;
+    }
+
+    svg.tree-svg {
+      display: block;
+      margin: auto;
+    }
+
+    .link {
+      fill: none;
+      stroke: #333;
+      stroke-width: 1.8px;
+    }
+
+    .node circle {
+      stroke-width: 2px;
+    }
+
+    .node text {
+      fill: #fff;
+      font-size: 11px;
+      font-weight: bold;
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+
+    .node .lbl {
+      fill: #777;
+      font-size: 9px;
+      text-anchor: middle;
+    }
+
+    /* ── FOCUS MODE ── */
+    .tree-panel {
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .tree-panel:hover {
+      background: #13131f;
+    }
+
+    #focus-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #0f0f1a;
+      z-index: 300;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 20px;
+    }
+
+    #focus-overlay.active {
+      display: flex;
+    }
+
+    #focus-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    #focus-title {
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    #focus-close {
+      background: #444;
+      color: #fff;
+      padding: 8px 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    #focus-svg-wrap {
+      width: 100%;
+      flex: 1;
+      overflow: auto;
+    }
+
+    #focus-stats {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .focus-chip {
+      background: #1e1e2e;
+      padding: 6px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+
+    .focus-chip span {
+      font-size: 20px;
+      font-weight: 800;
+      display: block;
+    }
+
+    /* ── VERDICT ── */
+    #verdict {
+      text-align: center;
+      padding: 10px 20px;
+      font-size: 13px;
+      color: #aaa;
+      border-top: 1px solid #1e1e2e;
+      min-height: 36px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ARBOR ARENA NAV -->
+  <nav class="ds-nav">
+    <a class="ds-nav-logo" href="./home.html">🌳 ARBOR <span>ARENA</span></a>
+    <div class="ds-nav-links">
+      <a href="./home.html">← Home</a>
+      <span class="ds-nav-sep">|</span>
+      <a href="./bst.html">BST</a>
+      <a href="./avl.html">AVL</a>
+      <a href="./battle.html">Battle</a>
+      <a href="./battle3.html" class="ds-active">3-Way</a>
+      <a href="./hash.html">Hash</a>
+      <a href="./story_a.html">Stories</a>
+      <span class="ds-nav-sep">|</span>
+      <a href="./arena.html" style="color: #ffd700; font-weight: 700">⚔️ Arena</a>
+      <button id="theme-toggle" title="Toggle light / dark mode">🌙</button>
     </div>
+  </nav>
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <h1>
+      ⚔️ <span class="b">BST</span> vs <span class="a">AVL</span> vs
+      <span class="r">Red-Black</span> Tree
+    </h1>
+    <div class="top-controls">
+      <input id="val-input" type="text" placeholder="10, 20, 30" style="width: 140px" />
 
-    <!-- AUTOPLAY ROW -->
-    <div class="autoplay-row">
-      <span>⚡ Auto-Play:</span>
-      <button id="btn-autoplay" onclick="toggleAutoplay()">▶ Start</button>
-      <span>Speed:</span>
-      <input
-        type="range"
-        id="speed-slider"
-        min="300"
-        max="2000"
-        value="900"
-        step="100"
-        style="width: 100px"
-        oninput="
+      <button id="btn-insert">Insert All</button>
+      <select id="preset-select" onchange="loadPreset(this.value)">
+        <option value="">📦 Preset Scenarios</option>
+        <option value="sorted">📈 Sorted (BST worst case)</option>
+        <option value="reverse">📉 Reverse Sorted</option>
+        <option value="random">🎲 Random 10</option>
+        <option value="zigzag">〰️ Zig-Zag Pattern</option>
+      </select>
+      <button id="btn-reset">Reset</button>
+    </div>
+  </div>
+
+  <!-- AUTOPLAY ROW -->
+  <div class="autoplay-row">
+    <span>⚡ Auto-Play:</span>
+    <button id="btn-autoplay" onclick="toggleAutoplay()">▶ Start</button>
+    <span>Speed:</span>
+    <input type="range" id="speed-slider" min="300" max="2000" value="900" step="100" style="width: 100px" oninput="
           autoplayDelay = parseInt(this.value);
           document.getElementById('speed-val').textContent = this.value + 'ms';
-        "
-      />
-      <span class="speed-label" id="speed-val">900ms</span>
-      <span style="margin-left: 16px">|</span>
-      <input
-        id="auto-input"
-        type="number"
-        min="1"
-        max="999"
-        placeholder="custom values..."
-        style="
+        " />
+    <span class="speed-label" id="speed-val">900ms</span>
+    <span style="margin-left: 16px">|</span>
+    <input id="auto-input" type="number" min="1" max="999" placeholder="custom values..." style="
           width: 120px;
           padding: 5px;
           border-radius: 6px;
@@ -405,146 +649,548 @@
           background: #1e1e2e;
           color: #fff;
           font-size: 13px;
-        "
-      />
-      <span style="color: #666; font-size: 12px">comma-separated</span>
-    </div>
+        " />
+    <span style="color: #666; font-size: 12px">comma-separated</span>
+  </div>
 
-    <!-- STATS ROW -->
-    <div class="stats-row">
-      <div class="stats-panel">
-        <h3 class="bst">BST</h3>
-        <div class="stat-chips">
-          <div class="chip">Height<span id="bst-h" class="bst">0</span></div>
-          <div class="chip">
-            Comparisons<span id="bst-cmp" class="bst">0</span>
-          </div>
-        </div>
-        <div class="winner-badge" id="bst-badge"></div>
-      </div>
-      <div class="stats-panel">
-        <h3 class="avl">AVL</h3>
-        <div class="stat-chips">
-          <div class="chip">Height<span id="avl-h" class="avl">0</span></div>
-          <div class="chip">
-            Rotations<span id="avl-rot" class="avl">0</span>
-          </div>
-        </div>
-        <div class="winner-badge" id="avl-badge"></div>
-      </div>
-      <div class="stats-panel">
-        <h3 class="rb">Red-Black</h3>
-        <div class="stat-chips">
-          <div class="chip">Height<span id="rb-h" class="rb">0</span></div>
-          <div class="chip">
-            Black-Height<span id="rb-bh" class="rb">0</span>
-          </div>
-        </div>
-        <div class="winner-badge" id="rb-badge"></div>
-      </div>
-    </div>
-
-    <!-- EXPLAIN ROW -->
-    <div class="explain-row">
-      <div class="explain-box bst-ex" id="ex-bst">
-        <div class="etitle">BST — click to expand</div>
-        <div class="emsg" id="ex-bst-msg">
-          Insert a value to see explanation
+  <!-- STATS ROW -->
+  <div class="stats-row">
+    <div class="stats-panel">
+      <h3 class="bst">BST</h3>
+      <div class="stat-chips">
+        <div class="chip">Height<span id="bst-h" class="bst">0</span></div>
+        <div class="chip">
+          Comparisons<span id="bst-cmp" class="bst">0</span>
         </div>
       </div>
-      <div class="explain-box avl-ex" id="ex-avl">
-        <div class="etitle">AVL — click to expand</div>
-        <div class="emsg" id="ex-avl-msg">
-          Insert a value to see explanation
+      <div class="winner-badge" id="bst-badge"></div>
+    </div>
+    <div class="stats-panel">
+      <h3 class="avl">AVL</h3>
+      <div class="stat-chips">
+        <div class="chip">Height<span id="avl-h" class="avl">0</span></div>
+        <div class="chip">
+          Rotations<span id="avl-rot" class="avl">0</span>
         </div>
       </div>
-      <div class="explain-box rb-ex" id="ex-rb">
-        <div class="etitle">Red-Black — click to expand</div>
-        <div class="emsg" id="ex-rb-msg">Insert a value to see explanation</div>
+      <div class="winner-badge" id="avl-badge"></div>
+    </div>
+    <div class="stats-panel">
+      <h3 class="rb">Red-Black</h3>
+      <div class="stat-chips">
+        <div class="chip">Height<span id="rb-h" class="rb">0</span></div>
+        <div class="chip">
+          Black-Height<span id="rb-bh" class="rb">0</span>
+        </div>
+      </div>
+      <div class="winner-badge" id="rb-badge"></div>
+    </div>
+  </div>
+
+  <!-- EXPLAIN ROW -->
+  <div class="explain-row">
+    <div class="explain-box bst-ex" id="ex-bst">
+      <div class="etitle">BST — click to expand</div>
+      <div class="emsg" id="ex-bst-msg">
+        Insert a value to see explanation
       </div>
     </div>
-
-    <!-- HEIGHT CHART -->
-    <div id="chart-row">
-      <span>📈 Height over insertions</span>
-      <svg id="height-chart" width="700" height="60"></svg>
-    </div>
-
-    <!-- TREES -->
-    <div class="trees-row">
-      <div class="tree-panel">
-        <svg
-          class="tree-svg"
-          id="bst-svg"
-          width="100%"
-          height="420"
-          viewBox="0 0 500 400"
-        ></svg>
-      </div>
-      <div class="tree-panel">
-        <svg
-          class="tree-svg"
-          id="avl-svg"
-          width="100%"
-          height="420"
-          viewBox="0 0 500 400"
-        ></svg>
-      </div>
-      <div class="tree-panel">
-        <svg
-          class="tree-svg"
-          id="rb-svg"
-          width="100%"
-          height="420"
-          viewBox="0 0 500 400"
-        ></svg>
+    <div class="explain-box avl-ex" id="ex-avl">
+      <div class="etitle">AVL — click to expand</div>
+      <div class="emsg" id="ex-avl-msg">
+        Insert a value to see explanation
       </div>
     </div>
+    <div class="explain-box rb-ex" id="ex-rb">
+      <div class="etitle">Red-Black — click to expand</div>
+      <div class="emsg" id="ex-rb-msg">Insert a value to see explanation</div>
+    </div>
+  </div>
 
-    <div id="verdict"></div>
+  <!-- HEIGHT CHART -->
+  <div id="chart-row">
+    <span>📈 Height over insertions</span>
+    <svg id="height-chart" width="700" height="60"></svg>
+  </div>
 
-    <script src="../wasm/ds_dojo.js"></script>
-    <script>
-      // ═══════════════════════════════════════════════════
-      // STATE
-      // ═══════════════════════════════════════════════════
-      let values = [];
-      let bstCmp = 0,
-        avlRot = 0;
-      let heightHistory = { bst: [], avl: [], rb: [] };
-      let autoplayTimer = null;
-      let autoplayQueue = [];
-      let autoplayDelay = 900;
-      let lastVal = null;
+  <!-- TREES -->
+  <div class="trees-row">
+    <div class="tree-panel">
+      <svg class="tree-svg" id="bst-svg" width="100%" height="420" viewBox="0 0 500 400"></svg>
+    </div>
+    <div class="tree-panel">
+      <svg class="tree-svg" id="avl-svg" width="100%" height="420" viewBox="0 0 500 400"></svg>
+    </div>
+    <div class="tree-panel">
+      <svg class="tree-svg" id="rb-svg" width="100%" height="420" viewBox="0 0 500 400"></svg>
+    </div>
+  </div>
 
-      // ═══════════════════════════════════════════════════
-      // BST JS
-      // ═══════════════════════════════════════════════════
-      function buildBST(vals) {
-        let root = null,
-          cmp = 0;
-        function ins(n, v) {
-          cmp++;
-          if (!n) return { data: v, left: null, right: null };
-          if (v < n.data) n.left = ins(n.left, v);
-          else if (v > n.data) n.right = ins(n.right, v);
-          return n;
+  <div id="verdict"></div>
+
+  <script src="../wasm/ds_dojo.js"></script>
+  <script>
+    // ═══════════════════════════════════════════════════
+    // STATE
+    // ═══════════════════════════════════════════════════
+    let values = [];
+    let bstCmp = 0,
+      avlRot = 0;
+    let heightHistory = { bst: [], avl: [], rb: [] };
+    let autoplayTimer = null;
+    let autoplayQueue = [];
+    let autoplayDelay = 900;
+    let lastVal = null;
+
+    // ═══════════════════════════════════════════════════
+    // BST JS
+    // ═══════════════════════════════════════════════════
+    function buildBST(vals) {
+      let root = null,
+        cmp = 0;
+      function ins(n, v) {
+        cmp++;
+        if (!n) return { data: v, left: null, right: null };
+        if (v < n.data) n.left = ins(n.left, v);
+        else if (v > n.data) n.right = ins(n.right, v);
+        return n;
+      }
+      vals.forEach((v) => (root = ins(root, v)));
+      bstCmp = cmp;
+      return root;
+    }
+
+    function bstHeight(n) {
+      return n ? 1 + Math.max(bstHeight(n.left), bstHeight(n.right)) : 0;
+    }
+
+    // ═══════════════════════════════════════════════════
+    // AVL JS
+    // ═══════════════════════════════════════════════════
+    function buildAVL(vals) {
+      let root = null,
+        rot = 0;
+      function h(n) {
+        return n ? n.h : 0;
+      }
+      function bf(n) {
+        return n ? h(n.left) - h(n.right) : 0;
+      }
+      function uh(n) {
+        if (n) n.h = 1 + Math.max(h(n.left), h(n.right));
+      }
+      function rr(y) {
+        let x = y.left,
+          T = x.right;
+        x.right = y;
+        y.left = T;
+        uh(y);
+        uh(x);
+        return x;
+      }
+      function rl(x) {
+        let y = x.right,
+          T = y.left;
+        y.left = x;
+        x.right = T;
+        uh(x);
+        uh(y);
+        return y;
+      }
+      function rebal(n, v) {
+        uh(n);
+        let b = bf(n);
+        if (b > 1 && bf(n.left) >= 0) {
+          rot++;
+          return rr(n);
         }
-        vals.forEach((v) => (root = ins(root, v)));
-        bstCmp = cmp;
-        return root;
+        if (b > 1 && bf(n.left) < 0) {
+          rot++;
+          n.left = rl(n.left);
+          return rr(n);
+        }
+        if (b < -1 && bf(n.right) <= 0) {
+          rot++;
+          return rl(n);
+        }
+        if (b < -1 && bf(n.right) > 0) {
+          rot++;
+          n.right = rr(n.right);
+          return rl(n);
+        }
+        return n;
       }
-
-      function bstHeight(n) {
-        return n ? 1 + Math.max(bstHeight(n.left), bstHeight(n.right)) : 0;
+      function ins(n, v) {
+        if (!n) return { data: v, left: null, right: null, h: 1 };
+        if (v < n.data) n.left = ins(n.left, v);
+        else if (v > n.data) n.right = ins(n.right, v);
+        else return n;
+        return rebal(n, v);
       }
+      vals.forEach((v) => (root = ins(root, v)));
+      avlRot = rot;
+      return root;
+    }
 
-      // ═══════════════════════════════════════════════════
-      // AVL JS
-      // ═══════════════════════════════════════════════════
-      function buildAVL(vals) {
-        let root = null,
-          rot = 0;
+    // ═══════════════════════════════════════════════════
+    // RB JS (for rendering only — logic in C)
+    // ═══════════════════════════════════════════════════
+    function buildRBJS(vals) {
+      // full JS RB tree for D3 rendering
+      const RED = 0,
+        BLACK = 1;
+      function newN(v) {
+        return { data: v, color: RED, left: null, right: null, parent: null };
+      }
+      let root = null;
+      function rl(r, x) {
+        let y = x.right;
+        x.right = y.left;
+        if (y.left) y.left.parent = x;
+        y.parent = x.parent;
+        if (!x.parent) r = y;
+        else if (x === x.parent.left) x.parent.left = y;
+        else x.parent.right = y;
+        y.left = x;
+        x.parent = y;
+        return r;
+      }
+      function rr(r, x) {
+        let y = x.left;
+        x.left = y.right;
+        if (y.right) y.right.parent = x;
+        y.parent = x.parent;
+        if (!x.parent) r = y;
+        else if (x === x.parent.right) x.parent.right = y;
+        else x.parent.left = y;
+        y.right = x;
+        x.parent = y;
+        return r;
+      }
+      function fix(r, z) {
+        while (z.parent && z.parent.color === RED) {
+          let gp = z.parent.parent;
+          if (!gp) break;
+          if (z.parent === gp.left) {
+            let u = gp.right;
+            if (u && u.color === RED) {
+              z.parent.color = BLACK;
+              u.color = BLACK;
+              gp.color = RED;
+              z = gp;
+            } else {
+              if (z === z.parent.right) {
+                z = z.parent;
+                r = rl(r, z);
+              }
+              z.parent.color = BLACK;
+              z.parent.parent.color = RED;
+              r = rr(r, z.parent.parent);
+            }
+          } else {
+            let u = gp.left;
+            if (u && u.color === RED) {
+              z.parent.color = BLACK;
+              u.color = BLACK;
+              gp.color = RED;
+              z = gp;
+            } else {
+              if (z === z.parent.left) {
+                z = z.parent;
+                r = rr(r, z);
+              }
+              z.parent.color = BLACK;
+              z.parent.parent.color = RED;
+              r = rl(r, z.parent.parent);
+            }
+          }
+        }
+        r.color = BLACK;
+        return r;
+      }
+      vals.forEach((v) => {
+        let z = newN(v),
+          y = null,
+          x = root;
+        while (x) {
+          y = x;
+          if (z.data < x.data) x = x.left;
+          else if (z.data > x.data) x = x.right;
+          else return;
+        }
+        z.parent = y;
+        if (!y) root = z;
+        else if (z.data < y.data) y.left = z;
+        else y.right = z;
+        root = fix(root, z);
+      });
+      return root;
+    }
+
+    // ═══════════════════════════════════════════════════
+    // D3 RENDER
+    // ═══════════════════════════════════════════════════
+    const svgs = {
+      bst: d3
+        .select("#bst-svg")
+        .append("g")
+        .attr("transform", "translate(0,30)"),
+      avl: d3
+        .select("#avl-svg")
+        .append("g")
+        .attr("transform", "translate(0,30)"),
+      rb: d3
+        .select("#rb-svg")
+        .append("g")
+        .attr("transform", "translate(0,30)"),
+    };
+
+    function toHierBST(n) {
+      if (!n) return null;
+      const o = { name: n.data, children: [] };
+      if (n.left) o.children.push(toHierBST(n.left));
+      if (n.right) o.children.push(toHierBST(n.right));
+      if (!o.children.length) delete o.children;
+      return o;
+    }
+    function toHierAVL(n) {
+      if (!n) return null;
+      const bf = (n.left ? n.left.h : 0) - (n.right ? n.right.h : 0);
+      const o = { name: n.data, bf, children: [] };
+      if (n.left) o.children.push(toHierAVL(n.left));
+      if (n.right) o.children.push(toHierAVL(n.right));
+      if (!o.children.length) delete o.children;
+      return o;
+    }
+    function toHierRB(n) {
+      if (!n) return null;
+      const o = { name: n.data, color: n.color, children: [] };
+      if (n.left) o.children.push(toHierRB(n.left));
+      if (n.right) o.children.push(toHierRB(n.right));
+      if (!o.children.length) delete o.children;
+      return o;
+    }
+
+    function drawTree(container, hierData, accentColor, lastV, type) {
+      container.selectAll("*").remove();
+      if (!hierData) return;
+      const hier = d3.hierarchy(hierData);
+      d3.tree().size([460, 340])(hier);
+
+      container
+        .selectAll(".link")
+        .data(hier.links())
+        .enter()
+        .append("path")
+        .attr("class", "link")
+        .attr(
+          "d",
+          d3
+            .linkVertical()
+            .x((d) => d.x + 20)
+            .y((d) => d.y),
+        )
+        .style("opacity", 0)
+        .transition()
+        .duration(350)
+        .style("opacity", 1);
+
+      const node = container
+        .selectAll(".node")
+        .data(hier.descendants())
+        .enter()
+        .append("g")
+        .attr("class", "node")
+        .attr("transform", (d) => {
+          const sx = d.parent ? d.parent.x + 20 : d.x + 20;
+          const sy = d.parent ? d.parent.y : d.y;
+          return `translate(${sx},${sy})`;
+        });
+
+      node
+        .transition()
+        .duration(480)
+        .ease(d3.easeCubicOut)
+        .attr("transform", (d) => `translate(${d.x + 20},${d.y})`);
+
+      node
+        .append("circle")
+        .attr("r", 18)
+        .style("fill", (d) => {
+          if (type === "rb")
+            return d.data.color === 0 ? "#c0392b" : "#1e1e2e";
+          return d.data.name === lastV ? accentColor : "#1e1e2e";
+        })
+        .style("stroke", (d) => {
+          if (type === "rb") return d.data.color === 0 ? "#ff6b6b" : "#888";
+          return accentColor;
+        })
+        .transition()
+        .delay(type === "rb" ? 0 : 700)
+        .duration(600)
+        .style("fill", (d) =>
+          type === "rb"
+            ? d.data.color === 0
+              ? "#c0392b"
+              : "#1e1e2e"
+            : "#1e1e2e",
+        );
+
+      node.append("text").text((d) => d.data.name);
+
+      if (type === "avl") {
+        node
+          .append("text")
+          .attr("class", "lbl")
+          .attr("dy", 28)
+          .text((d) => "bf:" + (d.data.bf || 0));
+      }
+      if (type === "rb") {
+        node
+          .append("text")
+          .attr("class", "lbl")
+          .attr("dy", 28)
+          .style("fill", (d) => (d.data.color === 0 ? "#ff9090" : "#777"))
+          .text((d) => (d.data.color === 0 ? "R" : "B"));
+      }
+    }
+
+    // ═══════════════════════════════════════════════════
+    // EXPLANATIONS
+    // ═══════════════════════════════════════════════════
+    function explainBST(v, bstH, prevH) {
+      if (!v) return "Insert a value to see explanation";
+      if (bstH > prevH)
+        return `Node ${v} inserted. BST height grew to ${bstH} — no balancing, just placed at the correct position.`;
+      return `Node ${v} inserted at depth ${bstH}. Height unchanged — tree still balanced by coincidence.`;
+    }
+
+    function explainAVL(v, rot, rotType) {
+      if (!v) return "Insert a value to see explanation";
+      if (rot > 0)
+        return `Node ${v} inserted → imbalance detected → ${rotType} rotation applied → height maintained.`;
+      return `Node ${v} inserted. Balance factors remain within [-1, +1] — no rotation needed.`;
+    }
+
+    function explainRB(v, rbH, rbBH) {
+      if (!v) return "Insert a value to see explanation";
+      return `Node ${v} inserted as RED. Recoloring/rotation applied to maintain RB properties. Height: ${rbH}, Black-height: ${rbBH}.`;
+    }
+
+    let lastRotType = "";
+
+    // ═══════════════════════════════════════════════════
+    // HEIGHT CHART
+    // ═══════════════════════════════════════════════════
+    function updateHeightChart() {
+      const chartSvg = d3.select("#height-chart");
+      chartSvg.selectAll("*").remove();
+      const W = 700,
+        H = 54,
+        pad = 10;
+      const n = heightHistory.bst.length;
+      if (n < 2) return;
+
+      const xScale = d3
+        .scaleLinear()
+        .domain([0, n - 1])
+        .range([pad, W - pad]);
+      const maxH = Math.max(
+        ...heightHistory.bst,
+        ...heightHistory.avl,
+        ...heightHistory.rb,
+        1,
+      );
+      const yScale = d3
+        .scaleLinear()
+        .domain([0, maxH])
+        .range([H - 6, 6]);
+
+      const line = (key) =>
+        d3
+          .line()
+          .x((_, i) => xScale(i))
+          .y((d) => yScale(d))
+          .curve(d3.curveMonotoneX)(heightHistory[key]);
+
+      const colors = { bst: "#00e5ff", avl: "#a78bfa", rb: "#ff4f4f" };
+      ["bst", "avl", "rb"].forEach((k) => {
+        chartSvg
+          .append("path")
+          .attr("d", line(k))
+          .style("fill", "none")
+          .style("stroke", colors[k])
+          .style("stroke-width", "2px")
+          .style("opacity", "0.85");
+      });
+
+      // legend
+      let lx = W - 160;
+      ["bst", "avl", "rb"].forEach((k, i) => {
+        chartSvg
+          .append("rect")
+          .attr("x", lx + i * 46)
+          .attr("y", 2)
+          .attr("width", 10)
+          .attr("height", 10)
+          .style("fill", colors[k]);
+        chartSvg
+          .append("text")
+          .attr("x", lx + i * 46 + 13)
+          .attr("y", 11)
+          .style("fill", colors[k])
+          .style("font-size", "9px")
+          .text(k.toUpperCase());
+      });
+    }
+
+    // ═══════════════════════════════════════════════════
+    // VERDICT
+    // ═══════════════════════════════════════════════════
+    function updateVerdict(bstH, avlH, rbH) {
+      const v = document.getElementById("verdict");
+      if (values.length < 3) {
+        v.textContent = "";
+        return;
+      }
+      const winner = avlH <= rbH ? "AVL" : "Red-Black";
+      const loser = bstH;
+      const diff = bstH - Math.min(avlH, rbH);
+      if (diff >= 2)
+        v.innerHTML = `🏆 <b style="color:#ffd700">${winner}</b> is most efficient right now. BST is ${diff} levels taller — ${diff * 2}× more comparisons needed for search. This is exactly why balanced trees exist.`;
+      else
+        v.textContent = `All trees have similar height for this input. Try "Sorted Input" preset to see BST degenerate dramatically.`;
+
+      // badges
+      const minH = Math.min(bstH, avlH, rbH);
+      document.getElementById("bst-badge").textContent =
+        bstH === minH
+          ? "🏆 Shortest"
+          : bstH > avlH + 1 || bstH > rbH + 1
+            ? "⚠️ Degenerating"
+            : "";
+      document.getElementById("avl-badge").textContent =
+        avlH === minH && avlH < bstH ? "🏆 Most Balanced" : "";
+      document.getElementById("rb-badge").textContent =
+        rbH === minH && rbH < bstH ? "🏆 Most Balanced" : "";
+    }
+
+    // ═══════════════════════════════════════════════════
+    // MAIN RENDER
+    // ═══════════════════════════════════════════════════
+    function render(v) {
+      lastVal = v;
+      const prevBstH = heightHistory.bst[heightHistory.bst.length - 1] || 0;
+      let detRot = 0,
+        detRotType = "";
+
+      // build trees
+      const bstTree = buildBST([...values]);
+      // AVL with rotation detection
+      let avlRoot = null,
+        aRot = 0,
+        aRotType = "";
+      (function () {
         function h(n) {
           return n ? n.h : 0;
         }
@@ -572,846 +1218,438 @@
           uh(y);
           return y;
         }
-        function rebal(n, v) {
+        function rebal(n) {
           uh(n);
           let b = bf(n);
           if (b > 1 && bf(n.left) >= 0) {
-            rot++;
+            aRot++;
+            aRotType = "LL→Right Rotation";
             return rr(n);
           }
           if (b > 1 && bf(n.left) < 0) {
-            rot++;
+            aRot++;
+            aRotType = "LR→Left-Right Rotation";
             n.left = rl(n.left);
             return rr(n);
           }
           if (b < -1 && bf(n.right) <= 0) {
-            rot++;
+            aRot++;
+            aRotType = "RR→Left Rotation";
             return rl(n);
           }
           if (b < -1 && bf(n.right) > 0) {
-            rot++;
+            aRot++;
+            aRotType = "RL→Right-Left Rotation";
             n.right = rr(n.right);
             return rl(n);
           }
           return n;
         }
-        function ins(n, v) {
-          if (!n) return { data: v, left: null, right: null, h: 1 };
-          if (v < n.data) n.left = ins(n.left, v);
-          else if (v > n.data) n.right = ins(n.right, v);
+        function ins(n, val) {
+          if (!n) return { data: val, left: null, right: null, h: 1 };
+          if (val < n.data) n.left = ins(n.left, val);
+          else if (val > n.data) n.right = ins(n.right, val);
           else return n;
-          return rebal(n, v);
+          return rebal(n);
         }
-        vals.forEach((v) => (root = ins(root, v)));
-        avlRot = rot;
-        return root;
-      }
+        values.forEach((val) => (avlRoot = ins(avlRoot, val)));
+      })();
+      const rbTree = buildRBJS([...values]);
 
-      // ═══════════════════════════════════════════════════
-      // RB JS (for rendering only — logic in C)
-      // ═══════════════════════════════════════════════════
-      function buildRBJS(vals) {
-        // full JS RB tree for D3 rendering
-        const RED = 0,
-          BLACK = 1;
-        function newN(v) {
-          return { data: v, color: RED, left: null, right: null, parent: null };
-        }
-        let root = null;
-        function rl(r, x) {
-          let y = x.right;
-          x.right = y.left;
-          if (y.left) y.left.parent = x;
-          y.parent = x.parent;
-          if (!x.parent) r = y;
-          else if (x === x.parent.left) x.parent.left = y;
-          else x.parent.right = y;
-          y.left = x;
-          x.parent = y;
-          return r;
-        }
-        function rr(r, x) {
-          let y = x.left;
-          x.left = y.right;
-          if (y.right) y.right.parent = x;
-          y.parent = x.parent;
-          if (!x.parent) r = y;
-          else if (x === x.parent.right) x.parent.right = y;
-          else x.parent.left = y;
-          y.right = x;
-          x.parent = y;
-          return r;
-        }
-        function fix(r, z) {
-          while (z.parent && z.parent.color === RED) {
-            let gp = z.parent.parent;
-            if (!gp) break;
-            if (z.parent === gp.left) {
-              let u = gp.right;
-              if (u && u.color === RED) {
-                z.parent.color = BLACK;
-                u.color = BLACK;
-                gp.color = RED;
-                z = gp;
-              } else {
-                if (z === z.parent.right) {
-                  z = z.parent;
-                  r = rl(r, z);
-                }
-                z.parent.color = BLACK;
-                z.parent.parent.color = RED;
-                r = rr(r, z.parent.parent);
-              }
-            } else {
-              let u = gp.left;
-              if (u && u.color === RED) {
-                z.parent.color = BLACK;
-                u.color = BLACK;
-                gp.color = RED;
-                z = gp;
-              } else {
-                if (z === z.parent.left) {
-                  z = z.parent;
-                  r = rr(r, z);
-                }
-                z.parent.color = BLACK;
-                z.parent.parent.color = RED;
-                r = rl(r, z.parent.parent);
-              }
-            }
-          }
-          r.color = BLACK;
-          return r;
-        }
-        vals.forEach((v) => {
-          let z = newN(v),
-            y = null,
-            x = root;
-          while (x) {
-            y = x;
-            if (z.data < x.data) x = x.left;
-            else if (z.data > x.data) x = x.right;
-            else return;
-          }
-          z.parent = y;
-          if (!y) root = z;
-          else if (z.data < y.data) y.left = z;
-          else y.right = z;
-          root = fix(root, z);
-        });
-        return root;
-      }
+      const bstH = bstHeight(bstTree);
+      const avlH = avlRoot
+        ? (function h(n) {
+          return n ? 1 + Math.max(h(n.left), h(n.right)) : 0;
+        })(avlRoot)
+        : 0;
+      const rbH = Module._rb_height_js();
+      const rbBH = Module._rb_black_height_js();
 
-      // ═══════════════════════════════════════════════════
-      // D3 RENDER
-      // ═══════════════════════════════════════════════════
-      const svgs = {
-        bst: d3
-          .select("#bst-svg")
-          .append("g")
-          .attr("transform", "translate(0,30)"),
-        avl: d3
-          .select("#avl-svg")
-          .append("g")
-          .attr("transform", "translate(0,30)"),
-        rb: d3
-          .select("#rb-svg")
-          .append("g")
-          .attr("transform", "translate(0,30)"),
+      heightHistory.bst.push(bstH);
+      heightHistory.avl.push(avlH);
+      heightHistory.rb.push(rbH);
+
+      // draw
+      drawTree(
+        svgs.bst,
+        bstTree ? toHierBST(bstTree) : null,
+        "#00e5ff",
+        v,
+        "bst",
+      );
+      drawTree(
+        svgs.avl,
+        avlRoot ? toHierAVL(avlRoot) : null,
+        "#a78bfa",
+        v,
+        "avl",
+      );
+      drawTree(svgs.rb, rbTree ? toHierRB(rbTree) : null, "#ff4f4f", v, "rb");
+
+      // stats
+      document.getElementById("bst-h").textContent = bstH;
+      document.getElementById("bst-cmp").textContent = bstCmp;
+      document.getElementById("avl-h").textContent = avlH;
+      document.getElementById("avl-rot").textContent = aRot;
+      document.getElementById("rb-h").textContent = rbH;
+      document.getElementById("rb-bh").textContent = rbBH;
+
+      // explanations
+      document.getElementById("ex-bst-msg").textContent = explainBST(
+        v,
+        bstH,
+        prevBstH,
+      );
+      document.getElementById("ex-avl-msg").textContent = explainAVL(
+        v,
+        aRot,
+        aRotType,
+      );
+      document.getElementById("ex-rb-msg").textContent = explainRB(
+        v,
+        rbH,
+        rbBH,
+      );
+
+      updateHeightChart();
+      updateVerdict(bstH, avlH, rbH);
+    }
+
+    // ═══════════════════════════════════════════════════
+    // INSERT
+    // ═══════════════════════════════════════════════════
+    function doInsert(v) {
+      if (isNaN(v)) return;
+      values.push(v);
+      Module._bst_insert_js(v);
+      Module._avl_insert_js(v);
+      Module._rb_insert_js(v);
+      render(v);
+    }
+
+    // ═══════════════════════════════════════════════════
+    // PRESETS
+    // ═══════════════════════════════════════════════════
+    function loadPreset(type) {
+      if (!type) return;
+      doReset();
+      const seqs = {
+        sorted: [10, 20, 30, 40, 50, 60, 70],
+        reverse: [70, 60, 50, 40, 30, 20, 10],
+        random: [42, 15, 73, 8, 55, 31, 88, 19, 64, 27],
+        zigzag: [50, 10, 90, 20, 80, 30, 70, 40, 60],
+      };
+      const seq = seqs[type] || [];
+      let i = 0;
+      function next() {
+        if (i >= seq.length) return;
+        doInsert(seq[i++]);
+        setTimeout(next, 700);
+      }
+      next();
+      document.getElementById("preset-select").value = "";
+    }
+
+    // ═══════════════════════════════════════════════════
+    // AUTOPLAY
+    // ═══════════════════════════════════════════════════
+    function toggleAutoplay() {
+      const btn = document.getElementById("btn-autoplay");
+      if (autoplayTimer) {
+        clearInterval(autoplayTimer);
+        autoplayTimer = null;
+        btn.textContent = "▶ Start";
+        btn.classList.remove("running");
+        return;
+      }
+      // build queue from custom input or random
+      const raw = document.getElementById("auto-input").value.trim();
+      if (raw) {
+        autoplayQueue = raw
+          .split(",")
+          .map((s) => parseInt(s.trim()))
+          .filter((n) => !isNaN(n));
+      } else {
+        autoplayQueue = Array.from(
+          { length: 12 },
+          () => Math.floor(Math.random() * 99) + 1,
+        );
+      }
+      btn.textContent = "⏹ Stop";
+      btn.classList.add("running");
+      doReset();
+      autoplayTimer = setInterval(() => {
+        if (!autoplayQueue.length) {
+          toggleAutoplay();
+          return;
+        }
+        doInsert(autoplayQueue.shift());
+      }, autoplayDelay);
+    }
+
+    // ═══════════════════════════════════════════════════
+    // RESET
+    // ═══════════════════════════════════════════════════
+    function doReset() {
+      if (autoplayTimer) {
+        clearInterval(autoplayTimer);
+        autoplayTimer = null;
+      }
+      document.getElementById("btn-autoplay").textContent = "▶ Start";
+      document.getElementById("btn-autoplay").classList.remove("running");
+      values = [];
+      lastVal = null;
+      bstCmp = 0;
+      avlRot = 0;
+      heightHistory = { bst: [], avl: [], rb: [] };
+      Module._bst_reset();
+      Module._avl_reset();
+      Module._rb_reset_js();
+      ["bst", "avl", "rb"].forEach((k) => svgs[k].selectAll("*").remove());
+      ["bst-h", "bst-cmp", "avl-h", "avl-rot", "rb-h", "rb-bh"].forEach(
+        (id) => (document.getElementById(id).textContent = "0"),
+      );
+      ["bst-badge", "avl-badge", "rb-badge"].forEach(
+        (id) => (document.getElementById(id).textContent = ""),
+      );
+      ["ex-bst-msg", "ex-avl-msg", "ex-rb-msg"].forEach(
+        (id) =>
+        (document.getElementById(id).textContent =
+          "Insert a value to see explanation"),
+      );
+      document.getElementById("verdict").textContent = "";
+      d3.select("#height-chart").selectAll("*").remove();
+    }
+    // ── FOCUS MODE ──────────────────────────────────────────────────
+    let focusG = null;
+    function openFocus(type) {
+      if (!values.length) return;
+
+      const configs = {
+        bst: {
+          title: "🌳 BST — Binary Search Tree",
+          color: "#00e5ff",
+          stats: () =>
+            `<div class="focus-chip">Height<span style="color:#00e5ff">${document.getElementById("bst-h").textContent}</span></div><div class="focus-chip">Comparisons<span style="color:#00e5ff">${document.getElementById("bst-cmp").textContent}</span></div>`,
+          explain: () => document.getElementById("ex-bst-msg").textContent,
+        },
+        avl: {
+          title: "⚖️ AVL — Self-Balancing Tree",
+          color: "#a78bfa",
+          stats: () =>
+            `<div class="focus-chip">Height<span style="color:#a78bfa">${document.getElementById("avl-h").textContent}</span></div><div class="focus-chip">Rotations<span style="color:#a78bfa">${document.getElementById("avl-rot").textContent}</span></div>`,
+          explain: () => document.getElementById("ex-avl-msg").textContent,
+        },
+        rb: {
+          title: "🔴 Red-Black Tree",
+          color: "#ff4f4f",
+          stats: () =>
+            `<div class="focus-chip">Height<span style="color:#ff4f4f">${document.getElementById("rb-h").textContent}</span></div><div class="focus-chip">Black-Height<span style="color:#ff4f4f">${document.getElementById("rb-bh").textContent}</span></div>`,
+          explain: () => document.getElementById("ex-rb-msg").textContent,
+        },
       };
 
-      function toHierBST(n) {
-        if (!n) return null;
-        const o = { name: n.data, children: [] };
-        if (n.left) o.children.push(toHierBST(n.left));
-        if (n.right) o.children.push(toHierBST(n.right));
-        if (!o.children.length) delete o.children;
-        return o;
+      const cfg = configs[type];
+      document.getElementById("focus-title").innerHTML =
+        `<span style="color:${cfg.color}">${cfg.title}</span>`;
+      document.getElementById("focus-stats").innerHTML = cfg.stats();
+      document.getElementById("focus-explain").textContent = cfg.explain();
+
+      // build hierarchy data
+      let hierData = null;
+      if (type === "bst") {
+        const t = buildBST([...values]);
+        hierData = t ? toHierBST(t) : null;
       }
-      function toHierAVL(n) {
-        if (!n) return null;
-        const bf = (n.left ? n.left.h : 0) - (n.right ? n.right.h : 0);
-        const o = { name: n.data, bf, children: [] };
-        if (n.left) o.children.push(toHierAVL(n.left));
-        if (n.right) o.children.push(toHierAVL(n.right));
-        if (!o.children.length) delete o.children;
-        return o;
+      if (type === "avl") {
+        const t = buildAVL([...values]);
+        hierData = t ? toHierAVL(t) : null;
       }
-      function toHierRB(n) {
-        if (!n) return null;
-        const o = { name: n.data, color: n.color, children: [] };
-        if (n.left) o.children.push(toHierRB(n.left));
-        if (n.right) o.children.push(toHierRB(n.right));
-        if (!o.children.length) delete o.children;
-        return o;
+      if (type === "rb") {
+        const t = buildRBJS([...values]);
+        hierData = t ? toHierRB(t) : null;
       }
+      if (!hierData) return;
 
-      function drawTree(container, hierData, accentColor, lastV, type) {
-        container.selectAll("*").remove();
-        if (!hierData) return;
-        const hier = d3.hierarchy(hierData);
-        d3.tree().size([460, 340])(hier);
+      // show overlay FIRST so SVG has real dimensions
+      document.getElementById("focus-overlay").classList.add("active");
 
-        container
-          .selectAll(".link")
-          .data(hier.links())
-          .enter()
-          .append("path")
-          .attr("class", "link")
-          .attr(
-            "d",
-            d3
-              .linkVertical()
-              .x((d) => d.x + 20)
-              .y((d) => d.y),
-          )
-          .style("opacity", 0)
-          .transition()
-          .duration(350)
-          .style("opacity", 1);
+      // now build on the visible SVG
+      const focusSvg = d3.select("#focus-svg");
+      focusSvg.selectAll("*").remove();
+      focusG = focusSvg.append("g").attr("transform", "translate(40,60)");
 
-        const node = container
-          .selectAll(".node")
-          .data(hier.descendants())
-          .enter()
-          .append("g")
-          .attr("class", "node")
-          .attr("transform", (d) => {
-            const sx = d.parent ? d.parent.x + 20 : d.x + 20;
-            const sy = d.parent ? d.parent.y : d.y;
-            return `translate(${sx},${sy})`;
-          });
+      const W = 1100,
+        H = 580;
+      focusSvg.attr("width", W + 80).attr("height", H + 120);
 
-        node
-          .transition()
-          .duration(480)
-          .ease(d3.easeCubicOut)
-          .attr("transform", (d) => `translate(${d.x + 20},${d.y})`);
+      const root = d3.hierarchy(hierData);
+      d3.tree().size([W, H])(root);
 
-        node
-          .append("circle")
-          .attr("r", 18)
-          .style("fill", (d) => {
-            if (type === "rb")
-              return d.data.color === 0 ? "#c0392b" : "#1e1e2e";
-            return d.data.name === lastV ? accentColor : "#1e1e2e";
-          })
-          .style("stroke", (d) => {
-            if (type === "rb") return d.data.color === 0 ? "#ff6b6b" : "#888";
-            return accentColor;
-          })
-          .transition()
-          .delay(type === "rb" ? 0 : 700)
-          .duration(600)
-          .style("fill", (d) =>
-            type === "rb"
-              ? d.data.color === 0
-                ? "#c0392b"
-                : "#1e1e2e"
-              : "#1e1e2e",
-          );
-
-        node.append("text").text((d) => d.data.name);
-
-        if (type === "avl") {
-          node
-            .append("text")
-            .attr("class", "lbl")
-            .attr("dy", 28)
-            .text((d) => "bf:" + (d.data.bf || 0));
-        }
-        if (type === "rb") {
-          node
-            .append("text")
-            .attr("class", "lbl")
-            .attr("dy", 28)
-            .style("fill", (d) => (d.data.color === 0 ? "#ff9090" : "#777"))
-            .text((d) => (d.data.color === 0 ? "R" : "B"));
-        }
-      }
-
-      // ═══════════════════════════════════════════════════
-      // EXPLANATIONS
-      // ═══════════════════════════════════════════════════
-      function explainBST(v, bstH, prevH) {
-        if (!v) return "Insert a value to see explanation";
-        if (bstH > prevH)
-          return `Node ${v} inserted. BST height grew to ${bstH} — no balancing, just placed at the correct position.`;
-        return `Node ${v} inserted at depth ${bstH}. Height unchanged — tree still balanced by coincidence.`;
-      }
-
-      function explainAVL(v, rot, rotType) {
-        if (!v) return "Insert a value to see explanation";
-        if (rot > 0)
-          return `Node ${v} inserted → imbalance detected → ${rotType} rotation applied → height maintained.`;
-        return `Node ${v} inserted. Balance factors remain within [-1, +1] — no rotation needed.`;
-      }
-
-      function explainRB(v, rbH, rbBH) {
-        if (!v) return "Insert a value to see explanation";
-        return `Node ${v} inserted as RED. Recoloring/rotation applied to maintain RB properties. Height: ${rbH}, Black-height: ${rbBH}.`;
-      }
-
-      let lastRotType = "";
-
-      // ═══════════════════════════════════════════════════
-      // HEIGHT CHART
-      // ═══════════════════════════════════════════════════
-      function updateHeightChart() {
-        const chartSvg = d3.select("#height-chart");
-        chartSvg.selectAll("*").remove();
-        const W = 700,
-          H = 54,
-          pad = 10;
-        const n = heightHistory.bst.length;
-        if (n < 2) return;
-
-        const xScale = d3
-          .scaleLinear()
-          .domain([0, n - 1])
-          .range([pad, W - pad]);
-        const maxH = Math.max(
-          ...heightHistory.bst,
-          ...heightHistory.avl,
-          ...heightHistory.rb,
-          1,
-        );
-        const yScale = d3
-          .scaleLinear()
-          .domain([0, maxH])
-          .range([H - 6, 6]);
-
-        const line = (key) =>
+      // links
+      focusG
+        .selectAll(".link")
+        .data(root.links())
+        .enter()
+        .append("path")
+        .attr("class", "link")
+        .attr(
+          "d",
           d3
-            .line()
-            .x((_, i) => xScale(i))
-            .y((d) => yScale(d))
-            .curve(d3.curveMonotoneX)(heightHistory[key]);
-
-        const colors = { bst: "#00e5ff", avl: "#a78bfa", rb: "#ff4f4f" };
-        ["bst", "avl", "rb"].forEach((k) => {
-          chartSvg
-            .append("path")
-            .attr("d", line(k))
-            .style("fill", "none")
-            .style("stroke", colors[k])
-            .style("stroke-width", "2px")
-            .style("opacity", "0.85");
-        });
-
-        // legend
-        let lx = W - 160;
-        ["bst", "avl", "rb"].forEach((k, i) => {
-          chartSvg
-            .append("rect")
-            .attr("x", lx + i * 46)
-            .attr("y", 2)
-            .attr("width", 10)
-            .attr("height", 10)
-            .style("fill", colors[k]);
-          chartSvg
-            .append("text")
-            .attr("x", lx + i * 46 + 13)
-            .attr("y", 11)
-            .style("fill", colors[k])
-            .style("font-size", "9px")
-            .text(k.toUpperCase());
-        });
-      }
-
-      // ═══════════════════════════════════════════════════
-      // VERDICT
-      // ═══════════════════════════════════════════════════
-      function updateVerdict(bstH, avlH, rbH) {
-        const v = document.getElementById("verdict");
-        if (values.length < 3) {
-          v.textContent = "";
-          return;
-        }
-        const winner = avlH <= rbH ? "AVL" : "Red-Black";
-        const loser = bstH;
-        const diff = bstH - Math.min(avlH, rbH);
-        if (diff >= 2)
-          v.innerHTML = `🏆 <b style="color:#ffd700">${winner}</b> is most efficient right now. BST is ${diff} levels taller — ${diff * 2}× more comparisons needed for search. This is exactly why balanced trees exist.`;
-        else
-          v.textContent = `All trees have similar height for this input. Try "Sorted Input" preset to see BST degenerate dramatically.`;
-
-        // badges
-        const minH = Math.min(bstH, avlH, rbH);
-        document.getElementById("bst-badge").textContent =
-          bstH === minH
-            ? "🏆 Shortest"
-            : bstH > avlH + 1 || bstH > rbH + 1
-              ? "⚠️ Degenerating"
-              : "";
-        document.getElementById("avl-badge").textContent =
-          avlH === minH && avlH < bstH ? "🏆 Most Balanced" : "";
-        document.getElementById("rb-badge").textContent =
-          rbH === minH && rbH < bstH ? "🏆 Most Balanced" : "";
-      }
-
-      // ═══════════════════════════════════════════════════
-      // MAIN RENDER
-      // ═══════════════════════════════════════════════════
-      function render(v) {
-        lastVal = v;
-        const prevBstH = heightHistory.bst[heightHistory.bst.length - 1] || 0;
-        let detRot = 0,
-          detRotType = "";
-
-        // build trees
-        const bstTree = buildBST([...values]);
-        // AVL with rotation detection
-        let avlRoot = null,
-          aRot = 0,
-          aRotType = "";
-        (function () {
-          function h(n) {
-            return n ? n.h : 0;
-          }
-          function bf(n) {
-            return n ? h(n.left) - h(n.right) : 0;
-          }
-          function uh(n) {
-            if (n) n.h = 1 + Math.max(h(n.left), h(n.right));
-          }
-          function rr(y) {
-            let x = y.left,
-              T = x.right;
-            x.right = y;
-            y.left = T;
-            uh(y);
-            uh(x);
-            return x;
-          }
-          function rl(x) {
-            let y = x.right,
-              T = y.left;
-            y.left = x;
-            x.right = T;
-            uh(x);
-            uh(y);
-            return y;
-          }
-          function rebal(n) {
-            uh(n);
-            let b = bf(n);
-            if (b > 1 && bf(n.left) >= 0) {
-              aRot++;
-              aRotType = "LL→Right Rotation";
-              return rr(n);
-            }
-            if (b > 1 && bf(n.left) < 0) {
-              aRot++;
-              aRotType = "LR→Left-Right Rotation";
-              n.left = rl(n.left);
-              return rr(n);
-            }
-            if (b < -1 && bf(n.right) <= 0) {
-              aRot++;
-              aRotType = "RR→Left Rotation";
-              return rl(n);
-            }
-            if (b < -1 && bf(n.right) > 0) {
-              aRot++;
-              aRotType = "RL→Right-Left Rotation";
-              n.right = rr(n.right);
-              return rl(n);
-            }
-            return n;
-          }
-          function ins(n, val) {
-            if (!n) return { data: val, left: null, right: null, h: 1 };
-            if (val < n.data) n.left = ins(n.left, val);
-            else if (val > n.data) n.right = ins(n.right, val);
-            else return n;
-            return rebal(n);
-          }
-          values.forEach((val) => (avlRoot = ins(avlRoot, val)));
-        })();
-        const rbTree = buildRBJS([...values]);
-
-        const bstH = bstHeight(bstTree);
-        const avlH = avlRoot
-          ? (function h(n) {
-              return n ? 1 + Math.max(h(n.left), h(n.right)) : 0;
-            })(avlRoot)
-          : 0;
-        const rbH = Module._rb_height_js();
-        const rbBH = Module._rb_black_height_js();
-
-        heightHistory.bst.push(bstH);
-        heightHistory.avl.push(avlH);
-        heightHistory.rb.push(rbH);
-
-        // draw
-        drawTree(
-          svgs.bst,
-          bstTree ? toHierBST(bstTree) : null,
-          "#00e5ff",
-          v,
-          "bst",
-        );
-        drawTree(
-          svgs.avl,
-          avlRoot ? toHierAVL(avlRoot) : null,
-          "#a78bfa",
-          v,
-          "avl",
-        );
-        drawTree(svgs.rb, rbTree ? toHierRB(rbTree) : null, "#ff4f4f", v, "rb");
-
-        // stats
-        document.getElementById("bst-h").textContent = bstH;
-        document.getElementById("bst-cmp").textContent = bstCmp;
-        document.getElementById("avl-h").textContent = avlH;
-        document.getElementById("avl-rot").textContent = aRot;
-        document.getElementById("rb-h").textContent = rbH;
-        document.getElementById("rb-bh").textContent = rbBH;
-
-        // explanations
-        document.getElementById("ex-bst-msg").textContent = explainBST(
-          v,
-          bstH,
-          prevBstH,
-        );
-        document.getElementById("ex-avl-msg").textContent = explainAVL(
-          v,
-          aRot,
-          aRotType,
-        );
-        document.getElementById("ex-rb-msg").textContent = explainRB(
-          v,
-          rbH,
-          rbBH,
+            .linkVertical()
+            .x((d) => d.x)
+            .y((d) => d.y),
         );
 
-        updateHeightChart();
-        updateVerdict(bstH, avlH, rbH);
-      }
+      // nodes
+      const node = focusG
+        .selectAll(".node")
+        .data(root.descendants())
+        .enter()
+        .append("g")
+        .attr("class", "node")
+        .attr("transform", (d) => `translate(${d.x},${d.y})`);
 
-      // ═══════════════════════════════════════════════════
-      // INSERT
-      // ═══════════════════════════════════════════════════
-      function doInsert(v) {
-        if (isNaN(v)) return;
-        values.push(v);
-        Module._bst_insert_js(v);
-        Module._avl_insert_js(v);
-        Module._rb_insert_js(v);
-        render(v);
-      }
+      node
+        .append("circle")
+        .attr("r", 22)
+        .style("fill", (d) =>
+          type === "rb"
+            ? d.data.color === 0
+              ? "#c0392b"
+              : "#1e1e2e"
+            : "#1e1e2e",
+        )
+        .style("stroke", (d) =>
+          type === "rb"
+            ? d.data.color === 0
+              ? "#ff6b6b"
+              : "#aaa"
+            : cfg.color,
+        )
+        .style("stroke-width", "2.5px");
 
-      // ═══════════════════════════════════════════════════
-      // PRESETS
-      // ═══════════════════════════════════════════════════
-      function loadPreset(type) {
-        if (!type) return;
-        doReset();
-        const seqs = {
-          sorted: [10, 20, 30, 40, 50, 60, 70],
-          reverse: [70, 60, 50, 40, 30, 20, 10],
-          random: [42, 15, 73, 8, 55, 31, 88, 19, 64, 27],
-          zigzag: [50, 10, 90, 20, 80, 30, 70, 40, 60],
-        };
-        const seq = seqs[type] || [];
-        let i = 0;
-        function next() {
-          if (i >= seq.length) return;
-          doInsert(seq[i++]);
-          setTimeout(next, 700);
-        }
-        next();
-        document.getElementById("preset-select").value = "";
-      }
+      node
+        .append("text")
+        .text((d) => d.data.name)
+        .style("fill", "#fff")
+        .style("font-size", "13px")
+        .style("font-weight", "bold")
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "central");
 
-      // ═══════════════════════════════════════════════════
-      // AUTOPLAY
-      // ═══════════════════════════════════════════════════
-      function toggleAutoplay() {
-        const btn = document.getElementById("btn-autoplay");
-        if (autoplayTimer) {
-          clearInterval(autoplayTimer);
-          autoplayTimer = null;
-          btn.textContent = "▶ Start";
-          btn.classList.remove("running");
-          return;
-        }
-        // build queue from custom input or random
-        const raw = document.getElementById("auto-input").value.trim();
-        if (raw) {
-          autoplayQueue = raw
-            .split(",")
-            .map((s) => parseInt(s.trim()))
-            .filter((n) => !isNaN(n));
-        } else {
-          autoplayQueue = Array.from(
-            { length: 12 },
-            () => Math.floor(Math.random() * 99) + 1,
-          );
-        }
-        btn.textContent = "⏹ Stop";
-        btn.classList.add("running");
-        doReset();
-        autoplayTimer = setInterval(() => {
-          if (!autoplayQueue.length) {
-            toggleAutoplay();
-            return;
-          }
-          doInsert(autoplayQueue.shift());
-        }, autoplayDelay);
-      }
-
-      // ═══════════════════════════════════════════════════
-      // RESET
-      // ═══════════════════════════════════════════════════
-      function doReset() {
-        if (autoplayTimer) {
-          clearInterval(autoplayTimer);
-          autoplayTimer = null;
-        }
-        document.getElementById("btn-autoplay").textContent = "▶ Start";
-        document.getElementById("btn-autoplay").classList.remove("running");
-        values = [];
-        lastVal = null;
-        bstCmp = 0;
-        avlRot = 0;
-        heightHistory = { bst: [], avl: [], rb: [] };
-        Module._bst_reset();
-        Module._avl_reset();
-        Module._rb_reset_js();
-        ["bst", "avl", "rb"].forEach((k) => svgs[k].selectAll("*").remove());
-        ["bst-h", "bst-cmp", "avl-h", "avl-rot", "rb-h", "rb-bh"].forEach(
-          (id) => (document.getElementById(id).textContent = "0"),
-        );
-        ["bst-badge", "avl-badge", "rb-badge"].forEach(
-          (id) => (document.getElementById(id).textContent = ""),
-        );
-        ["ex-bst-msg", "ex-avl-msg", "ex-rb-msg"].forEach(
-          (id) =>
-            (document.getElementById(id).textContent =
-              "Insert a value to see explanation"),
-        );
-        document.getElementById("verdict").textContent = "";
-        d3.select("#height-chart").selectAll("*").remove();
-      }
-      // ── FOCUS MODE ──────────────────────────────────────────────────
-      let focusG = null;
-      function openFocus(type) {
-        if (!values.length) return;
-
-        const configs = {
-          bst: {
-            title: "🌳 BST — Binary Search Tree",
-            color: "#00e5ff",
-            stats: () =>
-              `<div class="focus-chip">Height<span style="color:#00e5ff">${document.getElementById("bst-h").textContent}</span></div><div class="focus-chip">Comparisons<span style="color:#00e5ff">${document.getElementById("bst-cmp").textContent}</span></div>`,
-            explain: () => document.getElementById("ex-bst-msg").textContent,
-          },
-          avl: {
-            title: "⚖️ AVL — Self-Balancing Tree",
-            color: "#a78bfa",
-            stats: () =>
-              `<div class="focus-chip">Height<span style="color:#a78bfa">${document.getElementById("avl-h").textContent}</span></div><div class="focus-chip">Rotations<span style="color:#a78bfa">${document.getElementById("avl-rot").textContent}</span></div>`,
-            explain: () => document.getElementById("ex-avl-msg").textContent,
-          },
-          rb: {
-            title: "🔴 Red-Black Tree",
-            color: "#ff4f4f",
-            stats: () =>
-              `<div class="focus-chip">Height<span style="color:#ff4f4f">${document.getElementById("rb-h").textContent}</span></div><div class="focus-chip">Black-Height<span style="color:#ff4f4f">${document.getElementById("rb-bh").textContent}</span></div>`,
-            explain: () => document.getElementById("ex-rb-msg").textContent,
-          },
-        };
-
-        const cfg = configs[type];
-        document.getElementById("focus-title").innerHTML =
-          `<span style="color:${cfg.color}">${cfg.title}</span>`;
-        document.getElementById("focus-stats").innerHTML = cfg.stats();
-        document.getElementById("focus-explain").textContent = cfg.explain();
-
-        // build hierarchy data
-        let hierData = null;
-        if (type === "bst") {
-          const t = buildBST([...values]);
-          hierData = t ? toHierBST(t) : null;
-        }
-        if (type === "avl") {
-          const t = buildAVL([...values]);
-          hierData = t ? toHierAVL(t) : null;
-        }
-        if (type === "rb") {
-          const t = buildRBJS([...values]);
-          hierData = t ? toHierRB(t) : null;
-        }
-        if (!hierData) return;
-
-        // show overlay FIRST so SVG has real dimensions
-        document.getElementById("focus-overlay").classList.add("active");
-
-        // now build on the visible SVG
-        const focusSvg = d3.select("#focus-svg");
-        focusSvg.selectAll("*").remove();
-        focusG = focusSvg.append("g").attr("transform", "translate(40,60)");
-
-        const W = 1100,
-          H = 580;
-        focusSvg.attr("width", W + 80).attr("height", H + 120);
-
-        const root = d3.hierarchy(hierData);
-        d3.tree().size([W, H])(root);
-
-        // links
-        focusG
-          .selectAll(".link")
-          .data(root.links())
-          .enter()
-          .append("path")
-          .attr("class", "link")
-          .attr(
-            "d",
-            d3
-              .linkVertical()
-              .x((d) => d.x)
-              .y((d) => d.y),
-          );
-
-        // nodes
-        const node = focusG
-          .selectAll(".node")
-          .data(root.descendants())
-          .enter()
-          .append("g")
-          .attr("class", "node")
-          .attr("transform", (d) => `translate(${d.x},${d.y})`);
-
-        node
-          .append("circle")
-          .attr("r", 22)
-          .style("fill", (d) =>
-            type === "rb"
-              ? d.data.color === 0
-                ? "#c0392b"
-                : "#1e1e2e"
-              : "#1e1e2e",
-          )
-          .style("stroke", (d) =>
-            type === "rb"
-              ? d.data.color === 0
-                ? "#ff6b6b"
-                : "#aaa"
-              : cfg.color,
-          )
-          .style("stroke-width", "2.5px");
-
+      if (type === "avl") {
         node
           .append("text")
-          .text((d) => d.data.name)
-          .style("fill", "#fff")
-          .style("font-size", "13px")
-          .style("font-weight", "bold")
-          .attr("text-anchor", "middle")
-          .attr("dominant-baseline", "central");
-
-        if (type === "avl") {
-          node
-            .append("text")
-            .attr("dy", 32)
-            .text((d) => "bf:" + (d.data.bf || 0))
-            .style("fill", "#888")
-            .style("font-size", "10px")
-            .attr("text-anchor", "middle");
-        }
-        if (type === "rb") {
-          node
-            .append("text")
-            .attr("dy", 32)
-            .text((d) => (d.data.color === 0 ? "R" : "B"))
-            .style("fill", (d) => (d.data.color === 0 ? "#ff9090" : "#777"))
-            .style("font-size", "10px")
-            .attr("text-anchor", "middle");
-        }
+          .attr("dy", 32)
+          .text((d) => "bf:" + (d.data.bf || 0))
+          .style("fill", "#888")
+          .style("font-size", "10px")
+          .attr("text-anchor", "middle");
       }
+      if (type === "rb") {
+        node
+          .append("text")
+          .attr("dy", 32)
+          .text((d) => (d.data.color === 0 ? "R" : "B"))
+          .style("fill", (d) => (d.data.color === 0 ? "#ff9090" : "#777"))
+          .style("font-size", "10px")
+          .attr("text-anchor", "middle");
+      }
+    }
 
-      // ═══════════════════════════════════════════════════
-      // INIT
-      // ═══════════════════════════════════════════════════
-      Module.onRuntimeInitialized = function () {
-        // ── insert value (header input) ──
-        function insertValue() {
-          const input = document.getElementById("val-input");
-          const raw = input.value.trim();
-          if (!raw) return;
-          const vals = raw
-            .split(",")
-            .map((s) => parseInt(s.trim()))
-            .filter((n) => !isNaN(n));
-          vals.forEach((v) => doInsert(v));
-          input.value = "";
-          input.focus();
-        }
-        document.getElementById("btn-insert").onclick = insertValue;
-        document
-          .getElementById("val-input")
-          .addEventListener("keydown", (e) => {
-            if (e.key === "Enter") insertValue();
-          });
-        document.getElementById("btn-reset").onclick = doReset;
+    // ═══════════════════════════════════════════════════
+    // INIT
+    // ═══════════════════════════════════════════════════
+    Module.onRuntimeInitialized = function () {
+      // ── insert value (header input) ──
+      function insertValue() {
+        const input = document.getElementById("val-input");
+        const raw = input.value.trim();
+        if (!raw) return;
+        const vals = raw
+          .split(",")
+          .map((s) => parseInt(s.trim()))
+          .filter((n) => !isNaN(n));
+        vals.forEach((v) => doInsert(v));
+        input.value = "";
+        input.focus();
+      }
+      document.getElementById("btn-insert").onclick = insertValue;
+      document
+        .getElementById("val-input")
+        .addEventListener("keydown", (e) => {
+          if (e.key === "Enter") insertValue();
+        });
+      document.getElementById("btn-reset").onclick = doReset;
 
-        // ── focus close button ──
-        document
-          .getElementById("focus-close")
-          .addEventListener("click", function (e) {
-            e.stopPropagation();
-            document.getElementById("focus-overlay").classList.remove("active");
-            if (focusG) {
-              focusG.selectAll("*").remove();
-            }
-          });
+      // ── focus close button ──
+      document
+        .getElementById("focus-close")
+        .addEventListener("click", function (e) {
+          e.stopPropagation();
+          document.getElementById("focus-overlay").classList.remove("active");
+          if (focusG) {
+            focusG.selectAll("*").remove();
+          }
+        });
 
-        // ── tree panel click → focus open ──   ← MUST BE HERE, outside the close handler
-        document
-          .querySelector("#bst-svg")
-          .closest(".tree-panel")
-          .addEventListener("click", (e) => {
-            e.stopPropagation();
-            openFocus("bst");
-          });
-        document
-          .querySelector("#avl-svg")
-          .closest(".tree-panel")
-          .addEventListener("click", (e) => {
-            e.stopPropagation();
-            openFocus("avl");
-          });
-        document
-          .querySelector("#rb-svg")
-          .closest(".tree-panel")
-          .addEventListener("click", (e) => {
-            e.stopPropagation();
-            openFocus("rb");
-          });
-      };
-    </script>
-  </body>
-  <!-- FOCUS OVERLAY -->
-  <div id="focus-overlay">
-    <div id="focus-header">
-      <div id="focus-title"></div>
-      <div id="focus-stats"></div>
-      <button id="focus-close">✕ Back to 3-View</button>
-    </div>
-    <div
-      id="focus-explain"
-      style="
+      // ── tree panel click → focus open ──   ← MUST BE HERE, outside the close handler
+      document
+        .querySelector("#bst-svg")
+        .closest(".tree-panel")
+        .addEventListener("click", (e) => {
+          e.stopPropagation();
+          openFocus("bst");
+        });
+      document
+        .querySelector("#avl-svg")
+        .closest(".tree-panel")
+        .addEventListener("click", (e) => {
+          e.stopPropagation();
+          openFocus("avl");
+        });
+      document
+        .querySelector("#rb-svg")
+        .closest(".tree-panel")
+        .addEventListener("click", (e) => {
+          e.stopPropagation();
+          openFocus("rb");
+        });
+    };
+  </script>
+</body>
+<!-- FOCUS OVERLAY -->
+<div id="focus-overlay">
+  <div id="focus-header">
+    <div id="focus-title"></div>
+    <div id="focus-stats"></div>
+    <button id="focus-close">✕ Back to 3-View</button>
+  </div>
+  <div id="focus-explain" style="
         font-size: 14px;
         color: #aaa;
         margin-bottom: 12px;
         max-width: 900px;
-      "
-    ></div>
-    <div id="focus-svg-wrap">
-      <svg id="focus-svg" width="1200" height="700"></svg>
-    </div>
+      "></div>
+  <div id="focus-svg-wrap">
+    <svg id="focus-svg" width="1200" height="700"></svg>
   </div>
+</div>
+<script>
+  (function () {
+    var btn = document.getElementById("theme-toggle");
+    if (localStorage.getItem("ds-theme") === "light") {
+      document.body.classList.add("light-mode");
+      if (btn) btn.textContent = "☀️";
+    }
+    if (btn)
+      btn.addEventListener("click", function () {
+        var l = document.body.classList.toggle("light-mode");
+        localStorage.setItem("ds-theme", l ? "light" : "dark");
+        btn.textContent = l ? "☀️" : "🌙";
+      });
+  })();
+</script>
+
 </html>
